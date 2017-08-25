@@ -11,12 +11,12 @@
 import matplotlib.pyplot as plt
 from matplotlib import colors
 import numpy as np
+import itertools
 
 def main():
     # TODO: Execute tasks
     board = Board("easy-3.txt")
-    board.create_board()
-    print(board.create_colormap())
+    #board.create_board()
     board.print_board()
 
 
@@ -56,17 +56,17 @@ class Board:
         return board
 
     def create_board(self):
-        board = self.create_empty_board()
+        #board = self.create_empty_board()
         file = open((self.boardFile), 'r')
         for line in file:
             vehicle = self.create_vehicle(line)
             self.place_vehicle(vehicle)
-        return board
+        return self.board
 
     # Create vehicle object from string line
     def create_vehicle(self, line):
         line = line.split(',')
-        orientation = bool(line[0])
+        orientation = int(line[0])
         x = int(line[1])
         y = int(line[2])
         size = int(line[3])
@@ -78,7 +78,7 @@ class Board:
         y = vehicle.y
         for i in range(vehicle.size):
             self.board[x][y] = vehicle
-            if(vehicle.orientation):
+            if(vehicle.orientation is 0):
                 x += 1
             else:
                 y += 1
@@ -91,47 +91,51 @@ class Board:
         # TODO: Delete vehicle from spot and create on new spot
         return
 
+    # Print the board with help from matplotlib
     def print_board(self):
-        colormap, colormap, cars = self.create_colormap()
-        print(cars)
-        cmap = colors.ListedColormap(colormap)
-        print(cmap)
+        colormap, colorCycle, cars = self.create_colormap()
+        cmap = colors.ListedColormap(colorCycle)
         norm = colors.BoundaryNorm(cars, cmap.N)
-        print(norm)
-        plot_matrix(colormap,cmap=cmap)
+        self.plot_matrix(colormap,cmap)
 
-
+    # Generates:
+    # Numpy matrix of car ids
+    # List of car ids
+    # List of colors (colorCycle) one for each car
     def create_colormap(self):
-        colormap = self.create_empty_board()
-        colors = ['C0']
+        colormap = np.zeros((self.width, self.height))
+        colorCycle = ['C0']
         cars = []
         for i in range(len(self.board)):
             for j in range(len(self.board)):
                 if self.board[i][j] is None:
-                    colormap[i][j] = 0
+                    pass
                 else:
-                    carId = int((self.board[i][j].x+(self.board[i][j].y/10))*10)
+                    carId = self.board[i][j].registration
                     if not carId in cars:
-                        color = "C" + str(len(colors))
-                        colors.append(color)
+                        color = "C" + str(len(colorCycle))
+                        colorCycle.append(color)
                         cars.append(carId)
                     colormap[i][j] = carId
-        return colormap, colors, cars
+        return colormap, colorCycle, cars
 
-def plot_matrix(rm, title='Robot World', cmap=plt.cm.Blues):
-    plt.imshow(rm, interpolation='nearest', cmap=cmap)
-    plt.title(title)
-    plt.tight_layout()
-    plt.show()
+    # Plots the graphical view
+    def plot_matrix(self, colormap, cmap, title='Rush Hour'):
+        plt.imshow(colormap, interpolation='nearest', cmap=cmap)
+        plt.title(title)
+        plt.tight_layout()
+        plt.show()
 
 class Vehicle: #/?
-    # TODO: class for cars
     # orientation 0 = horizontal, 1 = vertical
+    index = 1
     def __init__(self, orientation, x, y, size):
         self.orientation = orientation
         self.x = x
         self.y = y
         self.size = size
+        self.registration = Vehicle.index
+        Vehicle.index += 1
 
 if __name__ == '__main__':
     main()
