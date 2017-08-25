@@ -44,21 +44,43 @@ def main():
         break
 
     board.print_board()
-
+    ps = ProblemSolver("AStar", "easy-3.txt")
+    print(ps.solve_problem())
 
 
 class ProblemSolver:
     # TODO: Implement problemsolving for different algorithms
     def __init__(self, algorithm, board):
         self.algorithm = algorithm
-        self. board = board
+        self.board = Board(board)
+
 
     def solve_problem(self):
         # TODO: Solve specific problem
+        if(self.algorithm is "AStar"):
+            print("Solve with AStar")
+            # Set heuristics
+            return self.best_first_search()
+
         return
 
     def best_first_search(self):
         # TODO:
+        solution = None
+        open_list = []
+        closed_list = []
+        # Add initial node to open list
+        open_list.append(self.board)
+        # Find best way
+        while solution is None:
+            if not open_list:
+                return None
+            current_node = open_list.pop(0)
+            # check if we have arrived to the goal
+            if(self.board.board[self.board.goal[1]][self.board.goal[0]] is self.board.vehicles[self.board.driver_index]):
+                print("Success, found solution")
+                self.board.print_board()
+            print("No solution yet")
         return
 
     def bfs(self):
@@ -69,8 +91,12 @@ class ProblemSolver:
         # TODO:
         return
 
+    def backtrack_path(self):
+        # TODO:
+        return
+
 class Board:
-    def __init__(self, boardFile, width=6, height=6, goal=[5,2]):
+    def __init__(self, boardFile, width=6, height=6, goal=[5,2], driver_index=0):
         self.boardFile = boardFile
         self.width = width
         self.height = height
@@ -78,6 +104,7 @@ class Board:
         self.vehicles = []
         self.board = self.create_empty_board()
         self.board = self.create_board()
+        self.driver_index = driver_index
 
     def create_empty_board(self):
         board = [ [ 0 for i in range(self.width) ] for j in range(self.height) ]
