@@ -18,6 +18,15 @@ def main():
     board = Board("easy-3.txt")
     #board.create_board()
     board.print_board()
+    for line in board.board:
+        for vehicle in line:
+            if(vehicle):
+                print("vehicle")
+                print(vehicle)
+                board.move_vehicle(vehicle, "forward")
+                break
+        break
+    board.print_board()
 
 
 class ProblemSolver:
@@ -85,10 +94,34 @@ class Board:
 
     def remove_vehicle(self, vehicle):
         # TODO: Remove vehicle from grid
+        x = vehicle.x
+        y = vehicle.y
+        for i in range(vehicle.size):
+            self.board[x][y] = None
+            if(vehicle.orientation is 0):
+                x += 1
+            else:
+                y += 1
         return
 
-    def move_vehicle(self, id, directopm):
+    def move_vehicle(self, vehicle, direction):
         # TODO: Delete vehicle from spot and create on new spot
+        self.remove_vehicle(vehicle)
+        if(vehicle.orientation is 0):
+            if(direction is "forward"):
+                vehicle.x += 1
+            else:
+                vehicle.x -= 1
+        else:
+            if(direction is "forward"):
+                vehicle.y += 1
+            else:
+                vehicle.y -= 1
+        self.place_vehicle(vehicle)
+        return
+
+    def get_moves():
+        # TODO: Get legal moves
         return
 
     # Print the board with help from matplotlib
@@ -136,6 +169,11 @@ class Vehicle: #/?
         self.size = size
         self.registration = Vehicle.index
         Vehicle.index += 1
+
+# The moves represents the nodes in the path
+class Move:
+    def __init__(self):
+        return
 
 if __name__ == '__main__':
     main()
