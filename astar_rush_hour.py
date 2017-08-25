@@ -15,6 +15,7 @@ import copy
 
 def main():
     # TODO: Execute tasks
+    """
     board = Board("easy-3.txt")
     board2 = copy.deepcopy(board)
     #board.create_board()
@@ -24,7 +25,7 @@ def main():
     for move in legalMoves:
         print(move[0].x, move[0].y, move[1])
     board.print_board()
-    """
+
     for line in board.board:
         for vehicle in line:
             if(vehicle):
@@ -33,7 +34,7 @@ def main():
                 board.expand_move(vehicle, "forward")
                 break
         break
-    """
+
     for line in board.board:
         print(line)
     for line in board.board:
@@ -44,6 +45,7 @@ def main():
         break
 
     board.print_board()
+    """
     ps = ProblemSolver("AStar", "easy-3.txt")
     print(ps.solve_problem())
 
@@ -53,6 +55,8 @@ class ProblemSolver:
     def __init__(self, algorithm, board):
         self.algorithm = algorithm
         self.board = Board(board)
+        self.goal = self.board.goal
+        self.driver = self.board.vehicles[self.board.driver_index]
 
 
     def solve_problem(self):
@@ -65,7 +69,6 @@ class ProblemSolver:
         return
 
     def best_first_search(self):
-        # TODO:
         solution = None
         open_list = []
         closed_list = []
@@ -76,12 +79,48 @@ class ProblemSolver:
             if not open_list:
                 return None
             current_node = open_list.pop(0)
+            print('current_node')
+            current_node.print_board()
             # check if we have arrived to the goal
-            if(self.board.board[self.board.goal[1]][self.board.goal[0]] is self.board.vehicles[self.board.driver_index]):
+            if(current_node.board[self.goal[1]][self.goal[0]] is self.driver):
                 print("Success, found solution")
-                self.board.print_board()
+                #self.board.print_board()
+                path = self.backtrack_path(current_node)
+                # return path
+                # TODO:
+
             print("No solution yet")
+            closed_list.append(current_node)
+            children = current_node.expand_node()
+            for child in children:
+                # if child node not in closed or open list, add to open list
+                if child not in closed_list and child not in open_list:
+                    self.attach_and_eval(child, current_node)
+                    open_list.append(child)
+                # else if child node in open list, check if this is a better way to the node
+                    self.attach_and_eval(child, current_node)
+                    if child in closed_list:
+                        self.propagate_path_improvements(current_node, children)
+            if self.algorithm is not "BFS":
+                open_list = self.merge_sort(open_list)
+
         return
+
+    def attach_and_eval(self, child, parent):
+        child.parent = parent
+        # All moves have the same distance, 1
+        child.g = parent.g + 1
+        child.f = child.g + child.h
+        return
+
+    def propagate_path_improvements(self, new_parent, children):
+        for child in children:
+            if child.parent is None or new_parent.g + 1 < child.g:
+                child.parent = new_parent
+                child.g = new_parent.g + 1
+                child.f = child.g + child.h
+                self.propagate_path_improvements(child, child.expand_node(self.board.matrix))
+        return children
 
     def bfs(self):
         # TODO:
@@ -91,12 +130,53 @@ class ProblemSolver:
         # TODO:
         return
 
-    def backtrack_path(self):
-        # TODO:
-        return
+    # find path used to arrive at node
+    def backtrack_path(self, node):
+        path = [node]
+        x = 0
+        # Get parent until we reach initial node
+        while path[x].parent:
+            path.append(path[x].parent)
+            x += 1
+        return path
+
+    #  sort the open list such that the node with lowest f value is on top (merge sort)
+    def merge_sort(self, some_list):
+        if len(some_list) > 1:
+            mid = len(some_list) // 2
+            lefthalf = some_list[:mid]
+            righthalf = some_list[mid:]
+            self.merge_sort(lefthalf)
+            self.merge_sort(righthalf)
+            i = 0
+            j = 0
+            k = 0
+            while i < len(lefthalf) and j < len(righthalf):
+                if lefthalf[i].f < righthalf[j].f:
+                    some_list[k] = lefthalf[i]
+                    i += 1
+                # if f is the same check h
+                elif lefthalf[i].f == righthalf[j].f and lefthalf[i].h < righthalf[j].h:
+                    some_list[k] = lefthalf[i]
+                    i += 1
+                else:
+                    some_list[k] = righthalf[j]
+                    j += 1
+                k += 1
+
+            while i < len(lefthalf):
+                some_list[k] = lefthalf[i]
+                i += 1
+                k += 1
+
+            while j < len(righthalf):
+                some_list[k] = righthalf[j]
+                j += 1
+                k += 1
+        return some_list
 
 class Board:
-    def __init__(self, boardFile, width=6, height=6, goal=[5,2], driver_index=0):
+    def __init__(self, boardFile, width=6, height=6, goal=[5,2], driver_index=0, parent=None, h=0, g=0):
         self.boardFile = boardFile
         self.width = width
         self.height = height
@@ -105,6 +185,10 @@ class Board:
         self.board = self.create_empty_board()
         self.board = self.create_board()
         self.driver_index = driver_index
+        self.parent = parent
+        self.h = h
+        self.g = g + 1
+        self.f = g + h
 
     def create_empty_board(self):
         board = [ [ 0 for i in range(self.width) ] for j in range(self.height) ]
@@ -144,6 +228,7 @@ class Board:
         y = vehicle.y
         for i in range(vehicle.size):
             self.board[y][x] = 0
+            print("changing coordinates", x, y)
             if(vehicle.orientation is 0):
                 x += 1
             else:
@@ -191,19 +276,27 @@ class Board:
     # Get state from specific move (but dont do the move)
     def expand_move(self, vehicle, direction):
         board = copy.deepcopy(self)
+        print("move", vehicle.x, vehicle.y, direction)
         board.move_vehicle(vehicle, direction)
+        board.print_board()
         return board
 
     # Get all possible children (legal moves) after a move
     def expand_node(self):
+        print("This object:")
+        self.print_board()
         legalMoves = self.get_legal_moves()
         children = []
-        print("Moves expanded:")
         for move in legalMoves:
             print(move[0].x, move[0].y, move[1])
-            children.append(self.expand_move(move[0],move[1]))
-        for child in children:
-            child.print_board()
+            child = self.expand_move(move[0],move[1])
+            children.append(child)
+        #print("can become:")
+        #i=1
+        #for child in children:
+        #    print(i)
+        #    i+=1
+        #    child.print_board()
         return children
 
     # Print the board with help from matplotlib
