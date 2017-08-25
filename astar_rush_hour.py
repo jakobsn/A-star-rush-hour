@@ -8,12 +8,17 @@
 #   Move car closer
 #   Clear space to clear space for car?
 
+import matplotlib.pyplot as plt
+from matplotlib import colors
+import numpy as np
 
 def main():
     # TODO: Execute tasks
     board = Board("easy-3.txt")
     board.create_board()
+    print(board.create_colormap())
     board.print_board()
+
 
 class ProblemSolver:
     # TODO: Implement problemsolving for different algorithms
@@ -43,11 +48,11 @@ class Board:
         self.width = width
         self.height = height
         self.goal = goal
+        self.board = self.create_empty_board()
         self.board = self.create_board()
 
     def create_empty_board(self):
         board = [ [ None for i in range(self.width) ] for j in range(self.height) ]
-        self.board = board
         return board
 
     def create_board(self):
@@ -87,16 +92,37 @@ class Board:
         return
 
     def print_board(self):
-        # TODO:
-        for line in self.board:
-            printline = ""
-            for cell in line:
-                if cell is None:
-                    printline += 'O'
+        colormap, colormap, cars = self.create_colormap()
+        print(cars)
+        cmap = colors.ListedColormap(colormap)
+        print(cmap)
+        norm = colors.BoundaryNorm(cars, cmap.N)
+        print(norm)
+        plot_matrix(colormap,cmap=cmap)
+
+
+    def create_colormap(self):
+        colormap = self.create_empty_board()
+        colors = ['C0']
+        cars = []
+        for i in range(len(self.board)):
+            for j in range(len(self.board)):
+                if self.board[i][j] is None:
+                    colormap[i][j] = 0
                 else:
-                    printline += 'X'
-            print(printline)
-        return
+                    carId = int((self.board[i][j].x+(self.board[i][j].y/10))*10)
+                    if not carId in cars:
+                        color = "C" + str(len(colors))
+                        colors.append(color)
+                        cars.append(carId)
+                    colormap[i][j] = carId
+        return colormap, colors, cars
+
+def plot_matrix(rm, title='Robot World', cmap=plt.cm.Blues):
+    plt.imshow(rm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.tight_layout()
+    plt.show()
 
 class Vehicle: #/?
     # TODO: class for cars
