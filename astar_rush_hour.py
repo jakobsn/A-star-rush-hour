@@ -143,29 +143,21 @@ class Board:
         # LegalMoves format: [[$car, $direction][...]]
         legalMoves = []
         for vehicle in self.vehicles:
-            print("vehicle")
-            print(vehicle.x, vehicle.y)
             # Horizontal moves
             if(vehicle.orientation is 0):
-                print("Horizontal")
                 # Check forward move
-                if(vehicle.x+vehicle.size < self.width and not self.board[vehicle.x+vehicle.size][vehicle.y]):
+                if(vehicle.x+vehicle.size < self.width and not self.board[vehicle.y][vehicle.x+vehicle.size]):
                     legalMoves.append([vehicle, "forward"])
                 # Check backward move
-                if(vehicle.x-1 > -1):
-                    print("x<-1")
-                print(self.board[vehicle.x-1][vehicle.y])
-                if(not self.board[vehicle.x-1][vehicle.y]):
-                    print("not empty")
-                elif(not self.board[vehicle.x-1][vehicle.y] and vehicle.x-1 > -1):
+                if(not self.board[vehicle.y][vehicle.x-1] and vehicle.x-1 > -1):
                     legalMoves.append([vehicle, "backward"])
             # Vertical moves
             else:
                 # Check forward move
-                if(vehicle.y+vehicle.size < self.height and not self.board[vehicle.x][vehicle.y+vehicle.size]):
+                if(vehicle.y+vehicle.size < self.height and not self.board[vehicle.y+vehicle.size][vehicle.x]):
                     legalMoves.append([vehicle, "forward"])
                 # Check backward move
-                elif(not self.board[vehicle.x][vehicle.y-1] and vehicle.y-1 > -1):
+                if(not self.board[vehicle.y-1][vehicle.x] and vehicle.y-1 > -1):
                     legalMoves.append([vehicle, "backward"])
         return legalMoves
 
