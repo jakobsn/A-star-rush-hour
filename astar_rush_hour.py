@@ -11,7 +11,6 @@
 import matplotlib.pyplot as plt
 from matplotlib import colors
 import numpy as np
-import itertools
 
 def main():
     # TODO: Execute tasks
@@ -23,7 +22,6 @@ def main():
     for move in legalMoves:
         print(move[0].x, move[0].y, move[1])
     board.print_board()
-
     """
     for line in board.board:
         for vehicle in line:
@@ -33,8 +31,9 @@ def main():
                 board.move_vehicle(vehicle, "forward")
                 break
         break
-    board.print_board()
     """
+    board.print_board()
+
 
 class ProblemSolver:
     # TODO: Implement problemsolving for different algorithms
@@ -69,7 +68,7 @@ class Board:
         self.board = self.create_board()
 
     def create_empty_board(self):
-        board = [ [ None for i in range(self.width) ] for j in range(self.height) ]
+        board = [ [ 0 for i in range(self.width) ] for j in range(self.height) ]
         return board
 
     # Fill the board with cars
@@ -105,7 +104,7 @@ class Board:
         x = vehicle.x
         y = vehicle.y
         for i in range(vehicle.size):
-            self.board[x][y] = None
+            self.board[y][x] = 0
             if(vehicle.orientation is 0):
                 x += 1
             else:
@@ -132,7 +131,6 @@ class Board:
         # LegalMoves format: [[$car, $direction][...]]
         legalMoves = []
         for vehicle in self.vehicles:
-            print(vehicle.x, vehicle.y)
             # Horizontal moves
             if(vehicle.orientation is 0):
                 # Check forward move
@@ -168,7 +166,7 @@ class Board:
         cars = []
         for i in range(len(self.board)):
             for j in range(len(self.board)):
-                if self.board[i][j] is None:
+                if self.board[i][j] is 0:
                     pass
                 else:
                     carId = self.board[i][j].registration
