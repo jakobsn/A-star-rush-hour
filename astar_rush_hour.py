@@ -17,7 +17,14 @@ def main():
     # TODO: Execute tasks
     board = Board("easy-3.txt")
     #board.create_board()
+
+    print("Legal moves:")
+    legalMoves = board.get_legal_moves()
+    for move in legalMoves:
+        print(move[0].x, move[0].y, move[1])
     board.print_board()
+
+    """
     for line in board.board:
         for vehicle in line:
             if(vehicle):
@@ -27,7 +34,7 @@ def main():
                 break
         break
     board.print_board()
-
+    """
 
 class ProblemSolver:
     # TODO: Implement problemsolving for different algorithms
@@ -57,6 +64,7 @@ class Board:
         self.width = width
         self.height = height
         self.goal = goal
+        self.vehicles = []
         self.board = self.create_empty_board()
         self.board = self.create_board()
 
@@ -64,11 +72,12 @@ class Board:
         board = [ [ None for i in range(self.width) ] for j in range(self.height) ]
         return board
 
+    # Fill the board with cars
     def create_board(self):
-        #board = self.create_empty_board()
         file = open((self.boardFile), 'r')
         for line in file:
             vehicle = self.create_vehicle(line)
+            self.vehicles.append(vehicle)
             self.place_vehicle(vehicle)
         return self.board
 
@@ -86,14 +95,13 @@ class Board:
         x = vehicle.x
         y = vehicle.y
         for i in range(vehicle.size):
-            self.board[x][y] = vehicle
+            self.board[y][x] = vehicle
             if(vehicle.orientation is 0):
                 x += 1
             else:
                 y += 1
 
     def remove_vehicle(self, vehicle):
-        # TODO: Remove vehicle from grid
         x = vehicle.x
         y = vehicle.y
         for i in range(vehicle.size):
@@ -105,7 +113,6 @@ class Board:
         return
 
     def move_vehicle(self, vehicle, direction):
-        # TODO: Delete vehicle from spot and create on new spot
         self.remove_vehicle(vehicle)
         if(vehicle.orientation is 0):
             if(direction is "forward"):
@@ -120,9 +127,29 @@ class Board:
         self.place_vehicle(vehicle)
         return
 
-    def get_moves():
-        # TODO: Get legal moves
-        return
+    def get_legal_moves(self):
+        # TODO: Get legal moves. Which are moves that dont crash cars and dont go out of the grid
+        # LegalMoves format: [[$car, $direction][...]]
+        legalMoves = []
+        for vehicle in self.vehicles:
+            print(vehicle.x, vehicle.y)
+            # Horizontal moves
+            if(vehicle.orientation is 0):
+                # Check forward move
+                if(not self.board[vehicle.x+1][vehicle.y] and vehicle.x+1 < self.width):
+                    legalMoves.append([vehicle, "forward"])
+                # Check backward move
+                elif(not self.board[vehicle.x-1][vehicle.y] and vehicle.x-1 > -1):
+                    legalMoves.append([vehicle, "backward"])
+            # Vertical moves
+            else:
+                # Check forward move
+                if(not self.board[vehicle.x][vehicle.y+1] and vehicle.y+1 < self.height):
+                    legalMoves.append([vehicle, "forward"])
+                # Check backward move
+                elif(not self.board[vehicle.x][vehicle.y+1] and vehicle.y-1 > -1):
+                    legalMoves.append([vehicle, "backward"])
+        return legalMoves
 
     # Print the board with help from matplotlib
     def print_board(self):
