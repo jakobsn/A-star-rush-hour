@@ -79,8 +79,6 @@ class ProblemSolver:
             if not open_list:
                 return None
             current_node = open_list.pop(0)
-            print('current_node')
-            current_node.print_board()
             # check if we have arrived to the goal
             if(current_node.board[self.goal[1]][self.goal[0]] is self.driver):
                 print("Success, found solution")
@@ -95,11 +93,13 @@ class ProblemSolver:
             for child in children:
                 # if child node not in closed or open list, add to open list
                 if child not in closed_list and child not in open_list:
+                    print("attach_and_eval")
                     self.attach_and_eval(child, current_node)
                     open_list.append(child)
                 # else if child node in open list, check if this is a better way to the node
                     self.attach_and_eval(child, current_node)
                     if child in closed_list:
+                        print("propagate_path_improvements")
                         self.propagate_path_improvements(current_node, children)
             if self.algorithm is not "BFS":
                 open_list = self.merge_sort(open_list)
@@ -237,17 +237,19 @@ class Board:
 
     def move_vehicle(self, vehicle, direction):
         self.remove_vehicle(vehicle)
+        new_vehicle = copy.deepcopy(vehicle)
         if(vehicle.orientation is 0):
             if(direction is "forward"):
-                vehicle.x += 1
+                new_vehicle.x += 1
             else:
-                vehicle.x -= 1
+                new_vehicle.x -= 1
         else:
             if(direction is "forward"):
-                vehicle.y += 1
+                new_vehicle.y += 1
             else:
-                vehicle.y -= 1
-        self.place_vehicle(vehicle)
+                new_vehicle.y -= 1
+        self.vehicles[new_vehicle.registration-1] = new_vehicle
+        self.place_vehicle(new_vehicle)
         return
 
     def get_legal_moves(self):
@@ -276,20 +278,23 @@ class Board:
     # Get state from specific move (but dont do the move)
     def expand_move(self, vehicle, direction):
         board = copy.deepcopy(self)
-        print("move", vehicle.x, vehicle.y, direction)
+        for i in range(len(board.vehicles)):
+            board.vehicles[i] = copy.deepcopy(self.vehicles[i])
         board.move_vehicle(vehicle, direction)
-        board.print_board()
         return board
 
     # Get all possible children (legal moves) after a move
     def expand_node(self):
-        print("This object:")
-        self.print_board()
         legalMoves = self.get_legal_moves()
         children = []
         for move in legalMoves:
-            print(move[0].x, move[0].y, move[1])
+            print("Expanding board: ")
+            for line in self.board:
+                print(line)
+            print("with move", move[0].x, move[0].y, move[1])
+            self.print_board()
             child = self.expand_move(move[0],move[1])
+            print("Becomes", child.print_board())
             children.append(child)
         #print("can become:")
         #i=1
