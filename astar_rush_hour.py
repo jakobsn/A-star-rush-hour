@@ -92,19 +92,35 @@ class ProblemSolver:
             children = current_node.expand_node()
             for child in children:
                 # if child node not in closed or open list, add to open list
-                if child not in closed_list and child not in open_list:
+                #if child not in closed_list and child not in open_list:
+                if not self.list_contains_board(closed_list, child) and self.list_contains_board(open_list, child):
                     print("attach_and_eval")
                     self.attach_and_eval(child, current_node)
                     open_list.append(child)
                 # else if child node in open list, check if this is a better way to the node
+                elif current_node.g + 1 < child.g:  # Found cheaper path
+                    print("cheaper path")
                     self.attach_and_eval(child, current_node)
-                    if child in closed_list:
+                    #if child in closed_list:
+                    if self.list_contains_board(closed_list, child):
                         print("propagate_path_improvements")
                         self.propagate_path_improvements(current_node, children)
-            if self.algorithm is not "BFS":
-                open_list = self.merge_sort(open_list)
+            #if self.algorithm is not "BFS":
+            #    open_list = self.merge_sort(open_list)
 
         return
+
+    def list_contains_board(self, array, board):
+        print("check list")
+        print(array)
+        print(board)
+        for instance in array:
+            for i in range(len(instance.vehicles)):
+                if not(instance.vehicles[i].x is board.vehicles[i].x and instance.vehicles[i].y is board.vehicles[i].y):
+                    print("True")
+                    return False
+        print("false")
+        return True
 
     def attach_and_eval(self, child, parent):
         child.parent = parent
@@ -176,6 +192,7 @@ class ProblemSolver:
         return some_list
 
 class Board:
+    #index = 1
     def __init__(self, boardFile, width=6, height=6, goal=[5,2], driver_index=0, parent=None, h=0, g=0):
         self.boardFile = boardFile
         self.width = width
@@ -189,6 +206,8 @@ class Board:
         self.h = h
         self.g = g + 1
         self.f = g + h
+        #self.registration = Board.index
+        #Board.index += 1
 
     def create_empty_board(self):
         board = [ [ 0 for i in range(self.width) ] for j in range(self.height) ]
