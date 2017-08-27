@@ -75,26 +75,35 @@ class ProblemSolver:
         # Add initial node to open list
         open_list.append(self.board)
         # Find best way
+        k =0
         while solution is None:
             if not open_list:
                 return None
+            k += 1
+            if k > 25:
+                k=0
+                #current_node.print_board()
+
             current_node = open_list.pop(0)
             # check if we have arrived to the goal
-            if(current_node.board[self.goal[1]][self.goal[0]] is self.driver):
+            if(self.goal[0] is (current_node.driver.x + current_node.driver.size - 1) and self.goal[1] is current_node.driver.y):
                 print("Success, found solution")
-                #self.board.print_board()
+                current_node.print_board()
                 path = self.backtrack_path(current_node)
                 # return path
                 # TODO:
 
             print("No solution yet")
             closed_list.append(current_node)
+            print("Current board:")
+            current_node.print_board()
             children = current_node.expand_node()
             for child in children:
                 # if child node not in closed or open list, add to open list
                 #if child not in closed_list and child not in open_list:
-                if not self.list_contains_board(closed_list, child) and self.list_contains_board(open_list, child):
+                if not self.list_contains_board(closed_list, child) and not self.list_contains_board(open_list, child):
                     print("attach_and_eval")
+                    child.print_board()
                     self.attach_and_eval(child, current_node)
                     open_list.append(child)
                 # else if child node in open list, check if this is a better way to the node
@@ -117,9 +126,9 @@ class ProblemSolver:
         for instance in array:
             for i in range(len(instance.vehicles)):
                 if not(instance.vehicles[i].x is board.vehicles[i].x and instance.vehicles[i].y is board.vehicles[i].y):
-                    print("True")
+                    print("False")
                     return False
-        print("false")
+        print("True")
         return True
 
     def attach_and_eval(self, child, parent):
@@ -202,9 +211,10 @@ class Board:
         self.board = self.create_empty_board()
         self.board = self.create_board()
         self.driver_index = driver_index
+        self.driver = self.vehicles[self.driver_index]
         self.parent = parent
+        self.g = g
         self.h = h
-        self.g = g + 1
         self.f = g + h
         #self.registration = Board.index
         #Board.index += 1
@@ -300,20 +310,25 @@ class Board:
         for i in range(len(board.vehicles)):
             board.vehicles[i] = copy.deepcopy(self.vehicles[i])
         board.move_vehicle(vehicle, direction)
+        board.g = self.g + 1
+        board.f = board.g + board.h
+        board.parent = self
         return board
 
     # Get all possible children (legal moves) after a move
     def expand_node(self):
         legalMoves = self.get_legal_moves()
         children = []
+        #print("Parent board: ")
+        #self.print_board()
         for move in legalMoves:
-            print("Expanding board: ")
+            #print("Expanding board: ")
             for line in self.board:
                 print(line)
-            print("with move", move[0].x, move[0].y, move[1])
-            self.print_board()
+            #print("with move", move[0].x, move[0].y, move[1])
             child = self.expand_move(move[0],move[1])
-            print("Becomes", child.print_board())
+            #print("Becomes")
+            #child.print_board()
             children.append(child)
         #print("can become:")
         #i=1
