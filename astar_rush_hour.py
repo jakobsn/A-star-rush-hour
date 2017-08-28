@@ -48,13 +48,19 @@ def main():
     """
     ps = ProblemSolver("AStar", "easy-3.txt")
     print(ps.solve_problem())
+    #Vehicle.index = 0
+    #ps = ProblemSolver("BFS", "easy-3.txt")
+    #print(ps.solve_problem())
 
 
 class ProblemSolver:
     # TODO: Implement problemsolving for different algorithms
     def __init__(self, algorithm, board):
         self.algorithm = algorithm
-        self.board = Board(board)
+        if(self.algorithm is "AStar"):
+            self.board = Board(board)
+        else:
+            self.board = Board(board, calculate_h=False)
         self.goal = self.board.goal
         self.driver = self.board.vehicles[self.board.driver_index]
 
@@ -63,9 +69,11 @@ class ProblemSolver:
         # TODO: Solve specific problem
         if(self.algorithm is "AStar"):
             print("Solve with AStar")
-            # Set heuristics
+            # Sets heuristics by default
             return self.best_first_search()
-
+        else:
+            print("Solve with something else")
+            return self.best_first_search()
         return
 
     def best_first_search(self):
@@ -74,36 +82,39 @@ class ProblemSolver:
         closed_list = []
         # Add initial node to open list
         open_list.append(self.board)
+        nodes_expanded = 0
         # Find best way
         k =0
         while solution is None:
             if not open_list:
                 return None
             k += 1
-            if k > 25:
-                k=0
-                current_node.print_board()
+            #if k > 25:
+            #    k=0
+            #    current_node.print_board()
 
             current_node = open_list.pop(0)
-            # check if we have arrived to the goal
+            # check if we have arrived to the goal, by checking if the driver vehicle is at the goal
             if(self.goal[0] is (current_node.vehicles[current_node.driver_index].x + current_node.vehicles[current_node.driver_index].size - 1) and
                        self.goal[1] is current_node.vehicles[current_node.driver_index].y):
                 print("Success, found solution")
                 current_node.print_board()
+                print("Nodes expanded: ", nodes_expanded)
                 path = self.backtrack_path(current_node)
                 # return path
                 # TODO:
+                return
 
             print("No solution yet")
             closed_list.append(current_node)
             print("Current board:")
             current_node.print_board()
             children = current_node.expand_node()
+            nodes_expanded += 1
             for child in children:
                 # if child node not in closed or open list, add to open list
                 #if child not in closed_list and child not in open_list:
                 if not self.list_contains_board(closed_list, child) and not self.list_contains_board(open_list, child):
-                    print("attach_and_eval")
                     child.print_board()
                     self.attach_and_eval(child, current_node)
                     open_list.append(child)
@@ -115,17 +126,13 @@ class ProblemSolver:
                     if self.list_contains_board(closed_list, child):
                         print("propagate_path_improvements")
                         self.propagate_path_improvements(current_node, children)
-            #if self.algorithm is not "BFS":
-            #    open_list = self.merge_sort(open_list)
+            if self.algorithm is not "BFS":
+                open_list = self.merge_sort(open_list)
 
         return
 
     def list_contains_board(self, array, board):
-        print("check list")
-        print(array)
-        print(board)
         if not len(array):
-            print("False")
             return False
         for instance in array:
             vehicle_missing = False
@@ -133,9 +140,7 @@ class ProblemSolver:
                 if not(instance.vehicles[i].x is board.vehicles[i].x and instance.vehicles[i].y is board.vehicles[i].y):
                     vehicle_missing = True
             if not vehicle_missing:
-                print("True")
                 return True
-        print("False")
         return False
 
     def attach_and_eval(self, child, parent):
@@ -209,7 +214,7 @@ class ProblemSolver:
 
 class Board:
     #index = 1
-    def __init__(self, boardFile, width=6, height=6, goal=[5,2], driver_index=0, parent=None, h=0, g=0):
+    def __init__(self, boardFile, width=6, height=6, goal=[5,2], driver_index=0, parent=None, g=0, calculate_h=True):
         self.boardFile = boardFile
         self.width = width
         self.height = height
@@ -221,11 +226,29 @@ class Board:
         #self.driver = self.vehicles[self.driver_index]
         self.parent = parent
         self.g = g
-        self.h = h
-        self.f = g + h
+        if calculate_h:
+            self.h = self.calculate_heuristic()
+        else:
+            self.h = 0
+        self.f = g + self.h
         #self.registration = Board.index
         #Board.index += 1
 
+    def calculate_heuristic(self):
+        h=0
+        if not self.vehicles[self.driver_index].x is self.goal[0]:
+            h += 1
+        # Find cars blocking the road
+        for i in range(self.vehicles[self.driver_index].x + self.vehicles[self.driver_index].size, self.goal[0] + 1):
+            if not self.board[self.goal[1]][i] is 0:
+                h += 1
+        #for block in self.board[self.goal[1]]:
+        #    # If the block contains 0, its empty. If registration is 1, its the main car
+        #    if not block is 0 and not block.registration is 1:
+        #        h += 1
+        return h
+
+    # Create matrix of zeros
     def create_empty_board(self):
         board = [ [ 0 for i in range(self.width) ] for j in range(self.height) ]
         return board
@@ -264,7 +287,6 @@ class Board:
         y = vehicle.y
         for i in range(vehicle.size):
             self.board[y][x] = 0
-            print("changing coordinates", x, y)
             if(vehicle.orientation is 0):
                 x += 1
             else:
@@ -311,13 +333,14 @@ class Board:
                     legalMoves.append([vehicle, "backward"])
         return legalMoves
 
-    # Get state from specific move (but dont do the move)
+    # Get state from specific move (but dont do the move). E.g create child
     def expand_move(self, vehicle, direction):
         board = copy.deepcopy(self)
         for i in range(len(board.vehicles)):
             board.vehicles[i] = copy.deepcopy(self.vehicles[i])
         board.move_vehicle(vehicle, direction)
         board.g = self.g + 1
+        board.h = board.calculate_heuristic()
         board.f = board.g + board.h
         board.parent = self
         return board
@@ -326,23 +349,9 @@ class Board:
     def expand_node(self):
         legalMoves = self.get_legal_moves()
         children = []
-        #print("Parent board: ")
-        #self.print_board()
         for move in legalMoves:
-            #print("Expanding board: ")
-            for line in self.board:
-                print(line)
-            #print("with move", move[0].x, move[0].y, move[1])
             child = self.expand_move(move[0],move[1])
-            #print("Becomes")
-            #child.print_board()
             children.append(child)
-        #print("can become:")
-        #i=1
-        #for child in children:
-        #    print(i)
-        #    i+=1
-        #    child.print_board()
         return children
 
     # Print the board with help from matplotlib
@@ -350,7 +359,7 @@ class Board:
         colormap, colorCycle, cars = self.create_colormap()
         cmap = colors.ListedColormap(colorCycle)
         norm = colors.BoundaryNorm(cars, cmap.N)
-        self.plot_matrix(colormap,cmap)
+        self.plot_matrix(colormap, cmap)
 
     # Generates:
     # Numpy matrix of car ids
