@@ -46,7 +46,9 @@ def main():
 
     board.print_board()
     """
-    ps = ProblemSolver("AStar", "easy-3.txt")
+    ps = ProblemSolver("AStar", "medium-1.txt")
+    #ps = ProblemSolver("AStar", "easy-3.txt")
+
     print(ps.solve_problem())
     #Vehicle.index = 0
     #ps = ProblemSolver("BFS", "easy-3.txt")
@@ -114,12 +116,18 @@ class ProblemSolver:
             for child in children:
                 # if child node not in closed or open list, add to open list
                 #if child not in closed_list and child not in open_list:
-                if not self.list_contains_board(closed_list, child) and not self.list_contains_board(open_list, child):
+                closed_list_contains_child = self.list_contains_board(closed_list, child)
+                open_list_contains_child = self.list_contains_board(open_list, child)
+                if closed_list_contains_child:
+                    old_child = closed_list_contains_child
+                elif open_list_contains_child:
+                    old_child = open_list_contains_child
+                if not closed_list_contains_child and not open_list_contains_child:
                     child.print_board()
                     self.attach_and_eval(child, current_node)
                     open_list.append(child)
                 # else if child node in open list, check if this is a better way to the node
-                elif current_node.g + 1 < child.g:  # Found cheaper path
+                elif(child.g < old_child.g):  # Found cheaper path
                     print("cheaper path")
                     self.attach_and_eval(child, current_node)
                     #if child in closed_list:
@@ -131,6 +139,7 @@ class ProblemSolver:
 
         return
 
+    # Return equal instance if exits, else return false
     def list_contains_board(self, array, board):
         if not len(array):
             return False
@@ -140,7 +149,7 @@ class ProblemSolver:
                 if not(instance.vehicles[i].x is board.vehicles[i].x and instance.vehicles[i].y is board.vehicles[i].y):
                     vehicle_missing = True
             if not vehicle_missing:
-                return True
+                return instance
         return False
 
     def attach_and_eval(self, child, parent):
@@ -367,7 +376,8 @@ class Board:
     # List of colors (colorCycle) one for each car
     def create_colormap(self):
         colormap = np.zeros((self.width, self.height))
-        colorCycle = ['C0']
+        colorCycle = ['white']
+        colorList = ["#FFFFFF", "#CC9933", "#FF99CC", "#3300CC", "black"]
         cars = []
         for i in range(len(self.board)):
             for j in range(len(self.board)):
@@ -376,7 +386,9 @@ class Board:
                 else:
                     carId = self.board[i][j].registration
                     if not carId in cars:
-                        color = "C" + str(len(colorCycle))
+                        color = "C" + str(len(colorCycle) - 1)
+                        if len(colorCycle) > 9:
+                            color = colorList.pop()
                         colorCycle.append(color)
                         cars.append(carId)
                     colormap[i][j] = carId
