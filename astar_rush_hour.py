@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 from matplotlib import colors
 import numpy as np
 import copy
+from time import sleep
 
 def main():
     # TODO: Execute tasks
@@ -46,13 +47,11 @@ def main():
 
     board.print_board()
     """
-    ps = ProblemSolver("AStar", "medium-1.txt")
-    #ps = ProblemSolver("AStar", "easy-3.txt")
+    #ps = ProblemSolver("AStar", "medium-1.txt")
+    ps = ProblemSolver("AStar", "easy-3.txt")
+    #ps = ProblemSolver("BFS", "medium-1.txt")
 
     print(ps.solve_problem())
-    #Vehicle.index = 0
-    #ps = ProblemSolver("BFS", "easy-3.txt")
-    #print(ps.solve_problem())
 
 
 class ProblemSolver:
@@ -72,11 +71,17 @@ class ProblemSolver:
         if(self.algorithm is "AStar"):
             print("Solve with AStar")
             # Sets heuristics by default
-            return self.best_first_search()
+            path = self.best_first_search()
         else:
             print("Solve with something else")
-            return self.best_first_search()
+            path = self.best_first_search()
+        self.print_path(path)
         return
+
+    def print_path(self, path):
+        print("Path:")
+        for state in reversed(path):
+            state.print_board(sleep_time=2)
 
     def best_first_search(self):
         solution = None
@@ -100,17 +105,17 @@ class ProblemSolver:
             if(self.goal[0] is (current_node.vehicles[current_node.driver_index].x + current_node.vehicles[current_node.driver_index].size - 1) and
                        self.goal[1] is current_node.vehicles[current_node.driver_index].y):
                 print("Success, found solution")
-                current_node.print_board()
+                #current_node.print_board()
                 print("Nodes expanded: ", nodes_expanded)
                 path = self.backtrack_path(current_node)
                 # return path
                 # TODO:
-                return
+                return path
 
             print("No solution yet")
             closed_list.append(current_node)
-            print("Current board:")
-            current_node.print_board()
+            print("Current board to expand:")
+            #current_node.print_board()
             children = current_node.expand_node()
             nodes_expanded += 1
             for child in children:
@@ -123,7 +128,7 @@ class ProblemSolver:
                 elif open_list_contains_child:
                     old_child = open_list_contains_child
                 if not closed_list_contains_child and not open_list_contains_child:
-                    child.print_board()
+                    #child.print_board()
                     self.attach_and_eval(child, current_node)
                     open_list.append(child)
                 # else if child node in open list, check if this is a better way to the node
@@ -245,9 +250,13 @@ class Board:
 
     def calculate_heuristic(self):
         h=0
-        if not self.vehicles[self.driver_index].x is self.goal[0]:
+        # h +1 for distance to coal
+        for i in range(self.vehicles[self.driver_index].x + self.vehicles[self.driver_index].size - 1, self.goal[0]+1):
             h += 1
-        # Find cars blocking the road
+        # adds 1+ h if vehicle not at goal
+        #if not self.vehicles[self.driver_index].x is self.goal[0]:
+        #    h += 1
+        # h +1 for cars blocking the road
         for i in range(self.vehicles[self.driver_index].x + self.vehicles[self.driver_index].size, self.goal[0] + 1):
             if not self.board[self.goal[1]][i] is 0:
                 h += 1
@@ -364,11 +373,11 @@ class Board:
         return children
 
     # Print the board with help from matplotlib
-    def print_board(self):
+    def print_board(self, sleep_time = 1):
         colormap, colorCycle, cars = self.create_colormap()
         cmap = colors.ListedColormap(colorCycle)
         norm = colors.BoundaryNorm(cars, cmap.N)
-        self.plot_matrix(colormap, cmap)
+        self.plot_matrix(colormap, cmap, sleep_time)
 
     # Generates:
     # Numpy matrix of car ids
@@ -395,11 +404,13 @@ class Board:
         return colormap, colorCycle, cars
 
     # Plots the graphical view
-    def plot_matrix(self, colormap, cmap, title='Rush Hour'):
+    def plot_matrix(self, colormap, cmap, sleep_time, title='Rush Hour'):
         plt.imshow(colormap, interpolation='nearest', cmap=cmap)
         plt.title(title)
         plt.tight_layout()
-        plt.show()
+        plt.show(block=False)
+        sleep(sleep_time)
+        plt.close()
 
 class Vehicle: #/?
     # orientation 0 = horizontal, 1 = vertical
