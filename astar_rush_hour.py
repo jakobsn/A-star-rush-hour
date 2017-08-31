@@ -47,8 +47,10 @@ def main():
 
     board.print_board()
     """
+    ps = ProblemSolver("AStar", "expert-2.txt")
+    #ps = ProblemSolver("AStar", "hard-3.txt")
     #ps = ProblemSolver("AStar", "medium-1.txt")
-    ps = ProblemSolver("AStar", "easy-3.txt")
+    #ps = ProblemSolver("AStar", "easy-3.txt")
     #ps = ProblemSolver("BFS", "medium-1.txt")
 
     print(ps.solve_problem())
@@ -59,8 +61,10 @@ class ProblemSolver:
     def __init__(self, algorithm, board):
         self.algorithm = algorithm
         if(self.algorithm is "AStar"):
+            # Creates board with heuristics
             self.board = Board(board)
         else:
+            # Creates board without heuristics
             self.board = Board(board, calculate_h=False)
         self.goal = self.board.goal
         self.driver = self.board.vehicles[self.board.driver_index]
@@ -69,19 +73,30 @@ class ProblemSolver:
     def solve_problem(self):
         # TODO: Solve specific problem
         if(self.algorithm is "AStar"):
-            print("Solve with AStar")
-            # Sets heuristics by default
-            path = self.best_first_search()
+            path = self.astar()
         else:
             print("Solve with something else")
-            path = self.best_first_search()
+            path = self.bfs()
         self.print_path(path)
         return
 
-    def print_path(self, path):
+    def print_path(self, path, sleeptime = 1):
         print("Path:")
         for state in reversed(path):
-            state.print_board(sleep_time=2)
+            state.print_board(sleeptime)
+
+    def astar(self):
+        print("Solve with AStar")
+        return self.best_first_search()
+
+    def bfs(self):
+        print("Solve with bfs")
+        return self.best_first_search()
+
+    def dfs(self):
+        print("Solve with dfs")
+        return self.best_first_search()
+        return
 
     def best_first_search(self):
         solution = None
@@ -91,14 +106,9 @@ class ProblemSolver:
         open_list.append(self.board)
         nodes_expanded = 0
         # Find best way
-        k =0
         while solution is None:
             if not open_list:
                 return None
-            k += 1
-            #if k > 25:
-            #    k=0
-            #    current_node.print_board()
 
             current_node = open_list.pop(0)
             # check if we have arrived to the goal, by checking if the driver vehicle is at the goal
@@ -130,7 +140,10 @@ class ProblemSolver:
                 if not closed_list_contains_child and not open_list_contains_child:
                     #child.print_board()
                     self.attach_and_eval(child, current_node)
-                    open_list.append(child)
+                    if self.algorithm is "DFS":
+                        open_list.push(child)
+                    else:
+                        open_list.append(child)
                 # else if child node in open list, check if this is a better way to the node
                 elif(child.g < old_child.g):  # Found cheaper path
                     print("cheaper path")
@@ -139,9 +152,8 @@ class ProblemSolver:
                     if self.list_contains_board(closed_list, child):
                         print("propagate_path_improvements")
                         self.propagate_path_improvements(current_node, children)
-            if self.algorithm is not "BFS":
+            if self.algorithm is "AStar":
                 open_list = self.merge_sort(open_list)
-
         return
 
     # Return equal instance if exits, else return false
@@ -172,14 +184,6 @@ class ProblemSolver:
                 child.f = child.g + child.h
                 self.propagate_path_improvements(child, child.expand_node(self.board.matrix))
         return children
-
-    def bfs(self):
-        # TODO:
-        return
-
-    def dfs(self):
-        # TODO:
-        return
 
     # find path used to arrive at node
     def backtrack_path(self, node):
@@ -226,8 +230,9 @@ class ProblemSolver:
                 k += 1
         return some_list
 
+
 class Board:
-    #index = 1
+
     def __init__(self, boardFile, width=6, height=6, goal=[5,2], driver_index=0, parent=None, g=0, calculate_h=True):
         self.boardFile = boardFile
         self.width = width
@@ -237,7 +242,6 @@ class Board:
         self.board = self.create_empty_board()
         self.board = self.create_board()
         self.driver_index = driver_index
-        #self.driver = self.vehicles[self.driver_index]
         self.parent = parent
         self.g = g
         if calculate_h:
@@ -245,8 +249,6 @@ class Board:
         else:
             self.h = 0
         self.f = g + self.h
-        #self.registration = Board.index
-        #Board.index += 1
 
     def calculate_heuristic(self):
         h=0
@@ -412,7 +414,8 @@ class Board:
         sleep(sleep_time)
         plt.close()
 
-class Vehicle: #/?
+class Vehicle:
+
     # orientation 0 = horizontal, 1 = vertical
     index = 1
     def __init__(self, orientation, x, y, size):
@@ -422,16 +425,6 @@ class Vehicle: #/?
         self.size = size
         self.registration = Vehicle.index
         Vehicle.index += 1
-
-# The moves represents the nodes in the path
-class Move:
-    def __init__(self, vehicle, move, lastMove, g, h=0):
-        self.vehicle = vehicle
-        self.move = move
-        self.lastMove = lastMove
-        self.h = h
-        self.g = g + 1
-        self.f = g + h
 
 if __name__ == '__main__':
     main()
