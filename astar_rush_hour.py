@@ -43,7 +43,7 @@ class ProblemSolver:
     def __init__(self, algorithm, board, show_process = False, show_solution = True):
         self.board_file = board
         self.algorithm = algorithm
-        if self.algorithm is 'AStar':
+        if self.algorithm == 'AStar':
             # Creates board with heuristics
             self.board = Board(board)
         else:
@@ -299,7 +299,9 @@ class Board:
 
     def move_vehicle(self, vehicle, direction):
         self.remove_vehicle(vehicle)
-        new_vehicle = copy.deepcopy(vehicle)
+        #new_vehicle = copy.deepcopy(vehicle)
+        new_vehicle = cPickle.loads(cPickle.dumps(vehicle, -1))
+
         if vehicle.orientation is 0:
             if direction is "forward":
                 new_vehicle.x += 1
@@ -352,7 +354,8 @@ class Board:
         board.move_vehicle(vehicle, direction)
         #print("done")
         board.g = self.g + 1
-        if self.calculate_h:
+        #print(board.calculate_h)
+        if board.calculate_h:
             #print("calc h")
             board.h = board.calculate_heuristic()
         board.f = board.g + board.h
