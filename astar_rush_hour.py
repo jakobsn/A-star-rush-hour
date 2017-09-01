@@ -103,8 +103,10 @@ class ProblemSolver:
                 print("Success, found solution for", self.algorithm, self.board_file)
                 if self.show_solution:
                     current_node.print_board()
-                print("Nodes expanded: ", nodes_expanded)
-                return self.backtrack_path(current_node)
+                print("Nodes expanded:", nodes_expanded)
+                path = self.backtrack_path(current_node)
+                print("Path length:", len(path)-1)
+                return path
 
             closed_list.append(current_node)
             if self.show_process:
@@ -125,9 +127,9 @@ class ProblemSolver:
                     self.attach_and_eval(child, current_node)
                     open_list.append(child)
                 # else if child node in open list, check if this is a better way to the node
-                elif(child.g < old_child.g):  # Found cheaper path
+                elif child.g < old_child.g:  # Found cheaper path
                     self.attach_and_eval(child, current_node)
-                    #if child in closed_list:
+                    # if child in closed_list:
                     if self.list_contains_board(closed_list, child):
                         self.propagate_path_improvements(current_node, children)
             if self.algorithm == "AStar":
@@ -241,7 +243,7 @@ class Board:
 
     # Create matrix of zeros
     def create_empty_board(self):
-        board = [ [ 0 for i in range(self.width) ] for j in range(self.height) ]
+        board = [[0 for i in range(self.width)] for j in range(self.height)]
         return board
 
     # Fill the board with cars
@@ -268,7 +270,7 @@ class Board:
         y = vehicle.y
         for i in range(vehicle.size):
             self.board[y][x] = vehicle
-            if(vehicle.orientation is 0):
+            if vehicle.orientation is 0:
                 x += 1
             else:
                 y += 1
@@ -278,7 +280,7 @@ class Board:
         y = vehicle.y
         for i in range(vehicle.size):
             self.board[y][x] = 0
-            if(vehicle.orientation is 0):
+            if vehicle.orientation is 0:
                 x += 1
             else:
                 y += 1
@@ -287,13 +289,13 @@ class Board:
     def move_vehicle(self, vehicle, direction):
         self.remove_vehicle(vehicle)
         new_vehicle = copy.deepcopy(vehicle)
-        if(vehicle.orientation is 0):
-            if(direction is "forward"):
+        if vehicle.orientation is 0:
+            if direction is "forward":
                 new_vehicle.x += 1
             else:
                 new_vehicle.x -= 1
         else:
-            if(direction is "forward"):
+            if direction is "forward":
                 new_vehicle.y += 1
             else:
                 new_vehicle.y -= 1
@@ -306,20 +308,20 @@ class Board:
         legalMoves = []
         for vehicle in self.vehicles:
             # Horizontal moves
-            if(vehicle.orientation is 0):
+            if vehicle.orientation is 0:
                 # Check forward move
-                if(vehicle.x+vehicle.size < self.width and not self.board[vehicle.y][vehicle.x+vehicle.size]):
+                if vehicle.x+vehicle.size < self.width and not self.board[vehicle.y][vehicle.x+vehicle.size]:
                     legalMoves.append([vehicle, "forward"])
                 # Check backward move
-                if(not self.board[vehicle.y][vehicle.x-1] and vehicle.x-1 > -1):
+                if not self.board[vehicle.y][vehicle.x-1] and vehicle.x-1 > -1:
                     legalMoves.append([vehicle, "backward"])
             # Vertical moves
             else:
                 # Check forward move
-                if(vehicle.y+vehicle.size < self.height and not self.board[vehicle.y+vehicle.size][vehicle.x]):
+                if vehicle.y+vehicle.size < self.height and not self.board[vehicle.y+vehicle.size][vehicle.x]:
                     legalMoves.append([vehicle, "forward"])
                 # Check backward move
-                if(not self.board[vehicle.y-1][vehicle.x] and vehicle.y-1 > -1):
+                if not self.board[vehicle.y-1][vehicle.x] and vehicle.y-1 > -1:
                     legalMoves.append([vehicle, "backward"])
         return legalMoves
 
@@ -386,6 +388,7 @@ class Board:
         plt.show(block=False)
         sleep(sleep_time)
         plt.close()
+
 
 class Vehicle:
 

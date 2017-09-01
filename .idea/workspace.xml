@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="98dcf60b-f936-40b1-ad97-d94f51d80540" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Report_AStar_jakob_notland.odt" afterPath="$PROJECT_DIR$/Report_AStar_jakob_notland.odt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.~lock.Report_AStar_jakob_notland.odt#" afterPath="$PROJECT_DIR$/.~lock.Report_AStar_jakob_notland.odt#" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/astar_rush_hour.py" afterPath="$PROJECT_DIR$/astar_rush_hour.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -23,8 +25,8 @@
       <file leaf-file-name="astar_rush_hour.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/astar_rush_hour.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="54">
-              <caret line="102" column="84" lean-forward="false" selection-start-line="102" selection-start-column="84" selection-end-line="102" selection-end-column="84" />
+            <state relative-caret-position="442">
+              <caret line="245" column="75" lean-forward="false" selection-start-line="245" selection-start-column="75" selection-end-line="245" selection-end-column="75" />
               <folding>
                 <element signature="e#161#192#0" expanded="true" />
               </folding>
@@ -513,8 +515,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/astar_rush_hour.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="54">
-          <caret line="102" column="84" lean-forward="false" selection-start-line="102" selection-start-column="84" selection-end-line="102" selection-end-column="84" />
+        <state relative-caret-position="442">
+          <caret line="245" column="75" lean-forward="false" selection-start-line="245" selection-start-column="75" selection-end-line="245" selection-end-column="75" />
           <folding>
             <element signature="e#161#192#0" expanded="true" />
           </folding>
