@@ -25,8 +25,8 @@
       <file leaf-file-name="astar_rush_hour.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/astar_rush_hour.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="442">
-              <caret line="245" column="75" lean-forward="false" selection-start-line="245" selection-start-column="75" selection-end-line="245" selection-end-column="75" />
+            <state relative-caret-position="396">
+              <caret line="355" column="28" lean-forward="true" selection-start-line="355" selection-start-column="28" selection-end-line="355" selection-end-column="28" />
               <folding>
                 <element signature="e#161#192#0" expanded="true" />
               </folding>
@@ -411,17 +411,17 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/astar_rush_hour.py</url>
-          <line>79</line>
+          <line>81</line>
           <option name="timeStamp" value="26" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/astar_rush_hour.py</url>
-          <line>102</line>
+          <line>104</line>
           <option name="timeStamp" value="28" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/astar_rush_hour.py</url>
-          <line>62</line>
+          <line>64</line>
           <option name="timeStamp" value="31" />
         </line-breakpoint>
       </breakpoints>
@@ -515,8 +515,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/astar_rush_hour.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="442">
-          <caret line="245" column="75" lean-forward="false" selection-start-line="245" selection-start-column="75" selection-end-line="245" selection-end-column="75" />
+        <state relative-caret-position="396">
+          <caret line="355" column="28" lean-forward="true" selection-start-line="355" selection-start-column="28" selection-end-line="355" selection-end-column="28" />
           <folding>
             <element signature="e#161#192#0" expanded="true" />
           </folding>

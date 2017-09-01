@@ -11,9 +11,11 @@ import copy
 from time import sleep
 import argparse
 import sys
+import six.moves.cPickle as cPickle
+from multiprocessing import Process
 
 def main():
-    sys.setrecursionlimit(10000)
+    sys.setrecursionlimit(15000)
 
     # Takes input from command line
     parser = argparse.ArgumentParser(description='Solve Rush Hour')
@@ -23,7 +25,7 @@ def main():
                         help='True if you want to see the entire process of the nodes expanded, and the solution', nargs = '?')
     args = parser.parse_args()
     if args.display:
-        ps = ProblemSolver(args.algorithm, args.board, args.display, args.display)
+        ps = ProblemSolver(args.algorithm, args.board, args.display)
     elif not args.display:
         ps = ProblemSolver(args.algorithm, args.board)
     ps.solve_problem()
@@ -38,7 +40,7 @@ def str2bool(v):
 
 # Class for solving specific problem
 class ProblemSolver:
-    def __init__(self, algorithm, board, show_process = False, show_solution = False):
+    def __init__(self, algorithm, board, show_process = False, show_solution = True):
         self.board_file = board
         self.algorithm = algorithm
         if self.algorithm is 'AStar':
@@ -64,7 +66,7 @@ class ProblemSolver:
             self.print_path(path)
         return
 
-    def print_path(self, path, sleeptime = 100):
+    def print_path(self, path, sleeptime = 1):
         print("Path:")
         for state in reversed(path):
             state.print_board(sleeptime)
@@ -101,8 +103,6 @@ class ProblemSolver:
             if(self.goal[0] is (current_node.vehicles[current_node.driver_index].x + current_node.vehicles[current_node.driver_index].size - 1) and
                        self.goal[1] is current_node.vehicles[current_node.driver_index].y):
                 print("Success, found solution for", self.algorithm, self.board_file)
-                if self.show_solution:
-                    current_node.print_board()
                 print("Nodes expanded:", nodes_expanded)
                 path = self.backtrack_path(current_node)
                 print("Path length:", len(path)-1)
@@ -112,26 +112,36 @@ class ProblemSolver:
             if self.show_process:
                 print("Current board to expand:")
                 current_node.print_board()
+            #print("Expand node")
             children = current_node.expand_node()
+            #print("done")
             nodes_expanded += 1
             print("Expanding node:", nodes_expanded)
             for child in children:
                 # if child node not in closed or open list, add to open list
+                #print("check closed list")
                 closed_list_contains_child = self.list_contains_board(closed_list, child)
+                #print("done")
+                #print("checking open list")
                 open_list_contains_child = self.list_contains_board(open_list, child)
+                #print("done")
                 if closed_list_contains_child:
                     old_child = closed_list_contains_child
                 elif open_list_contains_child:
                     old_child = open_list_contains_child
                 if not closed_list_contains_child and not open_list_contains_child:
+                    #print("attach and eval")
                     self.attach_and_eval(child, current_node)
+                    #print("done")
                     open_list.append(child)
                 # else if child node in open list, check if this is a better way to the node
                 elif child.g < old_child.g:  # Found cheaper path
                     self.attach_and_eval(child, current_node)
                     # if child in closed_list:
                     if self.list_contains_board(closed_list, child):
+                        #print("propagate")
                         self.propagate_path_improvements(current_node, children)
+                        #print("done")
             if self.algorithm == "AStar":
                 open_list = self.merge_sort(open_list)
         return
@@ -214,6 +224,7 @@ class ProblemSolver:
 class Board:
 
     def __init__(self, boardFile, width=6, height=6, goal=[5,2], driver_index=0, parent=None, g=0, calculate_h=True):
+        self.calculate_h = calculate_h
         self.boardFile = boardFile
         self.width = width
         self.height = height
@@ -327,23 +338,38 @@ class Board:
 
     # Get state from specific move (but dont do the move). E.g create child
     def expand_move(self, vehicle, direction):
-        board = copy.deepcopy(self)
-        for i in range(len(board.vehicles)):
-            board.vehicles[i] = copy.deepcopy(self.vehicles[i])
+        #print("copy board")
+        #board = copy.deepcopy(self)
+        board = cPickle.loads(cPickle.dumps(self, -1))
+        #print("done")
+#        for i in range(len(board.vehicles)):
+#            board.vehicles[i] = copy.deepcopy(self.vehicles[i])
+        #print("copy vehicles")
+        board.vehicles = cPickle.loads(cPickle.dumps(self.vehicles, -1))
+        #board.vehicles = copy.deepcopy(self.vehicles)
+        #print("done")
+        #print("perform move")
         board.move_vehicle(vehicle, direction)
+        #print("done")
         board.g = self.g + 1
-        board.h = board.calculate_heuristic()
+        if self.calculate_h:
+            #print("calc h")
+            board.h = board.calculate_heuristic()
         board.f = board.g + board.h
         board.parent = self
         return board
 
     # Get all possible children (legal moves) after a move
     def expand_node(self):
+        #print("get legal moves")
         legalMoves = self.get_legal_moves()
+        #print("done")
         children = []
+
         for move in legalMoves:
-            child = self.expand_move(move[0],move[1])
-            children.append(child)
+            #print("expand move")
+            children.append(self.expand_move(move[0],move[1]))
+            #print("done")
         return children
 
     # Print the board with help from matplotlib
