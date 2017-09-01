@@ -1,66 +1,47 @@
+#!/usr/bin/python
 # python 3.5
 
-# Find all possible moves
-# Heurestic for all moves
-
-# Good moves:
-#   Cleares space for car
-#   Move car closer
-#   Clear space to clear space for car?
+# By Jakob Notland
+# Created for "Artificial Intelligence Programming" at norwegian university Of science and technology (NTNU)
 
 import matplotlib.pyplot as plt
 from matplotlib import colors
 import numpy as np
 import copy
 from time import sleep
+import argparse
+import sys
 
 def main():
-    # TODO: Execute tasks
-    """
-    board = Board("easy-3.txt")
-    board2 = copy.deepcopy(board)
-    #board.create_board()
+    sys.setrecursionlimit(10000)
 
-    print("Legal moves:")
-    legalMoves = board.get_legal_moves()
-    for move in legalMoves:
-        print(move[0].x, move[0].y, move[1])
-    board.print_board()
+    # Takes input from command line
+    parser = argparse.ArgumentParser(description='Solve Rush Hour')
+    parser.add_argument('algorithm', type=str, help='Algorithm of choice (AStar, BFS or DFS)')
+    parser.add_argument('board', type=str, help='Board text file')
+    parser.add_argument('display', type=str2bool,
+                        help='True if you want to see the entire process of the nodes expanded, and the solution', nargs = '?')
+    args = parser.parse_args()
+    if args.display:
+        ps = ProblemSolver(args.algorithm, args.board, args.display, args.display)
+    elif not args.display:
+        ps = ProblemSolver(args.algorithm, args.board)
+    ps.solve_problem()
 
-    for line in board.board:
-        for vehicle in line:
-            if(vehicle):
-                print("vehicle")
-                print(vehicle.x, vehicle.y)
-                board.expand_move(vehicle, "forward")
-                break
-        break
+def str2bool(v):
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
 
-    for line in board.board:
-        print(line)
-    for line in board.board:
-        for vehicle in line:
-            if(vehicle):
-                board.expand_node()
-                break
-        break
-
-    board.print_board()
-    """
-    ps = ProblemSolver("AStar", "expert-2.txt")
-    #ps = ProblemSolver("AStar", "hard-3.txt")
-    #ps = ProblemSolver("AStar", "medium-1.txt")
-    #ps = ProblemSolver("AStar", "easy-3.txt")
-    #ps = ProblemSolver("BFS", "medium-1.txt")
-
-    print(ps.solve_problem())
-
-
+# Class for solving specific problem
 class ProblemSolver:
-    # TODO: Implement problemsolving for different algorithms
-    def __init__(self, algorithm, board):
+    def __init__(self, algorithm, board, show_process = False, show_solution = False):
+        self.board_file = board
         self.algorithm = algorithm
-        if(self.algorithm is "AStar"):
+        if self.algorithm is 'AStar':
             # Creates board with heuristics
             self.board = Board(board)
         else:
@@ -68,19 +49,22 @@ class ProblemSolver:
             self.board = Board(board, calculate_h=False)
         self.goal = self.board.goal
         self.driver = self.board.vehicles[self.board.driver_index]
+        self.show_process = show_process
+        self.show_solution = show_solution
 
-
+    # Solve given algorithm
     def solve_problem(self):
-        # TODO: Solve specific problem
-        if(self.algorithm is "AStar"):
+        if self.algorithm == "AStar":
             path = self.astar()
-        else:
-            print("Solve with something else")
+        elif self.algorithm == "BFS":
             path = self.bfs()
-        self.print_path(path)
+        else:
+            path = self.dfs()
+        if self.show_solution:
+            self.print_path(path)
         return
 
-    def print_path(self, path, sleeptime = 1):
+    def print_path(self, path, sleeptime = 100):
         print("Path:")
         for state in reversed(path):
             state.print_board(sleeptime)
@@ -90,19 +74,18 @@ class ProblemSolver:
         return self.best_first_search()
 
     def bfs(self):
-        print("Solve with bfs")
+        print("Solve with BFS")
         return self.best_first_search()
 
     def dfs(self):
-        print("Solve with dfs")
+        print("Solve with DFS")
         return self.best_first_search()
-        return
 
     def best_first_search(self):
         solution = None
-        open_list = []
         closed_list = []
         # Add initial node to open list
+        open_list = []
         open_list.append(self.board)
         nodes_expanded = 0
         # Find best way
@@ -110,27 +93,28 @@ class ProblemSolver:
             if not open_list:
                 return None
 
-            current_node = open_list.pop(0)
+            if self.algorithm == "DFS":
+                current_node = open_list.pop()
+            else:
+                current_node = open_list.pop(0)
             # check if we have arrived to the goal, by checking if the driver vehicle is at the goal
             if(self.goal[0] is (current_node.vehicles[current_node.driver_index].x + current_node.vehicles[current_node.driver_index].size - 1) and
                        self.goal[1] is current_node.vehicles[current_node.driver_index].y):
-                print("Success, found solution")
-                #current_node.print_board()
+                print("Success, found solution for", self.algorithm, self.board_file)
+                if self.show_solution:
+                    current_node.print_board()
                 print("Nodes expanded: ", nodes_expanded)
-                path = self.backtrack_path(current_node)
-                # return path
-                # TODO:
-                return path
+                return self.backtrack_path(current_node)
 
-            print("No solution yet")
             closed_list.append(current_node)
-            print("Current board to expand:")
-            #current_node.print_board()
+            if self.show_process:
+                print("Current board to expand:")
+                current_node.print_board()
             children = current_node.expand_node()
             nodes_expanded += 1
+            print("Expanding node:", nodes_expanded)
             for child in children:
                 # if child node not in closed or open list, add to open list
-                #if child not in closed_list and child not in open_list:
                 closed_list_contains_child = self.list_contains_board(closed_list, child)
                 open_list_contains_child = self.list_contains_board(open_list, child)
                 if closed_list_contains_child:
@@ -138,21 +122,15 @@ class ProblemSolver:
                 elif open_list_contains_child:
                     old_child = open_list_contains_child
                 if not closed_list_contains_child and not open_list_contains_child:
-                    #child.print_board()
                     self.attach_and_eval(child, current_node)
-                    if self.algorithm is "DFS":
-                        open_list.push(child)
-                    else:
-                        open_list.append(child)
+                    open_list.append(child)
                 # else if child node in open list, check if this is a better way to the node
                 elif(child.g < old_child.g):  # Found cheaper path
-                    print("cheaper path")
                     self.attach_and_eval(child, current_node)
                     #if child in closed_list:
                     if self.list_contains_board(closed_list, child):
-                        print("propagate_path_improvements")
                         self.propagate_path_improvements(current_node, children)
-            if self.algorithm is "AStar":
+            if self.algorithm == "AStar":
                 open_list = self.merge_sort(open_list)
         return
 
@@ -252,20 +230,13 @@ class Board:
 
     def calculate_heuristic(self):
         h=0
-        # h +1 for distance to coal
+        # h +1 for steps to goal
         for i in range(self.vehicles[self.driver_index].x + self.vehicles[self.driver_index].size - 1, self.goal[0]+1):
             h += 1
-        # adds 1+ h if vehicle not at goal
-        #if not self.vehicles[self.driver_index].x is self.goal[0]:
-        #    h += 1
         # h +1 for cars blocking the road
         for i in range(self.vehicles[self.driver_index].x + self.vehicles[self.driver_index].size, self.goal[0] + 1):
             if not self.board[self.goal[1]][i] is 0:
                 h += 1
-        #for block in self.board[self.goal[1]]:
-        #    # If the block contains 0, its empty. If registration is 1, its the main car
-        #    if not block is 0 and not block.registration is 1:
-        #        h += 1
         return h
 
     # Create matrix of zeros
@@ -330,9 +301,8 @@ class Board:
         self.place_vehicle(new_vehicle)
         return
 
+    # Return all moves which don't crash or goes out of the grid
     def get_legal_moves(self):
-        # TODO: Get legal moves. Which are moves that dont crash cars and dont go out of the grid
-        # LegalMoves format: [[$car, $direction][...]]
         legalMoves = []
         for vehicle in self.vehicles:
             # Horizontal moves
@@ -387,8 +357,8 @@ class Board:
     # List of colors (colorCycle) one for each car
     def create_colormap(self):
         colormap = np.zeros((self.width, self.height))
-        colorCycle = ['white']
-        colorList = ["#FFFFFF", "#CC9933", "#FF99CC", "#3300CC", "black"]
+        colorCycle = ['white', 'red']
+        colorList = ["blue", "#CC9933", "#FF99CC", "#3300CC", "black"]
         cars = []
         for i in range(len(self.board)):
             for j in range(len(self.board)):
@@ -397,9 +367,12 @@ class Board:
                 else:
                     carId = self.board[i][j].registration
                     if not carId in cars:
-                        color = "C" + str(len(colorCycle) - 1)
+                        if not len(colorCycle) == 4:
+                            color = "C" + str(len(colorCycle) - 1)
+                        else:
+                            color = "black"
                         if len(colorCycle) > 9:
-                            color = colorList.pop()
+                            color = colorList.pop(0)
                         colorCycle.append(color)
                         cars.append(carId)
                     colormap[i][j] = carId
