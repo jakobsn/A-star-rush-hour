@@ -7,12 +7,11 @@
 import matplotlib.pyplot as plt
 from matplotlib import colors
 import numpy as np
-import copy
 from time import sleep
 import argparse
 import sys
 import six.moves.cPickle as cPickle
-from multiprocessing import Process
+
 
 def main():
     sys.setrecursionlimit(15000)
@@ -21,14 +20,15 @@ def main():
     parser = argparse.ArgumentParser(description='Solve Rush Hour')
     parser.add_argument('algorithm', type=str, help='Algorithm of choice (AStar, BFS or DFS)')
     parser.add_argument('board', type=str, help='Board text file')
-    parser.add_argument('display', type=str2bool,
-                        help='True if you want to see the entire process of the nodes expanded, and the solution', nargs = '?')
+    parser.add_argument('display_path', type=str2bool,
+                        help='True if you want to see the solution path',
+                        nargs='?')
+    parser.add_argument('display_agenda', type=str2bool,
+                        help='True if you want to see the entire process of the nodes expanded', nargs = '?')
     args = parser.parse_args()
-    if args.display:
-        ps = ProblemSolver(args.algorithm, args.board, args.display)
-    elif not args.display:
-        ps = ProblemSolver(args.algorithm, args.board)
+    ps = ProblemSolver(args.algorithm, args.board, args.display_path, args.display_agenda)
     ps.solve_problem()
+
 
 def str2bool(v):
     if v.lower() in ('yes', 'true', 't', 'y', '1'):
@@ -38,9 +38,10 @@ def str2bool(v):
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
+
 # Class for solving specific problem
 class ProblemSolver:
-    def __init__(self, algorithm, board, show_process = False, show_solution = True):
+    def __init__(self, algorithm, board, show_solution = False, show_process = False):
         self.board_file = board
         self.algorithm = algorithm
         if self.algorithm == 'AStar':
@@ -242,15 +243,24 @@ class Board:
         self.f = g + self.h
 
     def calculate_heuristic(self):
-        h=0
-        # h +1 for steps to goal
-        for i in range(self.vehicles[self.driver_index].x + self.vehicles[self.driver_index].size - 1, self.goal[0]+1):
-            h += 1
+        # h +1 for every step to goal
+        h = self.goal[0] - self.vehicles[self.driver_index].x - self.vehicles[self.driver_index].size + 1
         # h +1 for cars blocking the road
+        d = 0
         for i in range(self.vehicles[self.driver_index].x + self.vehicles[self.driver_index].size, self.goal[0] + 1):
+            t = 0
             if not self.board[self.goal[1]][i] is 0:
                 h += 1
-        return h
+                conflict_vehicle = self.board[self.goal[1]][i]
+                if conflict_vehicle.y - 1 > -1:
+                    if self.board[conflict_vehicle.y - 1][conflict_vehicle.x]:
+                        t += 1
+                if conflict_vehicle.y + conflict_vehicle.size < 6:
+                    if self.board[conflict_vehicle.y + conflict_vehicle.size][conflict_vehicle.x]:
+                        t += 1
+                if t > d:
+                    d = t
+        return h + d
 
     # Create matrix of zeros
     def create_empty_board(self):
@@ -299,7 +309,6 @@ class Board:
 
     def move_vehicle(self, vehicle, direction):
         self.remove_vehicle(vehicle)
-        #new_vehicle = copy.deepcopy(vehicle)
         new_vehicle = cPickle.loads(cPickle.dumps(vehicle, -1))
 
         if vehicle.orientation is 0:
@@ -316,7 +325,7 @@ class Board:
         self.place_vehicle(new_vehicle)
         return
 
-    # Return all moves which don't crash or goes out of the grid
+    # Return all moves which don't crash, goes out of the grid or are the current nodes parent
     def get_legal_moves(self):
         legalMoves = []
         for vehicle in self.vehicles:
@@ -324,24 +333,33 @@ class Board:
             if vehicle.orientation is 0:
                 # Check forward move
                 if vehicle.x+vehicle.size < self.width and not self.board[vehicle.y][vehicle.x+vehicle.size]:
-                    legalMoves.append([vehicle, "forward"])
+                    if not self.move_leads_to_parent(vehicle.registration, vehicle.x + 1, vehicle.y):
+                        legalMoves.append([vehicle, "forward"])
                 # Check backward move
                 if not self.board[vehicle.y][vehicle.x-1] and vehicle.x-1 > -1:
-                    legalMoves.append([vehicle, "backward"])
+                    if not self.move_leads_to_parent(vehicle.registration, vehicle.x - 1, vehicle.y):
+                        legalMoves.append([vehicle, "backward"])
             # Vertical moves
             else:
                 # Check forward move
                 if vehicle.y+vehicle.size < self.height and not self.board[vehicle.y+vehicle.size][vehicle.x]:
-                    legalMoves.append([vehicle, "forward"])
+                    if not self.move_leads_to_parent(vehicle.registration, vehicle.x, vehicle.y + 1):
+                        legalMoves.append([vehicle, "forward"])
                 # Check backward move
                 if not self.board[vehicle.y-1][vehicle.x] and vehicle.y-1 > -1:
-                    legalMoves.append([vehicle, "backward"])
+                    if not self.move_leads_to_parent(vehicle.registration, vehicle.x, vehicle.y - 1):
+                        legalMoves.append([vehicle, "backward"])
         return legalMoves
+
+    def move_leads_to_parent(self, vehicle_id, x, y):
+        if self.parent:
+            if self.parent.vehicles[vehicle_id-1].x == x and self.parent.vehicles[vehicle_id-1].y == y:
+                return True
+        return False
 
     # Get state from specific move (but dont do the move). E.g create child
     def expand_move(self, vehicle, direction):
         #print("copy board")
-        #board = copy.deepcopy(self)
         board = cPickle.loads(cPickle.dumps(self, -1))
         #print("done")
 #        for i in range(len(board.vehicles)):
@@ -371,7 +389,7 @@ class Board:
 
         for move in legalMoves:
             #print("expand move")
-            children.append(self.expand_move(move[0],move[1]))
+            children.append(self.expand_move(move[0], move[1]))
             #print("done")
         return children
 
