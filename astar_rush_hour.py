@@ -246,21 +246,10 @@ class Board:
         # h +1 for every step to goal
         h = self.goal[0] - self.vehicles[self.driver_index].x - self.vehicles[self.driver_index].size + 1
         # h +1 for cars blocking the road
-        d = 0
         for i in range(self.vehicles[self.driver_index].x + self.vehicles[self.driver_index].size, self.goal[0] + 1):
-            t = 0
             if not self.board[self.goal[1]][i] is 0:
                 h += 1
-                conflict_vehicle = self.board[self.goal[1]][i]
-                if conflict_vehicle.y - 1 > -1:
-                    if self.board[conflict_vehicle.y - 1][conflict_vehicle.x]:
-                        t += 1
-                if conflict_vehicle.y + conflict_vehicle.size < 6:
-                    if self.board[conflict_vehicle.y + conflict_vehicle.size][conflict_vehicle.x]:
-                        t += 1
-                if t > d:
-                    d = t
-        return h + d
+        return h
 
     # Create matrix of zeros
     def create_empty_board(self):
