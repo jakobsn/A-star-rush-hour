@@ -25,11 +25,16 @@ def main():
                         nargs='?')
     parser.add_argument('display_agenda', type=str2bool,
                         help='True if you want to see the entire process of the nodes expanded', nargs = '?')
+    parser.add_argument('display_time', type=float,
+                        help='Specify how many seconds to display each frame when in display mode', nargs = '?')
     args = parser.parse_args()
-    ps = ProblemSolver(args.algorithm, args.board, args.display_path, args.display_agenda)
+
+    # Solve specific problem
+    ps = ProblemSolver(args.algorithm, args.board, args.display_path, args.display_agenda, args.display_time)
     ps.solve_problem()
 
 
+# Returns string input as boolean
 def str2bool(v):
     if v.lower() in ('yes', 'true', 't', 'y', '1'):
         return True
@@ -41,8 +46,9 @@ def str2bool(v):
 
 # Class for solving specific problem
 class ProblemSolver:
-    def __init__(self, algorithm, board, show_solution = False, show_process = False):
+    def __init__(self, algorithm, board, show_solution=False, show_process=False, display_time=1):
         self.board_file = board
+        self.display_time = display_time
         self.algorithm = algorithm
         if self.algorithm == 'AStar':
             # Creates board with heuristics
@@ -67,10 +73,10 @@ class ProblemSolver:
             self.print_path(path)
         return
 
-    def print_path(self, path, sleeptime = 1):
+    def print_path(self, path):
         print("Path:")
         for state in reversed(path):
-            state.print_board(sleeptime)
+            state.print_board(self.display_time)
 
     def astar(self):
         print("Solve with AStar")
@@ -87,20 +93,22 @@ class ProblemSolver:
     def best_first_search(self):
         solution = None
         closed_list = []
-        # Add initial node to open list
         open_list = []
+        # Add initial node to open list
         open_list.append(self.board)
         nodes_expanded = 0
         # Find best way
         while solution is None:
             if not open_list:
+                # No solution
                 return None
 
+            # Pop next node from the open list
             if self.algorithm == "DFS":
                 current_node = open_list.pop()
             else:
                 current_node = open_list.pop(0)
-            # check if we have arrived to the goal, by checking if the driver vehicle is at the goal
+            # Check if we have arrived to the goal, by checking if the driver vehicle is at the goal
             if(self.goal[0] is (current_node.vehicles[current_node.driver_index].x + current_node.vehicles[current_node.driver_index].size - 1) and
                        self.goal[1] is current_node.vehicles[current_node.driver_index].y):
                 print("Success, found solution for", self.algorithm, self.board_file)
@@ -112,37 +120,30 @@ class ProblemSolver:
             closed_list.append(current_node)
             if self.show_process:
                 print("Current board to expand:")
-                current_node.print_board()
-            #print("Expand node")
+                current_node.print_board(self.display_time)
+            # Generate successor states
             children = current_node.expand_node()
-            #print("done")
             nodes_expanded += 1
             print("Expanding node:", nodes_expanded)
+
             for child in children:
-                # if child node not in closed or open list, add to open list
-                #print("check closed list")
+                # Use custom functions to check if the new instances already exists.
                 closed_list_contains_child = self.list_contains_board(closed_list, child)
-                #print("done")
-                #print("checking open list")
                 open_list_contains_child = self.list_contains_board(open_list, child)
-                #print("done")
                 if closed_list_contains_child:
                     old_child = closed_list_contains_child
                 elif open_list_contains_child:
                     old_child = open_list_contains_child
+                # Discover new nodes and evaluate them
                 if not closed_list_contains_child and not open_list_contains_child:
-                    #print("attach and eval")
                     self.attach_and_eval(child, current_node)
-                    #print("done")
                     open_list.append(child)
-                # else if child node in open list, check if this is a better way to the node
-                elif child.g < old_child.g:  # Found cheaper path
+                # If node already discovered, look for cheaper path
+                elif child.g < old_child.g:
                     self.attach_and_eval(child, current_node)
-                    # if child in closed_list:
-                    if self.list_contains_board(closed_list, child):
-                        #print("propagate")
+                    if closed_list_contains_child:
                         self.propagate_path_improvements(current_node, children)
-                        #print("done")
+
             if self.algorithm == "AStar":
                 open_list = self.merge_sort(open_list)
         return
@@ -186,7 +187,7 @@ class ProblemSolver:
             x += 1
         return path
 
-    #  sort the open list such that the node with lowest f value is on top (merge sort)
+    # sort the open list such that the node with lowest f value is on top (merge sort)
     def merge_sort(self, some_list):
         if len(some_list) > 1:
             mid = len(some_list) // 2
@@ -222,6 +223,7 @@ class ProblemSolver:
         return some_list
 
 
+# Class keeping track of the rush hour puzzle board instances
 class Board:
 
     def __init__(self, boardFile, width=6, height=6, goal=[5,2], driver_index=0, parent=None, g=0, calculate_h=True):
@@ -340,50 +342,37 @@ class Board:
                         legalMoves.append([vehicle, "backward"])
         return legalMoves
 
+    # Check if moving vehicle of id to [x, y] leads to the state of self's parent
     def move_leads_to_parent(self, vehicle_id, x, y):
         if self.parent:
             if self.parent.vehicles[vehicle_id-1].x == x and self.parent.vehicles[vehicle_id-1].y == y:
                 return True
         return False
 
-    # Get state from specific move (but dont do the move). E.g create child
+    # Create child when created from moving vehicle in a direction
     def expand_move(self, vehicle, direction):
-        #print("copy board")
+        # Create copy of self (Board and vehicles)
         board = cPickle.loads(cPickle.dumps(self, -1))
-        #print("done")
-#        for i in range(len(board.vehicles)):
-#            board.vehicles[i] = copy.deepcopy(self.vehicles[i])
-        #print("copy vehicles")
         board.vehicles = cPickle.loads(cPickle.dumps(self.vehicles, -1))
-        #board.vehicles = copy.deepcopy(self.vehicles)
-        #print("done")
-        #print("perform move")
         board.move_vehicle(vehicle, direction)
-        #print("done")
         board.g = self.g + 1
-        #print(board.calculate_h)
+        # Only calculates h for AStar
         if board.calculate_h:
-            #print("calc h")
             board.h = board.calculate_heuristic()
         board.f = board.g + board.h
         board.parent = self
         return board
 
-    # Get all possible children (legal moves) after a move
+    # Get all possible children (board instances from legal moves) after a move
     def expand_node(self):
-        #print("get legal moves")
         legalMoves = self.get_legal_moves()
-        #print("done")
         children = []
-
         for move in legalMoves:
-            #print("expand move")
             children.append(self.expand_move(move[0], move[1]))
-            #print("done")
         return children
 
     # Print the board with help from matplotlib
-    def print_board(self, sleep_time = 1):
+    def print_board(self, sleep_time):
         colormap, colorCycle, cars = self.create_colormap()
         cmap = colors.ListedColormap(colorCycle)
         norm = colors.BoundaryNorm(cars, cmap.N)
@@ -426,10 +415,11 @@ class Board:
         plt.close()
 
 
+# Class for managing vehicles
 class Vehicle:
 
-    # orientation 0 = horizontal, 1 = vertical
     index = 1
+
     def __init__(self, orientation, x, y, size):
         self.orientation = orientation
         self.x = x
