@@ -30,7 +30,10 @@ def main():
     args = parser.parse_args()
 
     # Solve specific problem
-    ps = ProblemSolver(args.algorithm, args.board, args.display_path, args.display_agenda, args.display_time)
+    if args.display_time:
+        ps = ProblemSolver(args.algorithm, args.board, args.display_path, args.display_agenda, args.display_time)
+    else:
+        ps = ProblemSolver(args.algorithm, args.board, args.display_path, args.display_agenda)
     ps.solve_problem()
 
 
@@ -406,7 +409,8 @@ class Board:
         return colormap, colorCycle, cars
 
     # Plots the graphical view
-    def plot_matrix(self, colormap, cmap, sleep_time, title='Rush Hour'):
+    def plot_matrix(self, colormap, cmap, sleep_time):
+        title = 'Rush Hour \n Board: ' + str(self.boardFile).strip('.txt')
         plt.imshow(colormap, interpolation='nearest', cmap=cmap)
         plt.title(title)
         plt.tight_layout()

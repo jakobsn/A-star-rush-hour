@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="98dcf60b-f936-40b1-ad97-d94f51d80540" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Report_AStar_jakob_notland.odt" afterPath="$PROJECT_DIR$/Report_AStar_jakob_notland.odt" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.~lock.Report_AStar_jakob_notland.odt#" afterPath="$PROJECT_DIR$/.~lock.Report_AStar_jakob_notland.odt#" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/astar_rush_hour.py" afterPath="$PROJECT_DIR$/astar_rush_hour.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -26,8 +24,8 @@
       <file leaf-file-name="astar_rush_hour.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/astar_rush_hour.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="451">
-              <caret line="25" column="56" lean-forward="true" selection-start-line="25" selection-start-column="56" selection-end-line="25" selection-end-column="56" />
+            <state relative-caret-position="594">
+              <caret line="414" column="24" lean-forward="true" selection-start-line="414" selection-start-column="24" selection-end-line="414" selection-end-column="24" />
               <folding>
                 <element signature="e#161#192#0" expanded="true" />
               </folding>
@@ -78,7 +76,7 @@
   <component name="ProjectFrameBounds">
     <option name="x" value="1920" />
     <option name="y" value="400" />
-    <option name="width" value="1382" />
+    <option name="width" value="960" />
     <option name="height" value="1028" />
   </component>
   <component name="ProjectView">
@@ -118,6 +116,7 @@
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../../2016-2017/høst/introAI/oving3/AStar.py" />
     <property name="js.eslint.eslintPackage" value="" />
+    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors.Font" />
   </component>
   <component name="RunManager" selected="Python.astar_rush_hour">
     <configuration default="false" name="astar_rush_hour" type="PythonConfigurationType" factoryName="Python" temporary="true">
@@ -375,7 +374,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1920" y="400" width="1382" height="1028" extended-state="4" />
+    <frame x="1920" y="400" width="960" height="1028" extended-state="4" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.0" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -409,17 +408,17 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/astar_rush_hour.py</url>
-          <line>88</line>
+          <line>91</line>
           <option name="timeStamp" value="26" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/astar_rush_hour.py</url>
-          <line>113</line>
+          <line>116</line>
           <option name="timeStamp" value="28" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/astar_rush_hour.py</url>
-          <line>71</line>
+          <line>74</line>
           <option name="timeStamp" value="31" />
         </line-breakpoint>
       </breakpoints>
@@ -828,8 +827,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/astar_rush_hour.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="451">
-          <caret line="25" column="56" lean-forward="true" selection-start-line="25" selection-start-column="56" selection-end-line="25" selection-end-column="56" />
+        <state relative-caret-position="594">
+          <caret line="414" column="24" lean-forward="true" selection-start-line="414" selection-start-column="24" selection-end-line="414" selection-end-column="24" />
           <folding>
             <element signature="e#161#192#0" expanded="true" />
           </folding>
