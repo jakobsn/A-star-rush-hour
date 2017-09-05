@@ -112,8 +112,7 @@ class ProblemSolver:
             else:
                 current_node = open_list.pop(0)
             # Check if we have arrived to the goal, by checking if the driver vehicle is at the goal
-            if(self.goal[0] is (current_node.vehicles[current_node.driver_index].x + current_node.vehicles[current_node.driver_index].size - 1) and
-                       self.goal[1] is current_node.vehicles[current_node.driver_index].y):
+            if self.is_solution(current_node):
                 print("Success, found solution for", self.algorithm, self.board_file)
                 print("Nodes expanded:", nodes_expanded)
                 path = self.backtrack_path(current_node)
@@ -150,6 +149,11 @@ class ProblemSolver:
             if self.algorithm == "AStar":
                 open_list = self.merge_sort(open_list)
         return
+
+    # Check if the state of a Board is the goal.
+    def is_solution(self, node):
+        return (self.goal[0] is (node.vehicles[node.driver_index].x + node.vehicles[node.driver_index].size - 1) and
+                self.goal[1] is node.vehicles[node.driver_index].y)
 
     # Return equal instance if exits, else return false
     def list_contains_board(self, array, board):
