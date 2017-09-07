@@ -11,6 +11,7 @@ from time import sleep
 import argparse
 import sys
 import six.moves.cPickle as cPickle
+from gen_search import GenSearch
 
 
 def main():
@@ -48,7 +49,7 @@ def str2bool(v):
 
 
 # Class for solving specific problem
-class ProblemSolver:
+class ProblemSolver(GenSearch):
     def __init__(self, algorithm, board, show_solution=False, show_process=False, display_time=1):
         self.board_file = board
         self.display_time = display_time
@@ -67,31 +68,29 @@ class ProblemSolver:
     # Solve given algorithm
     def solve_problem(self):
         if self.algorithm == "AStar":
-            path = self.astar()
+            self.astar()
         elif self.algorithm == "BFS":
-            path = self.bfs()
+            self.bfs()
         else:
-            path = self.dfs()
-        if self.show_solution:
-            self.print_path(path)
+            self.dfs()
         return
 
     def print_path(self, path):
         print("Path:")
         for state in reversed(path):
-            state.print_board(self.display_time)
+            state.print_state(self.display_time)
 
     def astar(self):
         print("Solve with AStar")
-        return self.best_first_search()
+        return GenSearch.best_first_search(self, self.board, "AStar", self.board_file, self.show_process, self.show_solution)
 
     def bfs(self):
         print("Solve with BFS")
-        return self.best_first_search()
+        return GenSearch.best_first_search(self, self.board, "BFS", self.board_file, self.show_process, self.show_solution)
 
     def dfs(self):
         print("Solve with DFS")
-        return self.best_first_search()
+        return GenSearch.best_first_search(self, self.board, "DFS", self.board_file, self.show_process, self.show_solution)
 
     def best_first_search(self):
         solution = None
@@ -122,7 +121,7 @@ class ProblemSolver:
             closed_list.append(current_node)
             if self.show_process:
                 print("Current board to expand:")
-                current_node.print_board(self.display_time)
+                current_node.print_state(self.display_time)
             # Generate successor states
             children = current_node.expand_node()
             nodes_expanded += 1
@@ -379,7 +378,7 @@ class Board:
         return children
 
     # Print the board with help from matplotlib
-    def print_board(self, sleep_time):
+    def print_state(self, sleep_time):
         colormap, colorCycle, cars = self.create_colormap()
         cmap = colors.ListedColormap(colorCycle)
         norm = colors.BoundaryNorm(cars, cmap.N)

@@ -5,9 +5,9 @@
 # Created for "Artificial Intelligence Programming" at norwegian university Of science and technology (NTNU)
 
 
-class gen_Search:
+class GenSearch:
 
-    def best_first_search(self, initial_node, algorithm, board_file, show_process=False):
+    def best_first_search(self, initial_node, algorithm, board_file, show_process, show_solution):
         solution = None
         closed_list = []
         open_list = []
@@ -31,12 +31,14 @@ class gen_Search:
                 print("Nodes expanded:", nodes_expanded)
                 path = self.backtrack_path(current_node)
                 print("Path length:", len(path)-1)
+                if show_solution:
+                    self.print_path(path)
                 return path
 
             closed_list.append(current_node)
             print("Expanding node:", nodes_expanded)
             if show_process:
-                current_node.print_board(self.display_time)
+                current_node.print_state(self.display_time)
             # Generate successor states
             children = current_node.expand_node()
             nodes_expanded += 1
@@ -102,6 +104,11 @@ class gen_Search:
 
     def is_solution(self, current_node):
         raise NotImplementedError("Please Implement this method")
+
+    def print_path(self, path):
+        print("Path:")
+        for state in reversed(path):
+            state.print_state(self.display_time)
 
     # sort the open list such that the node with lowest f value is on top (merge sort)
     def merge_sort(self, some_list):
