@@ -7,12 +7,42 @@
 
 class GenSearch:
 
-    def best_first_search(self, initial_node, algorithm, board_file, show_process, show_solution):
+    def __init__(self, initial_node, algorithm, board_file, show_process, show_solution, display_time):
+        self.initial_node = initial_node
+        self.algorithm = algorithm
+        self.board_file = board_file
+        self.show_process = show_process
+        self.show_solution = show_solution
+        self.display_time = display_time
+
+    # Solve given algorithm
+    def solve_problem(self):
+        if self.algorithm == "AStar":
+            self.astar()
+        elif self.algorithm == "BFS":
+            self.bfs()
+        else:
+            self.dfs()
+        return
+
+    def astar(self):
+        print("Solve with AStar")
+        return GenSearch.best_first_search(self, self.initial_node, "AStar", self.board_file, self.show_process, self.show_solution, self.display_time)
+
+    def bfs(self):
+        print("Solve with BFS")
+        return GenSearch.best_first_search(self, self.initial_node, "BFS", self.board_file, self.show_process, self.show_solution, self.display_time)
+
+    def dfs(self):
+        print("Solve with DFS")
+        return GenSearch.best_first_search(self, self.initial_node, "DFS", self.board_file, self.show_process, self.show_solution, self.display_time)
+
+    # Solves search problem given the algorithm as long as the node object is created properly
+    def best_first_search(self, initial_node, algorithm, board_file, show_process, show_solution, display_time):
         solution = None
         closed_list = []
-        open_list = []
+        open_list = [initial_node]
         # Add initial node to open list
-        open_list.append(initial_node)
         nodes_expanded = 0
         # Find best way
         while solution is None:
@@ -32,13 +62,13 @@ class GenSearch:
                 path = self.backtrack_path(current_node)
                 print("Path length:", len(path)-1)
                 if show_solution:
-                    self.print_path(path)
+                    self.print_path(path, display_time)
                 return path
 
             closed_list.append(current_node)
             print("Expanding node:", nodes_expanded)
             if show_process:
-                current_node.print_state(self.display_time)
+                current_node.print_state(display_time)
             # Generate successor states
             children = current_node.expand_node()
             nodes_expanded += 1
@@ -61,7 +91,7 @@ class GenSearch:
                     if closed_list_contains_child:
                         self.propagate_path_improvements(current_node, children)
 
-            if self.algorithm == "AStar":
+            if algorithm == "AStar":
                 open_list = self.merge_sort(open_list)
         return
 
@@ -74,23 +104,23 @@ class GenSearch:
         child.f = child.g + child.h
         return
 
-    def propagate_path_improvements(self, new_parent, children, t=0):
+    def propagate_path_improvements(self, parent, children, t=0):
         for child in children:
-            if child.parent is None or new_parent.g + 1 < child.g:
-                child.parent = new_parent
+            if child.parent is None or parent.g + 1 < child.g:
+                child.parent = parent
                 if t:
                     child.g = parent.g + parent.t
-                else :
+                else:
                     child.g = parent.g + 1
                 child.f = child.g + child.h
-                self.propagate_path_improvements(child, child.expand_node(self.board.matrix))
+                self.propagate_path_improvements(child, child.expand_node())
         return children
 
     # find path used to arrive at node
     def backtrack_path(self, node):
         path = [node]
         x = 0
-        # Get parent until we reach initial node
+        # Get parent until initial node is reached
         while path[x].parent:
             path.append(path[x].parent)
             x += 1
@@ -99,16 +129,13 @@ class GenSearch:
     def list_contains_board(self, array, board):
         raise NotImplementedError("Please Implement this method")
 
-    def backtrack_path(self, current_node):
-        raise NotImplementedError("Please Implement this method")
-
     def is_solution(self, current_node):
         raise NotImplementedError("Please Implement this method")
 
-    def print_path(self, path):
+    def print_path(self, path, display_time):
         print("Path:")
         for state in reversed(path):
-            state.print_state(self.display_time)
+            state.print_state(display_time)
 
     # sort the open list such that the node with lowest f value is on top (merge sort)
     def merge_sort(self, some_list):
