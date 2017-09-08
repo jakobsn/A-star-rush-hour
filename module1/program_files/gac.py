@@ -51,14 +51,36 @@ class Monogram:
         self.row_constraints, self.col_constraints = self.store_constraints()
         self.monogram = self.initiate_monogram([self.width, self.height])
         self.monogram = self.create_monogram()
-
-
+        # Lists containing all the possible states of all rows and columns
+        self.row_segments = self.store_segments(self.row_constraints)
+        self.col_segments = self.store_segments(self.col_constraints)
 
     # Guess monogram shape
     def create_monogram(self):
+        #todo?
         pass
 
+    # Return all segments of one axis
+    def store_segments(self, constraints):
+        #todo
+        return #segments
 
+    # Return single segment with variables and local constraints
+    def store_var_block(self, block):
+        #todo
+        pass
+        return #variables, constraints
+
+    # Return vars with domains for a segment
+    def store_var_group(self, var):
+        #todo?
+        pass
+        return #var_group
+
+    # Return list of local constraints for a segment given segment constraints of one axis
+    def store_con_group(self):
+        #todo
+        return #con_group
 
 
 
@@ -106,7 +128,7 @@ class Monogram:
         for spec in lines:
             constraint = []
             for j in range(0, len(spec) - 1, 2):
-                constraint.append(spec[j])
+                constraint.append(int(spec[j]))
             constraints.append(constraint)
         return constraints
 
