@@ -38,39 +38,77 @@ class ProblemSolver:
 
     def solve_problem(self):
         #TODO
-        self.monogram.create_monogram()
         pass
 
 class Monogram:
 
     def __init__(self, file):
         self.file = file
+        f = open(self.file)
+        self.lines = f.readlines()
+        self.width = int(self.lines[0][0])
+        self.height = int(self.lines[0][2])
+        self.row_constraints, self.col_constraints = self.store_constraints()
+        self.monogram = self.initiate_monogram([self.width, self.height])
+        self.monogram = self.create_monogram()
+
+
 
     # Guess monogram shape
     def create_monogram(self):
+        pass
+
+
+
+
+
+
+    """
+    # Guess monogram shape
+    def create_monogram(self):
         # todo:
-        f = open(self.file)
-        lines = f.readlines()
-        print(lines[0])
-        width = int(lines[0][0])
-        height = int(lines[0][2])
-        monogram = self.initiate_monogram([width, height])
+
+        row_cons = []
+        column_cons = []
         print(monogram)
         # Every row spec
         for i in range(1, height+1):
             print(lines[i])
             # Every value in each row spec
-            l = 0
+            row_con = []
             for j in range(0, len(lines[i]), 2):
-                print(lines[i][j])
-                for k in range(l, int(lines[i][j])):
-                    monogram[height - i][k + l] = 1
-                    #l += 1
-                l += k + 1
+                #print(lines[i][j])
+                row_con.append(lines[i][j])
+                for k in range(int(lines[i][j])):
+                    monogram[height - i][k] = 1
+            row_cons.append(row_con)
+        # Every column spec
+        for i in range(height + 1, width + 1):
+            pass
 
 #                print(char)
+        print("rows", row_cons)
         print(monogram)
-        return monogram
+        return monogram, row_cons#, column
+    """
+
+    # Create both lists of constraints
+    def store_constraints(self):
+        row_constraints = self.store_spec_constraints(self.lines[:self.height])
+        col_constraints = self.store_spec_constraints(self.lines[self.height:])
+        print("row_cons", row_constraints)
+        print("col_cons", col_constraints)
+        return row_constraints, col_constraints
+
+    # Create a list of constraints
+    def store_spec_constraints(self, lines):
+        constraints = []
+        for spec in lines:
+            constraint = []
+            for j in range(0, len(spec) - 1, 2):
+                constraint.append(spec[j])
+            constraints.append(constraint)
+        return constraints
 
     # Create empty matrix
     def initiate_monogram(self, dimensions):
