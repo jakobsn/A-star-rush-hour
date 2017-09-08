@@ -104,6 +104,7 @@ class Board:
         else:
             self.h = 0
         self.f = g + self.h
+        self.children = []
 
     def calculate_heuristic(self):
         # h +1 for every step to goal

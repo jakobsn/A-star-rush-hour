@@ -44,6 +44,7 @@ class GenSearch:
         open_list = [initial_node]
         # Add initial node to open list
         nodes_expanded = 0
+        nodes_generated = 0
         # Find best way
         while solution is None:
             if not open_list:
@@ -58,6 +59,7 @@ class GenSearch:
             # Check if we have arrived to the goal, by checking if the driver vehicle is at the goal
             if self.is_solution(current_node):
                 print("Success, found solution for", algorithm, board_file)
+                print("Nodes generated", nodes_generated)
                 print("Nodes expanded:", nodes_expanded)
                 path = self.backtrack_path(current_node)
                 print("Path length:", len(path)-1)
@@ -66,12 +68,16 @@ class GenSearch:
                 return path
 
             closed_list.append(current_node)
+            print("Nodes generated", nodes_generated)
             print("Expanding node:", nodes_expanded)
+
             if show_process:
                 current_node.print_state(display_time)
             # Generate successor states
             children = current_node.expand_node()
             nodes_expanded += 1
+            nodes_generated += len(children)
+            current_node.children = children
 
             for child in children:
                 # Use custom functions to check if the new instances already exists.
@@ -113,7 +119,7 @@ class GenSearch:
                 else:
                     child.g = parent.g + 1
                 child.f = child.g + child.h
-                self.propagate_path_improvements(child, child.expand_node())
+                self.propagate_path_improvements(child, child.cildren)
         return children
 
     # find path used to arrive at node
