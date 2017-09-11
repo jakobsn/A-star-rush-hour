@@ -100,7 +100,7 @@ class Board:
         self.goal = goal
         self.vehicles = []
         self.board = self.create_empty_board()
-        self.board = self.create_board()
+        self.board = self.create_board(boardFile)
         self.driver_index = driver_index
         self.parent = parent
         self.g = g
@@ -109,6 +109,7 @@ class Board:
         else:
             self.h = 0
         self.f = g + self.h
+        self.children = []
 
     def calculate_heuristic(self):
         # h +1 for every step to goal
@@ -125,8 +126,8 @@ class Board:
         return board
 
     # Fill the board with cars
-    def create_board(self):
-        file = open((self.boardFile), 'r')
+    def create_board(self, file):
+        file = open(file, 'r')
         for line in file:
             vehicle = self.create_vehicle(line)
             self.vehicles.append(vehicle)
@@ -227,6 +228,7 @@ class Board:
             board.h = board.calculate_heuristic()
         board.f = board.g + board.h
         board.parent = self
+        #board.children = []
         return board
 
     # Get all possible children (board instances from legal moves) after a move

@@ -85,6 +85,9 @@ class GenSearch:
                     old_child = closed_list_contains_child
                 elif open_list_contains_child:
                     old_child = open_list_contains_child
+
+                #current_node.children.append(child)
+
                 # Discover new nodes and evaluate them
                 if not closed_list_contains_child and not open_list_contains_child:
                     self.attach_and_eval(child, current_node)
@@ -93,7 +96,7 @@ class GenSearch:
                 elif child.g < old_child.g:
                     self.attach_and_eval(child, current_node)
                     if closed_list_contains_child:
-                        self.propagate_path_improvements(current_node, child)
+                        self.propagate_path_improvements(child)
 
             if algorithm == "AStar":
                 open_list = self.merge_sort(open_list)
@@ -108,8 +111,9 @@ class GenSearch:
         child.f = child.g + child.h
         return
 
-    def propagate_path_improvements(self, parent, children, t=0):
-        for child in children:
+    def propagate_path_improvements(self, parent, t=0):
+        print("propagate-----------")
+        for child in parent.expand_node():
             if child.parent is None or parent.g + 1 < child.g:
                 child.parent = parent
                 if t:
@@ -117,8 +121,8 @@ class GenSearch:
                 else:
                     child.g = parent.g + 1
                 child.f = child.g + child.h
-                self.propagate_path_improvements(child, child.expand_node())
-        return children
+                self.propagate_path_improvements(child)
+         #return children
 
     # find path used to arrive at node
     def backtrack_path(self, node):
