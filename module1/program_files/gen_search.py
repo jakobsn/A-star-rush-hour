@@ -59,6 +59,7 @@ class GenSearch:
             # Check if we have arrived to the goal, by checking if the driver vehicle is at the goal
             if self.is_solution(current_node):
                 print("Success, found solution for", algorithm, board_file)
+                print("Nodes generated", nodes_generated)
                 print("Nodes expanded:", nodes_expanded)
                 print("Nodes generated:", nodes_generated)
                 path = self.backtrack_path(current_node)
@@ -117,7 +118,7 @@ class GenSearch:
                 else:
                     child.g = parent.g + 1
                 child.f = child.g + child.h
-                self.propagate_path_improvements(child, child.expand_node())
+                self.propagate_path_improvements(child, child.cildren)
         return children
 
     # find path used to arrive at node
