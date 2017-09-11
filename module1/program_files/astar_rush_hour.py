@@ -7,7 +7,7 @@
 import matplotlib.pyplot as plt
 from matplotlib import colors
 import numpy as np
-from time import sleep
+from time import sleep, time
 import argparse
 import sys
 import six.moves.cPickle as cPickle
@@ -30,6 +30,9 @@ def main():
                         help='Specify how many seconds to display each frame when in display mode', nargs = '?')
     args = parser.parse_args()
 
+    # Use to record time elapsed
+    start = time()
+
     # Solve specific problem
     if args.display_time:
         ps = RushHour(args.algorithm, args.board, args.display_path, args.display_agenda, args.display_time)
@@ -37,6 +40,8 @@ def main():
         ps = RushHour(args.algorithm, args.board, args.display_path, args.display_agenda)
     ps.solve_problem()
 
+    end = time()
+    print("Time elapsed:", end - start)
 
 # Returns string input as boolean
 def str2bool(v):

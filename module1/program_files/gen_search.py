@@ -44,6 +44,7 @@ class GenSearch:
         open_list = [initial_node]
         # Add initial node to open list
         nodes_expanded = 0
+        nodes_generated = 0
         # Find best way
         while solution is None:
             if not open_list:
@@ -59,6 +60,7 @@ class GenSearch:
             if self.is_solution(current_node):
                 print("Success, found solution for", algorithm, board_file)
                 print("Nodes expanded:", nodes_expanded)
+                print("Nodes generated:", nodes_generated)
                 path = self.backtrack_path(current_node)
                 print("Path length:", len(path)-1)
                 if show_solution:
@@ -67,11 +69,13 @@ class GenSearch:
 
             closed_list.append(current_node)
             print("Expanding node:", nodes_expanded)
+            print("Nodes generated:", nodes_generated)
             if show_process:
                 current_node.print_state(display_time)
             # Generate successor states
             children = current_node.expand_node()
             nodes_expanded += 1
+            nodes_generated += len(children)
 
             for child in children:
                 # Use custom functions to check if the new instances already exists.
@@ -89,7 +93,7 @@ class GenSearch:
                 elif child.g < old_child.g:
                     self.attach_and_eval(child, current_node)
                     if closed_list_contains_child:
-                        self.propagate_path_improvements(current_node, children)
+                        self.propagate_path_improvements(current_node, child.expand_node())
 
             if algorithm == "AStar":
                 open_list = self.merge_sort(open_list)
