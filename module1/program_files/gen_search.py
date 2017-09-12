@@ -78,22 +78,28 @@ class GenSearch:
             nodes_generated += len(children)
 
             for child in children:
+                #old_child = None
                 # Use custom functions to check if the new instances already exists.
                 closed_list_contains_child = self.list_contains_board(closed_list, child)
                 open_list_contains_child = self.list_contains_board(open_list, child)
                 if closed_list_contains_child:
                     old_child = closed_list_contains_child
+                    closed_list[old_child] = child
                 elif open_list_contains_child:
                     old_child = open_list_contains_child
+                    open_list[old_child] = child
 
                 #current_node.children.append(child)
+                #if old_child:
+                #    old_child = child
 
                 # Discover new nodes and evaluate them
                 if not closed_list_contains_child and not open_list_contains_child:
                     self.attach_and_eval(child, current_node)
                     open_list.append(child)
                 # If node already discovered, look for cheaper path
-                elif child.g < old_child.g:
+                # THIS MUST BE WRONG!!!
+                elif (current_node.g + 1) < child.g:
                     self.attach_and_eval(child, current_node)
                     if closed_list_contains_child:
                         self.propagate_path_improvements(child)
@@ -112,7 +118,7 @@ class GenSearch:
         return
 
     def propagate_path_improvements(self, parent, t=0):
-        print("propagate-----------")
+        print("propagate-------------------")
         for child in parent.expand_node():
             if child.parent is None or parent.g + 1 < child.g:
                 child.parent = parent

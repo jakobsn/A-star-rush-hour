@@ -79,18 +79,20 @@ class RushHour(GenSearch):
     def list_contains_board(self, array, board):
         if not len(array):
             return False
-        for instance in array:
+        for j in range(len(array)):
             vehicle_missing = False
-            for i in range(len(instance.vehicles)):
-                if not(instance.vehicles[i].x is board.vehicles[i].x and instance.vehicles[i].y is board.vehicles[i].y):
+            for i in range(len(array[j].vehicles)):
+                if not(array[j].vehicles[i].x is board.vehicles[i].x and array[j].vehicles[i].y is board.vehicles[i].y):
                     vehicle_missing = True
             if not vehicle_missing:
-                return instance
+                return j
         return False
 
 
 # Class keeping track of the rush hour puzzle board instances
 class Board:
+
+# If boardfile is a list use another method
 
     def __init__(self, boardFile, width=6, height=6, goal=[5,2], driver_index=0, parent=None, g=0, calculate_h=True):
         self.calculate_h = calculate_h
@@ -98,9 +100,13 @@ class Board:
         self.width = width
         self.height = height
         self.goal = goal
-        self.vehicles = []
         self.board = self.create_empty_board()
-        self.board = self.create_board(boardFile)
+        if type(boardFile) is list:
+            self.vehicles = boardFile
+            self.board = self.create_board_vehicles(boardFile)
+        else:
+            self.vehicles = []
+            self.board = self.create_board(boardFile)
         self.driver_index = driver_index
         self.parent = parent
         self.g = g
@@ -110,6 +116,26 @@ class Board:
             self.h = 0
         self.f = g + self.h
         self.children = []
+    """
+    # TODO: Create objects by providing vehilce list
+    def __init__(self, vehicles, width=6, height=6, goal=[5,2], driver_index=0, parent=None, g=0, calculate_h=True):
+        self.calculate_h = calculate_h
+        self.width = width
+        self.height = height
+        self.goal = goal
+        self.vehicles = vehicles
+        self.board = self.create_empty_board()
+        #self.board = self.create_board_vehicles(vehicles)
+        self.driver_index = driver_index
+        self.parent = parent
+        self.g = g
+        if calculate_h:
+            self.h = self.calculate_heuristic()
+        else:
+            self.h = 0
+        self.f = g + self.h
+        self.children = []
+    """
 
     def calculate_heuristic(self):
         # h +1 for every step to goal
@@ -124,6 +150,11 @@ class Board:
     def create_empty_board(self):
         board = [[0 for i in range(self.width)] for j in range(self.height)]
         return board
+
+    def create_board_vehicles(self, vehicles):
+        for vehicle in vehicles:
+            self.place_vehicle(vehicle)
+        return self.board
 
     # Fill the board with cars
     def create_board(self, file):
@@ -219,7 +250,9 @@ class Board:
     # Create child when created from moving vehicle in a direction
     def expand_move(self, vehicle, direction):
         # Create copy of self (Board and vehicles)
-        board = cPickle.loads(cPickle.dumps(self, -1))
+        #board = cPickle.loads(cPickle.dumps(self, -1))
+        board = Board(self.vehicles)
+        #print("copy", self)
         board.vehicles = cPickle.loads(cPickle.dumps(self.vehicles, -1))
         board.move_vehicle(vehicle, direction)
         board.g = self.g + 1
