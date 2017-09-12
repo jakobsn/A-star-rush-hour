@@ -84,18 +84,16 @@ class GenSearch:
                 open_list_contains_child = self.list_contains_board(open_list, child)
                 if closed_list_contains_child:
                     child_index = closed_list_contains_child
+                    old_child = closed_list[child_index]
                     if closed_list[child_index].g == child.g:
                         closed_list[child_index] = child
-                    else:
-                        old_child = closed_list[child_index]
                 elif open_list_contains_child:
                     child_index = open_list_contains_child
+                    old_child = open_list[child_index]
                     if open_list[child_index].g == child.g:
                         open_list[child_index] = child
-                    else:
-                        old_child = open_list[child_index]
 
-                #current_node.children.append(child)
+                current_node.children.append(child)
                 #if old_child:
                 #    old_child = child
 
@@ -105,11 +103,11 @@ class GenSearch:
                     open_list.append(child)
                 # If node already discovered, look for cheaper path
                 # THIS MUST BE WRONG!!!
-                elif old_child:
-                    if child.g < old_child.g:
-                        self.attach_and_eval(child, current_node)
-                        if closed_list_contains_child:
-                            self.propagate_path_improvements(child)
+                elif child.g < old_child.g:
+                    print("gggggggggGGGGGGGGGGGGGGGGGGGGGGgg")
+                    self.attach_and_eval(child, current_node)
+                    if closed_list_contains_child:
+                        self.propagate_path_improvements(child)
 
             if algorithm == "AStar":
                 open_list = self.merge_sort(open_list)
@@ -126,7 +124,7 @@ class GenSearch:
 
     def propagate_path_improvements(self, parent, t=0):
         print("propagate-------------------")
-        for child in parent.expand_node():
+        for child in parent.children:
             if child.parent is None or parent.g + 1 < child.g:
                 child.parent = parent
                 if t:
