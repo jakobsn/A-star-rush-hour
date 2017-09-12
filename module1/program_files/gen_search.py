@@ -78,16 +78,22 @@ class GenSearch:
             nodes_generated += len(children)
 
             for child in children:
-                #old_child = None
+                old_child = None
                 # Use custom functions to check if the new instances already exists.
                 closed_list_contains_child = self.list_contains_board(closed_list, child)
                 open_list_contains_child = self.list_contains_board(open_list, child)
                 if closed_list_contains_child:
-                    old_child = closed_list_contains_child
-                    closed_list[old_child] = child
+                    child_index = closed_list_contains_child
+                    if closed_list[child_index].g == child.g:
+                        closed_list[child_index] = child
+                    else:
+                        old_child = closed_list[child_index]
                 elif open_list_contains_child:
-                    old_child = open_list_contains_child
-                    open_list[old_child] = child
+                    child_index = open_list_contains_child
+                    if open_list[child_index].g == child.g:
+                        open_list[child_index] = child
+                    else:
+                        old_child = open_list[child_index]
 
                 #current_node.children.append(child)
                 #if old_child:
@@ -99,10 +105,11 @@ class GenSearch:
                     open_list.append(child)
                 # If node already discovered, look for cheaper path
                 # THIS MUST BE WRONG!!!
-                elif (current_node.g + 1) < child.g:
-                    self.attach_and_eval(child, current_node)
-                    if closed_list_contains_child:
-                        self.propagate_path_improvements(child)
+                elif old_child:
+                    if child.g < old_child.g:
+                        self.attach_and_eval(child, current_node)
+                        if closed_list_contains_child:
+                            self.propagate_path_improvements(child)
 
             if algorithm == "AStar":
                 open_list = self.merge_sort(open_list)
