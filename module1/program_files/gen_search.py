@@ -75,7 +75,7 @@ class GenSearch:
             # Generate successor states
             children = current_node.expand_node()
             nodes_expanded += 1
-            nodes_generated += len(children)
+            #nodes_generated += len(children)
 
             for child in children:
                 old_child = None
@@ -99,12 +99,12 @@ class GenSearch:
 
                 # Discover new nodes and evaluate them
                 if not closed_list_contains_child and not open_list_contains_child:
+                    nodes_generated += 1
                     self.attach_and_eval(child, current_node)
                     open_list.append(child)
                 # If node already discovered, look for cheaper path
                 # THIS MUST BE WRONG!!!
                 elif child.g < old_child.g:
-                    print("gggggggggGGGGGGGGGGGGGGGGGGGGGGgg")
                     self.attach_and_eval(child, current_node)
                     if closed_list_contains_child:
                         self.propagate_path_improvements(child)
@@ -123,7 +123,6 @@ class GenSearch:
         return
 
     def propagate_path_improvements(self, parent, t=0):
-        print("propagate-------------------")
         for child in parent.children:
             if child.parent is None or parent.g + 1 < child.g:
                 child.parent = parent
@@ -133,7 +132,6 @@ class GenSearch:
                     child.g = parent.g + 1
                 child.f = child.g + child.h
                 self.propagate_path_improvements(child)
-         #return children
 
     # find path used to arrive at node
     def backtrack_path(self, node):

@@ -308,10 +308,10 @@ class Board:
 
     # Plots the graphical view
     def plot_matrix(self, colormap, cmap, sleep_time):
-        title = 'Rush Hour \n Board: ' + str(self.boardFile).strip('.txt')
+        title = 'Rush Hour'
         plt.imshow(colormap, interpolation='nearest', cmap=cmap)
         plt.title(title)
-        plt.tight_layout()
+        #plt.tight_layout()
         plt.show(block=False)
         sleep(sleep_time)
         plt.close()
