@@ -50,10 +50,10 @@ class Monogram:
         self.height = int(self.lines[0][2])
         self.row_constraints, self.col_constraints = self.store_constraints()
         self.monogram = self.initiate_monogram([self.width, self.height])
-        self.monogram = self.create_monogram()
+        #self.monogram = self.create_monogram()
         # Lists containing all the possible states of all rows and columns
-        self.row_segments = self.store_segments(self.row_constraints)
-        self.col_segments = self.store_segments(self.col_constraints)
+        self.row_segments = self.store_segments(self.row_constraints, self.width)
+        self.col_segments = self.store_segments(self.col_constraints, self.height)
 
     # Guess monogram shape
     def create_monogram(self):
@@ -61,26 +61,45 @@ class Monogram:
         pass
 
     # Return all segments of one axis
-    def store_segments(self, constraints):
-        #todo
-        return #segments
+    def store_segments(self, constraints, segment_length):
+        segments = []
+        for segment in constraints:
+            segments.append(self.store_single_segment(segment, segment_length))
+        return segments
 
     # Return single segment with variables and local constraints
-    def store_var_block(self, block):
+    def store_single_segment(self, segment, segment_length):
         #todo
-        pass
-        return #variables, constraints
+        variables = self.store_segment_variables(segment, segment_length)
+        constraints = self.store_segment_constraints(segment)
+        return variables, constraints
 
     # Return vars with domains for a segment
-    def store_var_group(self, var):
+    def store_segment_variables(self, segment, segment_length):
         #todo?
-        pass
-        return #var_group
+        variables = []
+        variables_lenght = 0
+        for spec in segment[:-1]:
+            variables_lenght += spec
+            # Add blank space
+            variables_lenght += 1
+        variables_lenght += segment[-1]
+
+        extra_space = segment_length - variables_lenght
+        domains = []
+
+        # Store first variable
+        for i in range(extra_space):
+            domains.append(i)
+        variables.append(domains)
+
+        return variables
 
     # Return list of local constraints for a segment given segment constraints of one axis
-    def store_con_group(self):
+    def store_segment_constraints(self, segment):
         #todo
-        return #con_group
+        constraints = []
+        return constraints
 
 
 
