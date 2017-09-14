@@ -41,8 +41,8 @@ class GenSearch:
     def best_first_search(self, initial_node, algorithm, board_file, show_process, show_solution, display_time):
         solution = None
         closed_list = []
-        open_list = [initial_node]
         # Add initial node to open list
+        open_list = [initial_node]
         nodes_expanded = 0
         nodes_generated = 0
         # Find best way
@@ -75,11 +75,10 @@ class GenSearch:
             # Generate successor states
             children = current_node.expand_node()
             nodes_expanded += 1
-            #nodes_generated += len(children)
 
             for child in children:
                 old_child = None
-                # Use custom functions to check if the new instances already exists.
+                # Use custom functions to check if the new children already have been instanced
                 closed_list_contains_child = self.list_contains_board(closed_list, child)
                 open_list_contains_child = self.list_contains_board(open_list, child)
                 if closed_list_contains_child:
@@ -94,8 +93,6 @@ class GenSearch:
                         open_list[child_index] = child
 
                 current_node.children.append(child)
-                #if old_child:
-                #    old_child = child
 
                 # Discover new nodes and evaluate them
                 if not closed_list_contains_child and not open_list_contains_child:
@@ -103,7 +100,6 @@ class GenSearch:
                     self.attach_and_eval(child, current_node)
                     open_list.append(child)
                 # If node already discovered, look for cheaper path
-                # THIS MUST BE WRONG!!!
                 elif child.g < old_child.g:
                     self.attach_and_eval(child, current_node)
                     if closed_list_contains_child:
@@ -111,7 +107,6 @@ class GenSearch:
 
             if algorithm == "AStar":
                 open_list = self.merge_sort(open_list)
-        return
 
     def attach_and_eval(self, child, parent, t=0):
         child.parent = parent

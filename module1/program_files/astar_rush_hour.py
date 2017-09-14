@@ -92,8 +92,6 @@ class RushHour(GenSearch):
 # Class keeping track of the rush hour puzzle board instances
 class Board:
 
-# If boardfile is a list use another method
-
     def __init__(self, boardFile, width=6, height=6, goal=[5,2], driver_index=0, parent=None, g=0, calculate_h=True):
         self.calculate_h = calculate_h
         self.boardFile = boardFile
@@ -101,6 +99,7 @@ class Board:
         self.height = height
         self.goal = goal
         self.board = self.create_empty_board()
+        # Board objects can be instanced from lists of vehicles or text files
         if type(boardFile) is list:
             self.vehicles = boardFile
             self.board = self.create_board_vehicles(boardFile)
@@ -116,26 +115,6 @@ class Board:
             self.h = 0
         self.f = g + self.h
         self.children = []
-    """
-    # TODO: Create objects by providing vehilce list
-    def __init__(self, vehicles, width=6, height=6, goal=[5,2], driver_index=0, parent=None, g=0, calculate_h=True):
-        self.calculate_h = calculate_h
-        self.width = width
-        self.height = height
-        self.goal = goal
-        self.vehicles = vehicles
-        self.board = self.create_empty_board()
-        #self.board = self.create_board_vehicles(vehicles)
-        self.driver_index = driver_index
-        self.parent = parent
-        self.g = g
-        if calculate_h:
-            self.h = self.calculate_heuristic()
-        else:
-            self.h = 0
-        self.f = g + self.h
-        self.children = []
-    """
 
     def calculate_heuristic(self):
         # h +1 for every step to goal
@@ -250,9 +229,7 @@ class Board:
     # Create child when created from moving vehicle in a direction
     def expand_move(self, vehicle, direction):
         # Create copy of self (Board and vehicles)
-        #board = cPickle.loads(cPickle.dumps(self, -1))
         board = Board(self.vehicles)
-        #print("copy", self)
         board.vehicles = cPickle.loads(cPickle.dumps(self.vehicles, -1))
         board.move_vehicle(vehicle, direction)
         board.g = self.g + 1
@@ -261,7 +238,6 @@ class Board:
             board.h = board.calculate_heuristic()
         board.f = board.g + board.h
         board.parent = self
-        #board.children = []
         return board
 
     # Get all possible children (board instances from legal moves) after a move
@@ -276,7 +252,6 @@ class Board:
     def print_state(self, sleep_time):
         colormap, colorCycle, cars = self.create_colormap()
         cmap = colors.ListedColormap(colorCycle)
-        norm = colors.BoundaryNorm(cars, cmap.N)
         self.plot_matrix(colormap, cmap, sleep_time)
 
     # Generates:
@@ -311,7 +286,6 @@ class Board:
         title = 'Rush Hour'
         plt.imshow(colormap, interpolation='nearest', cmap=cmap)
         plt.title(title)
-        #plt.tight_layout()
         plt.show(block=False)
         sleep(sleep_time)
         plt.close()
