@@ -15,8 +15,8 @@ from matplotlib import colors
 import numpy as np
 
 def main():
-    ps = ProblemSolver("monograms/nono-cat.txt")
-    ps.solve_problem()
+    ps = ProblemSolver("monograms/mono-cat.txt")
+    #ps.solve_problem()
 
     """
     # Takes input from command line
@@ -40,6 +40,7 @@ class ProblemSolver:
         #TODO
         pass
 
+
 class Monogram:
 
     def __init__(self, file):
@@ -48,12 +49,24 @@ class Monogram:
         self.lines = f.readlines()
         self.width = int(self.lines[0][0])
         self.height = int(self.lines[0][2])
-        self.row_constraints, self.col_constraints = self.store_constraints()
+        self.row_constraints, self.col_constraints = self.store_constraints(self.lines[1:])
         self.monogram = self.initiate_monogram([self.width, self.height])
         #self.monogram = self.create_monogram()
         # Lists containing all the possible states of all rows and columns
         self.row_segments = self.store_segments(self.row_constraints, self.width)
         self.col_segments = self.store_segments(self.col_constraints, self.height)
+
+
+        for segment in self.row_segments:
+            print("row:", segment)
+
+        print("")
+
+        for segment in self.col_segments:
+            print("col:", segment)
+
+
+
 
     # Guess monogram shape
     def create_monogram(self):
@@ -78,22 +91,43 @@ class Monogram:
     def store_segment_variables(self, segment, segment_length):
         #todo?
         variables = []
-        variables_lenght = 0
+
+        """
+        # Store variables for segments containing only one spec
+        if len(segment) < 2:
+            domains = []
+            for i in range(segment[0]):
+                domains.append(i)
+            variables.append(domains)
+            return variables
+        """
+
+        variables_length = 0
         for spec in segment[:-1]:
-            variables_lenght += spec
+            variables_length += spec
             # Add blank space
-            variables_lenght += 1
-        variables_lenght += segment[-1]
+            variables_length += 1
+        variables_length += segment[-1]
 
-        extra_space = segment_length - variables_lenght
+        extra_space = segment_length - variables_length
+
+        """
         domains = []
-
         # Store first variable
         for i in range(extra_space):
             domains.append(i)
         variables.append(domains)
+        """
 
+        filled_space = 0
+        for spec in segment:
+            domains = []
+            for i in range(filled_space, (filled_space + extra_space + 1)):
+                domains.append(i)
+            filled_space += spec
+            variables.append(domains)
         return variables
+
 
     # Return list of local constraints for a segment given segment constraints of one axis
     def store_segment_constraints(self, segment):
@@ -134,9 +168,9 @@ class Monogram:
     """
 
     # Create both lists of constraints
-    def store_constraints(self):
-        row_constraints = self.store_spec_constraints(self.lines[:self.height])
-        col_constraints = self.store_spec_constraints(self.lines[self.height:])
+    def store_constraints(self, lines):
+        row_constraints = self.store_spec_constraints(lines[:self.height])
+        col_constraints = self.store_spec_constraints(lines[self.height:])
         print("row_cons", row_constraints)
         print("col_cons", col_constraints)
         return row_constraints, col_constraints
