@@ -13,9 +13,10 @@ import argparse
 import matplotlib.pyplot as plt
 from matplotlib import colors
 import numpy as np
+from gen_search import GenSearch
 
 def main():
-    ps = ProblemSolver("monograms/mono-cat.txt")
+    ps = GAC("monograms/mono-cat.txt")
     #ps.solve_problem()
 
     """
@@ -30,15 +31,40 @@ def main():
     ps.solve_problem()"""
 
 
-class ProblemSolver:
+class GAC(GenSearch):
 
-    def __init__(self, file):
-        self.file = file
-        self.monogram = Monogram(file)
+    def __init__(self, board_file, initial_node=None, algorithm="AStar", show_process=False, show_solution=False, display_time=0.5):
+        self.board_file = board_file
+        self.monogram = Monogram(board_file)
+        h = self.monogram.calculate_heuristic(self.monogram.monogram)
+        self.initial_node = Board(self.monogram.monogram, None, h)
+        self.algorithm = algorithm
+        self.show_process = show_process
+        self.show_solution = show_solution
+        self.display_time = display_time
 
     def solve_problem(self):
         #TODO
         pass
+
+    def list_contains_board(self, array, board):
+        #TODO
+        pass
+
+    def is_solution(self, node):
+        #TODO
+        pass
+
+    """
+    CREATE MONOGRAM
+    
+    CHECK ALL CONSTRAINTS
+    
+    CONSTRAINTS VIOLATED = h
+    
+    GO TO THAT SHIT WITH SMALLEST HHHH
+    
+    """
 
 
 class Monogram:
@@ -194,6 +220,21 @@ class Monogram:
     def print_state(self, sleep_time=0):
         # todo:
         pass
+
+    def calculate_heuristic(self, monogram):
+        # todo:
+        return 1
+
+
+class Board:
+
+    def __init__(self, monogram, parent, h, g=0):
+        self.monogram = monogram
+        self.g = g
+        self.h = h
+        self.f = g + self.h
+        self.children = []
+        self.parent = parent
 
 
 if __name__ == '__main__':

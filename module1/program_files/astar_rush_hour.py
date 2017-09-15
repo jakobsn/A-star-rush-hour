@@ -55,7 +55,7 @@ def str2bool(v):
 
 # Class for solving rush hour problems. Inherits methods from general search module
 class RushHour(GenSearch):
-    def __init__(self, algorithm, board, show_solution=False, show_process=False, display_time=1):
+    def __init__(self, algorithm, board, show_solution=False, show_process=False, display_time=0.5):
         self.board_file = board
         self.display_time = display_time
         self.algorithm = algorithm
