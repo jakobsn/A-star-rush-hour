@@ -37,7 +37,7 @@ class GAC(GenSearch):
         self.board_file = board_file
         self.monogram = Monogram(board_file)
         h = self.monogram.calculate_heuristic(self.monogram.monogram)
-        self.initial_node = Board(self.monogram.monogram, None, h)
+        self.initial_node = Board(self.monogram.monogram, self.monogram.row_variables, self.monogram.col_variables, None, h)
         self.algorithm = algorithm
         self.show_process = show_process
         self.show_solution = show_solution
@@ -52,6 +52,10 @@ class GAC(GenSearch):
         pass
 
     def is_solution(self, node):
+        #TODO
+        pass
+
+    def min_conflicts(self, csp):
         #TODO
         pass
 
@@ -92,11 +96,13 @@ class Monogram:
             print("row:", variable, constraint)
 
         print("")
-        #for elself.row_segments[x]
         for w in range(self.width):
             for h in range(self.height):
                 print(w, h, ":", self.cell_constraint_satisfied(w, h))
 
+        print("")
+
+        print(self.monogram)
 
     # Guess monogram shape
     def create_monogram(self):
@@ -228,13 +234,15 @@ class Monogram:
 
 class Board:
 
-    def __init__(self, monogram, parent, h, g=0):
+    def __init__(self, monogram, row_variables, col_variables, parent, h, g=0):
         self.monogram = monogram
         self.g = g
         self.h = h
         self.f = g + self.h
         self.children = []
         self.parent = parent
+        self.row_variables = row_variables
+        self.col_variables = col_variables
 
 
 if __name__ == '__main__':
