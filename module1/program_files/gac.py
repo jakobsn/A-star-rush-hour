@@ -65,9 +65,6 @@ class Monogram:
         for segment in self.col_segments:
             print("col:", segment)
 
-
-
-
     # Guess monogram shape
     def create_monogram(self):
         #todo?
@@ -92,40 +89,24 @@ class Monogram:
         #todo?
         variables = []
 
-        """
-        # Store variables for segments containing only one spec
-        if len(segment) < 2:
-            domains = []
-            for i in range(segment[0]):
-                domains.append(i)
-            variables.append(domains)
-            return variables
-        """
-
+        # Find length of the variables in the segment
         variables_length = 0
         for spec in segment[:-1]:
             variables_length += spec
             # Add blank space
             variables_length += 1
         variables_length += segment[-1]
-
         extra_space = segment_length - variables_length
 
-        """
-        domains = []
-        # Store first variable
-        for i in range(extra_space):
-            domains.append(i)
-        variables.append(domains)
-        """
-
+        # Create a list containing the domain for each variable
         filled_space = 0
         for spec in segment:
             domains = []
             for i in range(filled_space, (filled_space + extra_space + 1)):
                 domains.append(i)
-            filled_space += spec
             variables.append(domains)
+            filled_space += spec + 1
+
         return variables
 
 
@@ -133,6 +114,9 @@ class Monogram:
     def store_segment_constraints(self, segment):
         #todo
         constraints = []
+        for i in range(len(segment) - 1):
+            constraint = str(i + 1) + " > " + str(i) + " + " + str(segment[i])
+            constraints.append(constraint)
         return constraints
 
 
