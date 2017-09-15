@@ -49,21 +49,28 @@ class Monogram:
         self.lines = f.readlines()
         self.width = int(self.lines[0][0])
         self.height = int(self.lines[0][2])
-        self.row_constraints, self.col_constraints = self.store_constraints(self.lines[1:])
+        self.row_specs, self.col_specs = self.store_specs(self.lines[1:])
         self.monogram = self.initiate_monogram([self.width, self.height])
         #self.monogram = self.create_monogram()
         # Lists containing all the possible states of all rows and columns
-        self.row_segments = self.store_segments(self.row_constraints, self.width)
-        self.col_segments = self.store_segments(self.col_constraints, self.height)
+        self.row_variables, self.row_constraints = self.store_segments(self.row_specs, self.width)
+        self.col_variables, self.col_constraints = self.store_segments(self.col_specs, self.height)
 
 
-        for segment in self.row_segments:
-            print("row:", segment)
+        for variable, constraint in zip(self.row_variables, self.row_constraints):
+            print("row:", variable, constraint)
 
         print("")
 
-        for segment in self.col_segments:
-            print("col:", segment)
+        for variable, constraint in zip(self.col_variables, self.col_constraints):
+            print("row:", variable, constraint)
+
+        print("")
+        #for elself.row_segments[x]
+        for w in range(self.width):
+            for h in range(self.height):
+                print(w, h, ":", self.cell_constraint_satisfied(w, h))
+
 
     # Guess monogram shape
     def create_monogram(self):
@@ -71,19 +78,24 @@ class Monogram:
         pass
 
     # Return all segments of one axis
-    def store_segments(self, constraints, segment_length):
-        segments = []
-        for segment in constraints:
-            segments.append(self.store_single_segment(segment, segment_length))
-        return segments
+    def store_segments(self, specs, segment_length):
+        #segments = []
+        variables = []
+        constraints = []
+        for segment in specs:
+            #segments.append(self.store_segments(segment, segment_length))
+            variables.append(self.store_segment_variables(segment, segment_length))
+            constraints.append(self.store_segment_constraints(segment))
+        return variables, constraints
 
-    # Return single segment with variables and local constraints
-    def store_single_segment(self, segment, segment_length):
+    """
+    # Return segments of one line with variables and local constraints
+    def store_segments(self, segment, segment_length):
         #todo
         variables = self.store_segment_variables(segment, segment_length)
         constraints = self.store_segment_constraints(segment)
         return variables, constraints
-
+    """
     # Return vars with domains for a segment
     def store_segment_variables(self, segment, segment_length):
         #todo?
@@ -112,15 +124,21 @@ class Monogram:
 
     # Return list of local constraints for a segment given segment constraints of one axis
     def store_segment_constraints(self, segment):
-        #todo
         constraints = []
         for i in range(len(segment) - 1):
             constraint = str(i + 1) + " > " + str(i) + " + " + str(segment[i])
             constraints.append(constraint)
         return constraints
 
-
-
+    # Global cell constraint
+    def cell_constraint_satisfied(self, x, y):
+        if x in self.row_variables[y]:
+            if y not in self.col_variables[x]:
+                return False
+        if y in self.col_variables[x]:
+            if x not in self.row_variables[y]:
+                return False
+        return True
 
     """
     # Guess monogram shape
@@ -152,15 +170,15 @@ class Monogram:
     """
 
     # Create both lists of constraints
-    def store_constraints(self, lines):
-        row_constraints = self.store_spec_constraints(lines[:self.height])
-        col_constraints = self.store_spec_constraints(lines[self.height:])
+    def store_specs(self, lines):
+        row_constraints = self.store_spec(lines[:self.height])
+        col_constraints = self.store_spec(lines[self.height:])
         print("row_cons", row_constraints)
         print("col_cons", col_constraints)
         return row_constraints, col_constraints
 
     # Create a list of constraints
-    def store_spec_constraints(self, lines):
+    def store_spec(self, lines):
         constraints = []
         for spec in lines:
             constraint = []
