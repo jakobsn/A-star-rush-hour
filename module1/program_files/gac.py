@@ -21,13 +21,13 @@ def main():
 
     """
     # Takes input from command line
-    parser = argparse.ArgumentParser(description='Solve monograms')
-    parser.add_argument('monogram', type=str, help='monogram text file')
+    parser = argparse.ArgumentParser(description='Solve nonograms')
+    parser.add_argument('nonogram', type=str, help='nonogram text file')
 
     args = parser.parse_args()
 
     # Solve specific problem
-    ps = ProblemSolver(args.monogram)
+    ps = ProblemSolver(args.nonogram)
     ps.solve_problem()"""
 
 
@@ -35,9 +35,9 @@ class GAC(GenSearch):
 
     def __init__(self, board_file, initial_node=None, algorithm="AStar", show_process=False, show_solution=False, display_time=0.5):
         self.board_file = board_file
-        self.monogram = Monogram(board_file)
-        h = self.monogram.calculate_heuristic(self.monogram.monogram)
-        self.initial_node = Board(self.monogram.monogram, self.monogram.row_variables, self.monogram.col_variables, None, h)
+        self.nonogram = nonogram(board_file)
+        #h = self.nonogram.calculate_heuristic(self.nonogram.nonogram)
+        #self.initial_node = Board(self.nonogram.nonogram, self.nonogram.row_variables, self.nonogram.col_variables, None, h)
         self.algorithm = algorithm
         self.show_process = show_process
         self.show_solution = show_solution
@@ -60,7 +60,7 @@ class GAC(GenSearch):
         pass
 
     """
-    CREATE MONOGRAM
+    CREATE nonoGRAM
     
     CHECK ALL CONSTRAINTS
     
@@ -71,7 +71,7 @@ class GAC(GenSearch):
     """
 
 
-class Monogram:
+class nonogram:
 
     def __init__(self, file):
         self.file = file
@@ -80,12 +80,11 @@ class Monogram:
         self.width = int(self.lines[0][0])
         self.height = int(self.lines[0][2])
         self.row_specs, self.col_specs = self.store_specs(self.lines[1:])
-        self.monogram = self.initiate_monogram([self.width, self.height])
-        #self.monogram = self.create_monogram()
+        #self.nonogram = self.initiate_nonogram([self.width, self.height])
         # Lists containing all the possible states of all rows and columns
         self.row_variables, self.row_constraints = self.store_segments(self.row_specs, self.width)
         self.col_variables, self.col_constraints = self.store_segments(self.col_specs, self.height)
-
+        self.create_nonogram(self.row_specs, self.row_variables, self.col_specs, self.col_variables, [self.width, self.height])
 
         for variable, constraint in zip(self.row_variables, self.row_constraints):
             print("row:", variable, constraint)
@@ -102,11 +101,41 @@ class Monogram:
 
         print("")
 
-        print(self.monogram)
+        #print(self.nonogram)
 
-    # Guess monogram shape
-    def create_monogram(self):
-        #todo?
+    # Guess nonogram shape
+    def create_nonogram(self, row_specs, row_variables, col_specs, col_variables, dimensions):
+        nonogram = self.initiate_nonogram(dimensions)
+        new_row_variables = []
+        new_col_variables = []
+        for specs_in_row, variables_in_row, i in zip(row_specs, row_variables, range(len(row_specs))):
+            new_variables_in_row = []
+            new_variables_in_col = []
+            for variable, spec in zip(variables_in_row, specs_in_row):
+                new_variables_in_row.append(variable[0])
+                for j in range(variable[0], variable[0] + spec):
+                    nonogram[i][j] = 1
+
+            new_row_variables.append(new_variables_in_row)
+
+        for row in nonogram:
+            pass
+
+
+
+
+
+        print("New row variables")
+
+        for row in new_row_variables:
+            print(row)
+
+        print("")
+
+        print(nonogram)
+
+        print("")
+
         pass
 
     # Return all segments of one axis
@@ -173,13 +202,13 @@ class Monogram:
         return True
 
     """
-    # Guess monogram shape
-    def create_monogram(self):
+    # Guess nonogram shape
+    def create_nonogram(self):
         # todo:
 
         row_cons = []
         column_cons = []
-        print(monogram)
+        print(nonogram)
         # Every row spec
         for i in range(1, height+1):
             print(lines[i])
@@ -189,7 +218,7 @@ class Monogram:
                 #print(lines[i][j])
                 row_con.append(lines[i][j])
                 for k in range(int(lines[i][j])):
-                    monogram[height - i][k] = 1
+                    nonogram[height - i][k] = 1
             row_cons.append(row_con)
         # Every column spec
         for i in range(height + 1, width + 1):
@@ -197,8 +226,8 @@ class Monogram:
 
 #                print(char)
         print("rows", row_cons)
-        print(monogram)
-        return monogram, row_cons#, column
+        print(nonogram)
+        return nonogram, row_cons#, column
     """
 
     # Create both lists of constraints
@@ -220,22 +249,22 @@ class Monogram:
         return constraints
 
     # Create empty matrix
-    def initiate_monogram(self, dimensions):
+    def initiate_nonogram(self, dimensions):
         return np.zeros((dimensions[1], dimensions[0]))
 
     def print_state(self, sleep_time=0):
         # todo:
         pass
 
-    def calculate_heuristic(self, monogram):
+    def calculate_heuristic(self, nonogram):
         # todo:
         return 1
 
 
 class Board:
 
-    def __init__(self, monogram, row_variables, col_variables, parent, h, g=0):
-        self.monogram = monogram
+    def __init__(self, nonogram, row_variables, col_variables, parent, h, g=0):
+        self.nonogram = nonogram
         self.g = g
         self.h = h
         self.f = g + self.h
