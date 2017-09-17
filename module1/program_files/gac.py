@@ -15,9 +15,10 @@ from matplotlib import colors
 import numpy as np
 from gen_search import GenSearch
 from time import sleep
+import string
 
 def main():
-    ps = GAC("monograms/mono-cat.txt")
+    ps = GAC("monograms/mono-clover.txt")
     #ps.solve_problem()
 
     """
@@ -99,12 +100,14 @@ class Nonogram:
             print("row:", variable, constraint)
 
         print("")
-        for w in range(self.width):
-            for h in range(self.height):
-                print(w, h, ":", self.cell_constraint_violated(w, h, new_row_vars, new_col_vars))
 
-        print("")
 
+        self.row_functions = self.create_constraint_functions(self.row_variables, self.row_constraints)
+        self.col_functions = self.create_constraint_functions(self.col_variables, self.col_constraints)
+
+        #print(row_functs)
+
+        self.calculate_heuristic(new_row_vars, new_col_vars, self.row_functions, self.col_functions)
         self.nonogram.print_state(10)
 
         #print(self.nonogram)
@@ -196,12 +199,11 @@ class Nonogram:
 
         return variables
 
-
     # Return list of local constraints for a segment given segment constraints of one axis
     def store_segment_constraints(self, segment):
         constraints = []
         for i in range(len(segment) - 1):
-            constraint = str(i + 1) + " > " + str(i) + " + " + str(segment[i])
+            constraint = chr(ord('a') + i + 1) + " > " + chr(ord('a') + i) + " + " + str(segment[i])
             constraints.append(constraint)
         return constraints
 
@@ -245,6 +247,27 @@ class Nonogram:
         return nonogram, row_cons#, column
     """
 
+
+    def create_constraint_functions(self, variables, constraints):
+        constraint_functions = []
+        for line_variables, line_constraints in zip(variables, constraints):
+            line_functions = []
+            for constraint in line_constraints:
+                line_functions.append(self.create_constraint_function(line_variables, constraint))
+            constraint_functions.append(line_functions)
+        return constraint_functions
+
+
+    def create_constraint_function(self, variables, constraint, envir=globals()):
+        args = ""
+        for i in range(len(variables)):
+            args += ",".join(chr(ord('a') + i))
+            args += ","
+        args = args[:-1]
+        #TODO
+        print("args", args)
+        return eval("(lambda " + args + ": " + constraint + ")", envir)
+
     # Create both lists of constraints
     def store_specs(self, lines):
         row_constraints = self.store_spec(lines[:self.height])
@@ -267,12 +290,37 @@ class Nonogram:
     def initiate_nonogram(self, dimensions):
         return np.zeros((dimensions[1], dimensions[0]))
 
-    def calculate_heuristic(self, nonogram):
+    def calculate_heuristic(self, row_variables, col_variables, row_functions, col_functions):
+        cell_heuristic = self.calculate_cell_heuristics(row_variables, col_variables)
+        row_heuristic = self.calculate_line_heuristics(row_variables, row_functions)
         # todo:
-        return 1
+        #col h
+        return
 
-    def calculate_line_heuristic(self, line):
+    def calculate_cell_heuristics(self, row_variables, col_variables):
+        cell_heuristic = 0
+        for x in range(len(col_variables)):
+            for y in range(len(row_variables)):
+                #print(w, h, ":", self.cell_constraint_violated(w, h, new_row_vars, new_col_vars))
+
+                cell_heuristic += self.cell_constraint_violated(x, y, row_variables, col_variables)
+        print("cell heuristic", cell_heuristic)
+        return cell_heuristic
+
+    def calculate_line_heuristics(self, variables, functions):
         # todo
+        print("line h")
+        for con_functions, line_variables in zip(functions, variables):
+            parameters = []
+            for con_function in con_functions:
+                varnames = con_function.__code__.co_varnames
+                for i in range(len(varnames)):
+                #for varname in con_function.__code__.co_varnames:
+                    print("varname", varnames[i])
+                    parameters.append(line_variables[string.ascii_lowercase.index(varnames[i])])
+                print("fparams:", con_function.__code__.co_varnames)
+                print("params:", parameters)
+                print("funct:", con_function(*parameters))
         return
 
 
