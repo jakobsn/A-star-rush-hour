@@ -17,7 +17,7 @@ from gen_search import GenSearch
 from time import sleep
 
 def main():
-    ps = GAC("monograms/mono-clover.txt")
+    ps = GAC("monograms/mono-cat.txt")
     #ps.solve_problem()
 
     """
@@ -87,8 +87,8 @@ class Nonogram:
         # Lists containing all the possible states of all rows and columns
         self.row_variables, self.row_constraints = self.store_segments(self.row_specs, self.width)
         self.col_variables, self.col_constraints = self.store_segments(self.col_specs, self.height)
-        self.nonogram = self.create_nonogram(self.row_specs, self.row_variables, self.col_specs, self.col_variables, [self.width, self.height])
-        self.nonogram = Board(self, self.nonogram, self.row_variables, self.col_variables, None, 0)
+        self.nonogram, new_row_vars, new_col_vars = self.create_nonogram(self.row_specs, self.row_variables, self.col_specs, self.col_variables, [self.width, self.height])
+        self.nonogram = Board(self, self.nonogram, new_row_vars, new_col_vars, None, 0)
 
         for variable, constraint in zip(self.row_variables, self.row_constraints):
             print("row:", variable, constraint)
@@ -101,11 +101,11 @@ class Nonogram:
         print("")
         for w in range(self.width):
             for h in range(self.height):
-                print(w, h, ":", self.cell_constraint_violated(w, h, self.row_variables, self.col_variables))
+                print(w, h, ":", self.cell_constraint_violated(w, h, new_row_vars, new_col_vars))
 
         print("")
 
-        self.nonogram.print_state(0.10)
+        self.nonogram.print_state(10)
 
         #print(self.nonogram)
 
@@ -140,8 +140,9 @@ class Nonogram:
 
         print("New row variables")
 
-        for row in new_row_variables:
-            print(row)
+        print(new_row_variables)
+        print(new_col_variables)
+
 
         print("")
 
@@ -149,7 +150,7 @@ class Nonogram:
 
         print("")
 
-        return nonogram, new_variables_in_row, new_variables_in_col
+        return nonogram, new_row_variables, new_col_variables
 
     # Return all segments of one axis
     def store_segments(self, specs, segment_length):
