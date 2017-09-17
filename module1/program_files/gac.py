@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 from matplotlib import colors
 import numpy as np
 from gen_search import GenSearch
+from time import sleep
 
 def main():
     ps = GAC("monograms/mono-cat.txt")
@@ -37,7 +38,7 @@ class GAC(GenSearch):
         self.board_file = board_file
         self.nonogram = nonogram(board_file)
         #h = self.nonogram.calculate_heuristic(self.nonogram.nonogram)
-        #self.initial_node = Board(self.nonogram.nonogram, self.nonogram.row_variables, self.nonogram.col_variables, None, h)
+        #self.initial_node = Board(self.nonogram.nonogram, self.nonogram.row_variables, self.nonogram.col_variables, None, 0)
         self.algorithm = algorithm
         self.show_process = show_process
         self.show_solution = show_solution
@@ -84,7 +85,8 @@ class nonogram:
         # Lists containing all the possible states of all rows and columns
         self.row_variables, self.row_constraints = self.store_segments(self.row_specs, self.width)
         self.col_variables, self.col_constraints = self.store_segments(self.col_specs, self.height)
-        self.create_nonogram(self.row_specs, self.row_variables, self.col_specs, self.col_variables, [self.width, self.height])
+        self.nonogram = self.create_nonogram(self.row_specs, self.row_variables, self.col_specs, self.col_variables, [self.width, self.height])
+        self.nonogram = Board(self.nonogram, self.row_variables, self.col_variables, None, 0)
 
         for variable, constraint in zip(self.row_variables, self.row_constraints):
             print("row:", variable, constraint)
@@ -100,6 +102,8 @@ class nonogram:
                 print(w, h, ":", self.cell_constraint_satisfied(w, h))
 
         print("")
+
+        self.nonogram.print_state(10)
 
         #print(self.nonogram)
 
@@ -122,9 +126,6 @@ class nonogram:
             pass
 
 
-
-
-
         print("New row variables")
 
         for row in new_row_variables:
@@ -136,7 +137,7 @@ class nonogram:
 
         print("")
 
-        pass
+        return nonogram
 
     # Return all segments of one axis
     def store_segments(self, specs, segment_length):
@@ -252,10 +253,6 @@ class nonogram:
     def initiate_nonogram(self, dimensions):
         return np.zeros((dimensions[1], dimensions[0]))
 
-    def print_state(self, sleep_time=0):
-        # todo:
-        pass
-
     def calculate_heuristic(self, nonogram):
         # todo:
         return 1
@@ -272,6 +269,23 @@ class Board:
         self.parent = parent
         self.row_variables = row_variables
         self.col_variables = col_variables
+
+    # Print the board with help from matplotlib
+    def print_state(self, sleep_time):
+        colormap = self.nonogram
+        colorCycle = ['white', 'blue']
+        cmap = colors.ListedColormap(colorCycle)
+        self.plot_matrix(colormap, cmap, sleep_time)
+
+    # Plots the graphical view
+    def plot_matrix(self, colormap, cmap, sleep_time):
+        title = 'Rush Hour'
+        plt.imshow(colormap, interpolation='nearest', cmap=cmap)
+        plt.title(title)
+        plt.show(block=False)
+        sleep(sleep_time)
+        plt.close()
+
 
 
 if __name__ == '__main__':
