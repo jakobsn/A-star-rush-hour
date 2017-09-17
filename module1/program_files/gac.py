@@ -17,7 +17,7 @@ from gen_search import GenSearch
 from time import sleep
 
 def main():
-    ps = GAC("monograms/mono-cat.txt")
+    ps = GAC("monograms/mono-clover.txt")
     #ps.solve_problem()
 
     """
@@ -101,11 +101,11 @@ class Nonogram:
         print("")
         for w in range(self.width):
             for h in range(self.height):
-                print(w, h, ":", self.cell_constraint_satisfied(w, h))
+                print(w, h, ":", self.cell_constraint_violated(w, h, self.row_variables, self.col_variables))
 
         print("")
 
-        self.nonogram.print_state(10)
+        self.nonogram.print_state(0.10)
 
         #print(self.nonogram)
 
@@ -118,25 +118,25 @@ class Nonogram:
     def create_nonogram(self, row_specs, row_variables, col_specs, col_variables, dimensions):
         nonogram = self.initiate_nonogram(dimensions)
         new_row_variables = []
-        new_col_variables = []
         for specs_in_row, variables_in_row, i in zip(row_specs, row_variables, range(len(row_specs))):
             new_variables_in_row = []
             for variable, spec in zip(variables_in_row, specs_in_row):
                 new_variables_in_row.append(variable[0])
                 for j in range(variable[0], variable[0] + spec):
                     nonogram[i][j] = 1
-
             new_row_variables.append(new_variables_in_row)
 
         for row in nonogram:
             pass
 
+        new_col_variables = []
         for specs_in_col, variables_in_col, i in zip(col_specs, col_variables, range(len(col_specs))):
             new_variables_in_col = []
             for variable, spec in zip(variables_in_col, specs_in_col):
                 new_variables_in_col.append(variable[0])
                 for j in range(variable[0], variable[0] + spec):
                     nonogram[i][j] = 1
+            new_col_variables.append(new_variables_in_col)
 
         print("New row variables")
 
@@ -149,7 +149,7 @@ class Nonogram:
 
         print("")
 
-        return nonogram
+        return nonogram, new_variables_in_row, new_variables_in_col
 
     # Return all segments of one axis
     def store_segments(self, specs, segment_length):
@@ -205,14 +205,15 @@ class Nonogram:
         return constraints
 
     # Global cell constraint
-    def cell_constraint_satisfied(self, x, y):
-        if x in self.row_variables[y]:
-            if y not in self.col_variables[x]:
-                return False
-        if y in self.col_variables[x]:
-            if x not in self.row_variables[y]:
-                return False
-        return True
+    def cell_constraint_violated(self, x, y, row_variables, col_variables):
+        not_satisfied = 0
+        if x in row_variables[y]:
+            if y not in col_variables[x]:
+                not_satisfied += 1
+        if y in col_variables[x]:
+            if x not in row_variables[y]:
+                not_satisfied += 1
+        return not_satisfied
 
     """
     # Guess nonogram shape
@@ -254,10 +255,10 @@ class Nonogram:
     # Create a list of constraints
     def store_spec(self, lines):
         constraints = []
-        for spec in lines:
+        for segment in lines:
             constraint = []
-            for j in range(0, len(spec) - 1, 2):
-                constraint.append(int(spec[j]))
+            for spec in segment.replace("\n", "").split(" "):
+                constraint.append(int(spec))
             constraints.append(constraint)
         return constraints
 
@@ -268,6 +269,10 @@ class Nonogram:
     def calculate_heuristic(self, nonogram):
         # todo:
         return 1
+
+    def calculate_line_heuristic(self, line):
+        # todo
+        return
 
 
 class Board:
