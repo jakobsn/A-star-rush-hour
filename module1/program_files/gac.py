@@ -36,7 +36,7 @@ class GAC(GenSearch):
 
     def __init__(self, board_file, initial_node=None, algorithm="AStar", show_process=False, show_solution=False, display_time=0.5):
         self.board_file = board_file
-        self.nonogram = nonogram(board_file)
+        self.nonogram = Nonogram(board_file)
         #h = self.nonogram.calculate_heuristic(self.nonogram.nonogram)
         #self.initial_node = Board(self.nonogram.nonogram, self.nonogram.row_variables, self.nonogram.col_variables, None, 0)
         self.algorithm = algorithm
@@ -72,21 +72,23 @@ class GAC(GenSearch):
     """
 
 
-class nonogram:
+class Nonogram:
 
     def __init__(self, file):
         self.file = file
         f = open(self.file)
         self.lines = f.readlines()
-        self.width = int(self.lines[0][0])
-        self.height = int(self.lines[0][2])
+        self.dimensions = self.lines[0].split(" ")
+        self.width = int(self.dimensions[0])
+        self.height = int(self.dimensions[1])
+        print("WH", self.width, self.height)
         self.row_specs, self.col_specs = self.store_specs(self.lines[1:])
         #self.nonogram = self.initiate_nonogram([self.width, self.height])
         # Lists containing all the possible states of all rows and columns
         self.row_variables, self.row_constraints = self.store_segments(self.row_specs, self.width)
         self.col_variables, self.col_constraints = self.store_segments(self.col_specs, self.height)
         self.nonogram = self.create_nonogram(self.row_specs, self.row_variables, self.col_specs, self.col_variables, [self.width, self.height])
-        self.nonogram = Board(self.nonogram, self.row_variables, self.col_variables, None, 0)
+        self.nonogram = Board(self, self.nonogram, self.row_variables, self.col_variables, None, 0)
 
         for variable, constraint in zip(self.row_variables, self.row_constraints):
             print("row:", variable, constraint)
@@ -107,14 +109,18 @@ class nonogram:
 
         #print(self.nonogram)
 
-    # Guess nonogram shape
+    def expand_node(self, nonogram):
+        #TODO
+        children = []
+        return children
+
+    # Guess nonogram shape. Picks the value of each variable to be the first in the domain
     def create_nonogram(self, row_specs, row_variables, col_specs, col_variables, dimensions):
         nonogram = self.initiate_nonogram(dimensions)
         new_row_variables = []
         new_col_variables = []
         for specs_in_row, variables_in_row, i in zip(row_specs, row_variables, range(len(row_specs))):
             new_variables_in_row = []
-            new_variables_in_col = []
             for variable, spec in zip(variables_in_row, specs_in_row):
                 new_variables_in_row.append(variable[0])
                 for j in range(variable[0], variable[0] + spec):
@@ -125,6 +131,12 @@ class nonogram:
         for row in nonogram:
             pass
 
+        for specs_in_col, variables_in_col, i in zip(col_specs, col_variables, range(len(col_specs))):
+            new_variables_in_col = []
+            for variable, spec in zip(variables_in_col, specs_in_col):
+                new_variables_in_col.append(variable[0])
+                for j in range(variable[0], variable[0] + spec):
+                    nonogram[i][j] = 1
 
         print("New row variables")
 
@@ -260,7 +272,8 @@ class nonogram:
 
 class Board:
 
-    def __init__(self, nonogram, row_variables, col_variables, parent, h, g=0):
+    def __init__(self, csp, nonogram, row_variables, col_variables, parent, h, g=0):
+        self.csp = csp
         self.nonogram = nonogram
         self.g = g
         self.h = h
@@ -279,13 +292,15 @@ class Board:
 
     # Plots the graphical view
     def plot_matrix(self, colormap, cmap, sleep_time):
-        title = 'Rush Hour'
+        title = 'Nonogram'
         plt.imshow(colormap, interpolation='nearest', cmap=cmap)
         plt.title(title)
         plt.show(block=False)
         sleep(sleep_time)
         plt.close()
 
+    def expand_node(self):
+        return self.csp.expand_node(self.nonogram)
 
 
 if __name__ == '__main__':
