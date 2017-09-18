@@ -18,7 +18,7 @@ from time import sleep
 import string
 
 def main():
-    ps = GAC("monograms/mono-cat.txt")
+    ps = GAC("monograms/mono-clover.txt")
     ps.solve_problem()
 
     """
@@ -394,13 +394,14 @@ class Board:
         nonogram = self.initiate_nonogram(dimensions)
         for specs_in_row, variables_in_row, i in zip(row_specs, row_variables, range(len(row_specs))):
             for variable, spec in zip(variables_in_row, specs_in_row):
-                for j in range(variable, variable + spec):
-                    nonogram[j][i] += 1
+                #print("var, spec", variable, spec)
+                for j in range(variable, variable + spec -1):
+                    nonogram[i][j] += 1
 
         for specs_in_col, variables_in_col, i in zip(col_specs, col_variables, range(len(col_specs))):
             for variable, spec in zip(variables_in_col, specs_in_col):
-                for j in range(variable, variable + spec):
-                    nonogram[i][j] += 2
+                for j in range(variable, variable + spec - 1):
+                    nonogram[j][i] += 2
 
 
 
@@ -449,18 +450,17 @@ class Board:
                     line_children.append(nonogram)
                 best_child = None
                 for child in line_children:
-                    if not child is child.parent:
-                        children.append(child)
-                    """
-                    if child.h < best_heuristic:
-                        best_heuristic = child.h
-                        best_child = child
-                    else:
-                        print('bad h', child.h, "worse than", best_heuristic)
-                                    if best_child:
-                    if self.parent:
-                    children.append(best_child)
-                    """
+                    if not child is child.parent or None:
+                        #children.append(child)
+                        #child.print_state(1)
+
+                        if child.h < best_heuristic:
+                            best_heuristic = child.h
+                            best_child = child
+
+                            children.append(best_child)
+                            child.print_state(1)
+
                 #best_child.print_state(5)
 
         return children
