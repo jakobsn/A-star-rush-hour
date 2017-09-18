@@ -16,6 +16,8 @@ import numpy as np
 from gen_search import GenSearch
 from time import sleep
 import string
+from random import randint
+import six.moves.cPickle as cPickle
 
 def main():
 
@@ -440,42 +442,57 @@ class Board:
         #new_row_variables = self.row_variables
         #new_col_variables = self.col_variables
 
-        for line_variables, line_domains, y in zip(self.csp.row_variables, self.csp.row_variables, range(len(self.csp.row_variables))):
-            new_row_variables = self.row_variables
-            new_col_variables = self.col_variables
-            for domain, x in zip(line_domains, range(len(line_variables))):
+        for line_domains, y in zip(self.csp.row_variables, range(len(self.csp.row_variables))):
+            new_row_variables = cPickle.loads(cPickle.dumps(self.row_variables, -1))
+            new_col_variables = cPickle.loads(cPickle.dumps(self.col_variables, -1))
+            for domain, x in zip(line_domains, range(len(line_domains))):
                 line_children = []
                 for domain_variable in domain:
-                    if not(self.csp.row_variables[y][x] is domain_variable):
+                    if not(self.row_variables[y][x] is domain_variable):
                         print("Change", x, y, "from", new_row_variables[y][x], "to", domain_variable)
 
                         new_row_variables[y][x] = domain_variable
                         if domain_variable in self.csp.col_variables[x]:
-                            self.csp.col_variables[x][y] = domain_variable
+                            print("**********************col var change***************************")
+                            print(domain_variable, "in", self.csp.col_variables[x], "cor", x, y)
+                            print(len(new_col_variables))
+                            print(len(new_col_variables[x]))
+                            print(new_col_variables[x][y])
+                            new_col_variables[x][y] = domain_variable
+
+                        else:
+                            print(domain_variable, "not in", self.csp.col_variables[x], "cor", x, y)
                     else:
 
                         print("var", self.row_variables[y][x], "not in", domain)
                         print(type(self.row_variables[y][x]), type(domain[0]))
-                    print("child row vars", self.row_variables)
-                    print("child col vars", self.col_variables)
+                    print("child row vars", new_row_variables)
+                    print("child col vars", new_col_variables)
                     nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
                     line_children.append(nonogram)
-                best_children = []
+                best_child = None
                 best_heuristic = 99999999999999999999999
                 for child in line_children:
                     if not child is child.parent or None:
                         #children.append(child)
                         #child.print_state(1)
-
                         if child.h <= best_heuristic:
                             best_heuristic = child.h
+                            best_child = child
 
-                            children.append(child)
 
-                            print("Best change for", x, y, "with heristic", best_heuristic, "instead of", child.parent.h)
-                            #child.print_state(1)
-                        else:
-                            print(child.h, "more than", best_heuristic)
+                    if best_child:
+                        #best_child.print_state(0.5)
+
+                        children.append(best_child)
+                        print("Best change for", x, y, "with heristic", best_heuristic, "instead of", child.parent.h)
+
+                    else:
+                       child = line_children[randint(0, len(line_children) -1)]
+                       children.append(child)
+                       print(child.h, "more than", best_heuristic)
+                       #child.print_state(0.5)
+
                 #best_child.print_state(5)
 
 
