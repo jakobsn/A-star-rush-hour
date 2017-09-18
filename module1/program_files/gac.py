@@ -404,12 +404,12 @@ class Board:
         for specs_in_row, variables_in_row, i in zip(row_specs, row_variables, range(len(row_specs))):
             for variable, spec in zip(variables_in_row, specs_in_row):
                 #print("var, spec", variable, spec)
-                for j in range(variable, variable + spec -1):
+                for j in range(variable, variable + spec):
                     nonogram[i][j] += 1
 
         for specs_in_col, variables_in_col, i in zip(col_specs, col_variables, range(len(col_specs))):
             for variable, spec in zip(variables_in_col, specs_in_col):
-                for j in range(variable, variable + spec - 1):
+                for j in range(variable, variable + spec):
                     nonogram[j][i] += 2
 
 
@@ -445,6 +445,7 @@ class Board:
         for line_domains, y in zip(self.csp.row_variables, range(len(self.csp.row_variables))):
             new_row_variables = cPickle.loads(cPickle.dumps(self.row_variables, -1))
             new_col_variables = cPickle.loads(cPickle.dumps(self.col_variables, -1))
+            # Dette blir feeeeil
             for domain, x in zip(line_domains, range(len(line_domains))):
                 line_children = []
                 for domain_variable in domain:
@@ -452,20 +453,27 @@ class Board:
                         print("Change", x, y, "from", new_row_variables[y][x], "to", domain_variable)
 
                         new_row_variables[y][x] = domain_variable
-                        if domain_variable in self.csp.col_variables[x]:
-                            print("**********************col var change***************************")
-                            print(domain_variable, "in", self.csp.col_variables[x], "cor", x, y)
-                            print(len(new_col_variables))
-                            print(len(new_col_variables[x]))
-                            print(new_col_variables[x][y])
-                            new_col_variables[x][y] = domain_variable
+                        for col_domain, k in zip(self.csp.col_variables[domain_variable], range(len(new_col_variables))):
+                        #if domain_variable in self.csp.col_variables[x]:
+                            if y in col_domain:
+                                print("**********************col var change***************************")
+                                print(domain_variable, "in", self.csp.col_variables[domain_variable], "cor", x, y)
+                                print(len(new_col_variables))
+                                new_col_variables[domain_variable][k] = y
+                                #print(len(new_col_variables[x]))
+                                #print(new_col_variables[x][y])
+                            #new_col_variables[x][y] = domain_variable
 
-                        else:
-                            print(domain_variable, "not in", self.csp.col_variables[x], "cor", x, y)
+                            else:
+                                print(domain_variable, "not in", self.csp.col_variables[x], "cor", x, y)
                     else:
 
                         print("var", self.row_variables[y][x], "not in", domain)
                         print(type(self.row_variables[y][x]), type(domain[0]))
+                    print("domains:")
+                    print(self.csp.row_variables)
+                    print(self.csp.col_variables)
+                    print("")
                     print("child row vars", new_row_variables)
                     print("child col vars", new_col_variables)
                     nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
@@ -474,15 +482,15 @@ class Board:
                 best_heuristic = 99999999999999999999999
                 for child in line_children:
                     if not child is child.parent or None:
-                        #children.append(child)
-                        #child.print_state(1)
+                        children.append(child)
+                        child.print_state(0)
                         if child.h <= best_heuristic:
                             best_heuristic = child.h
                             best_child = child
 
 
                     if best_child:
-                        #best_child.print_state(0.5)
+                        best_child.print_state(0.0)
 
                         children.append(best_child)
                         print("Best change for", x, y, "with heristic", best_heuristic, "instead of", child.parent.h)
@@ -491,7 +499,7 @@ class Board:
                        child = line_children[randint(0, len(line_children) -1)]
                        children.append(child)
                        print(child.h, "more than", best_heuristic)
-                       #child.print_state(0.5)
+                       #child.print_state(0.50)
 
                 #best_child.print_state(5)
 
