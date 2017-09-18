@@ -88,8 +88,11 @@ class Nonogram:
         # Lists containing all the possible states of all rows and columns
         self.row_variables, self.row_constraints = self.store_segments(self.row_specs, self.width)
         self.col_variables, self.col_constraints = self.store_segments(self.col_specs, self.height)
+        self.row_functions = self.create_constraint_functions(self.row_variables, self.row_constraints)
+        self.col_functions = self.create_constraint_functions(self.col_variables, self.col_constraints)
+
         self.nonogram, new_row_vars, new_col_vars = self.create_nonogram(self.row_specs, self.row_variables, self.col_specs, self.col_variables, [self.width, self.height])
-        self.nonogram = Board(self, self.nonogram, new_row_vars, new_col_vars, None, 0)
+        self.nonogram = Board(self, new_row_vars, new_col_vars, None, 0)
 
         for variable, constraint in zip(self.row_variables, self.row_constraints):
             print("row:", variable, constraint)
@@ -102,19 +105,22 @@ class Nonogram:
         print("")
 
 
-        self.row_functions = self.create_constraint_functions(self.row_variables, self.row_constraints)
-        self.col_functions = self.create_constraint_functions(self.col_variables, self.col_constraints)
-
         #print(row_functs)
 
         self.calculate_heuristic(new_row_vars, new_col_vars, self.row_functions, self.col_functions)
-        self.nonogram.print_state(10)
+        self.nonogram.print_state(100)
 
         #print(self.nonogram)
 
-    def expand_node(self, nonogram):
+    def expand_node(self, row_variables, col_variables):
         #TODO
         children = []
+        best_heuristic = 0 # Large number
+        """
+        Traverse through every possible change and create children that has min conflicts in its domain
+        """
+        for line_variables in row_variables:
+            pass
         return children
 
     # Guess nonogram shape. Picks the value of each variable to be the first in the domain
@@ -247,7 +253,6 @@ class Nonogram:
         return nonogram, row_cons#, column
     """
 
-
     def create_constraint_functions(self, variables, constraints):
         constraint_functions = []
         for line_variables, line_constraints in zip(variables, constraints):
@@ -257,11 +262,10 @@ class Nonogram:
             constraint_functions.append(line_functions)
         return constraint_functions
 
-
     def create_constraint_function(self, variables, constraint, envir=globals()):
         args = ""
         for i in range(len(variables)):
-            if (chr(ord('a') + i) in constraint):
+            if chr(ord('a') + i) in constraint:
                 args += ",".join(chr(ord('a') + i))
                 args += ","
         args = args[:-1]
@@ -340,21 +344,23 @@ class Nonogram:
 
 class Board:
 
-    def __init__(self, csp, nonogram, row_variables, col_variables, parent, h, g=0):
+    def __init__(self, csp, row_variables, col_variables, parent, g):
         self.csp = csp
-        self.nonogram = nonogram
-        self.g = g
-        self.h = h
-        self.f = g + self.h
-        self.children = []
-        self.parent = parent
         self.row_variables = row_variables
         self.col_variables = col_variables
+        self.g = g
+        self.h, self.row_axis_heuristics, self.col_variables_heuristics = self.csp.calculate_heuristic(self.row_variables, col_variables, csp.row_functions, csp.col_functions)
+        self.f = self.g + self.h
+        self.children = []
+        self.parent = parent
+        print("")
+        print("Board created with h:", self.h)
+
 
     # Print the board with help from matplotlib
     def print_state(self, sleep_time):
-        colormap = self.nonogram
-        colorCycle = ['white', 'blue']
+        colormap = self.create_colormap(self.csp.row_specs, self.row_variables, self.csp.col_specs, self.col_variables, [self.csp.width, self.csp.height])
+        colorCycle = ['white', 'blue', 'red', 'green']
         cmap = colors.ListedColormap(colorCycle)
         self.plot_matrix(colormap, cmap, sleep_time)
 
@@ -368,7 +374,34 @@ class Board:
         plt.close()
 
     def expand_node(self):
-        return self.csp.expand_node(self.nonogram)
+        return self.csp.expand_node(self.row_variables, self.col_variables)
+
+    # Guess nonogram shape. Picks the value of each variable to be the first in the domain
+    def create_colormap(self, row_specs, row_variables, col_specs, col_variables, dimensions):
+        nonogram = self.initiate_nonogram(dimensions)
+        for specs_in_row, variables_in_row, i in zip(row_specs, row_variables, range(len(row_specs))):
+            for variable, spec in zip(variables_in_row, specs_in_row):
+                for j in range(variable, variable + spec):
+                    nonogram[j][i] += 1
+
+        for specs_in_col, variables_in_col, i in zip(col_specs, col_variables, range(len(col_specs))):
+            for variable, spec in zip(variables_in_col, specs_in_col):
+                for j in range(variable, variable + spec):
+                    nonogram[i][j] += 2
+
+
+
+        print("")
+
+        print("colormap", nonogram)
+
+        print("")
+
+        return nonogram
+
+    # Create empty matrix
+    def initiate_nonogram(self, dimensions):
+        return np.zeros((dimensions[1], dimensions[0]))
 
 
 if __name__ == '__main__':
