@@ -18,8 +18,11 @@ from time import sleep
 import string
 
 def main():
-    ps = GAC("monograms/mono-clover.txt")
+
+    #ps = GAC("monograms/mono-cat.txt")
+    ps = GAC(None, "AStar", "monograms/mono-cat.txt", True, False, 50)
     ps.solve_problem()
+    #ps = RushHour(args.algorithm, args.board, args.display_path, args.display_agenda, args.display_time)
 
     """
     # Takes input from command line
@@ -35,7 +38,7 @@ def main():
 
 class GAC(GenSearch):
 
-    def __init__(self, board_file, initial_node=None, algorithm="AStar", show_process=False, show_solution=False, display_time=0.5):
+    def __init__(self, initial_node, algorithm, board_file, show_solution=False, show_process=False, display_time=0.5):
         self.board_file = board_file
         self.nonogram = Nonogram(board_file)
         self.initial_node = self.nonogram.nonogram
@@ -48,6 +51,7 @@ class GAC(GenSearch):
 #        #TODO
 #        gen
 #        pass
+
 
     def list_contains_board(self, array, board):
         #TODO
@@ -101,6 +105,7 @@ class Nonogram:
 
         new_row_vars, new_col_vars = self.create_nonogram(self.row_specs, self.row_variables, self.col_specs, self.col_variables, [self.width, self.height])
         self.nonogram = Board(self, new_row_vars, new_col_vars, None, 0)
+        #self.nonogram.print_state(10)
 
         for variable, constraint in zip(self.row_variables, self.row_constraints):
             print("row:", variable, constraint)
@@ -115,6 +120,7 @@ class Nonogram:
 
 
         #self.calculate_heuristic(new_row_vars, new_col_vars, self.row_functions, self.col_functions)
+
         #self.nonogram.expand_node(self.nonogram.row_variables, self.nonogram.col_variables)
 
         #self.nonogram.print_state(100)
@@ -381,8 +387,9 @@ class Board:
         sleep(sleep_time)
         plt.close()
 
-    def expand_node(self):
-        return self.csp.expand_node(self.row_variables, self.col_variables)
+#    def expand_node(self):
+#        print("vars:", self.row_variables, self.col_variables)
+#        return self.csp.expand_node(self.row_variables, self.col_variables)
 
     # Guess nonogram shape. Picks the value of each variable to be the first in the domain
     def create_colormap(self, row_specs, row_variables, col_specs, col_variables, dimensions):
@@ -405,9 +412,11 @@ class Board:
 
 
 
-        print("")
-
-        print("colormap", nonogram)
+        print("vars:")
+        print("row", row_variables)
+        print("col", col_variables)
+        print("colormap")
+        print(nonogram)
 
         print("")
 
@@ -418,10 +427,11 @@ class Board:
         return np.zeros((dimensions[1], dimensions[0]))
 
     def expand_node(self):
+
+        print("***********************EXPAND*********************")
         #TODO
         children = []
         # maybe need to copy?
-        best_heuristic = 99999999999999999999999
         """
         Traverse through every possible change and create children that has min conflicts in its domain
         """
@@ -438,30 +448,37 @@ class Board:
                 for domain_variable in domain:
                     if not(self.csp.row_variables[y][x] is domain_variable):
                         print("Change", x, y, "from", new_row_variables[y][x], "to", domain_variable)
+
                         new_row_variables[y][x] = domain_variable
                         if domain_variable in self.csp.col_variables[x]:
                             self.csp.col_variables[x][y] = domain_variable
                     else:
-                        print("var", new_row_variables[y][x], "not in", domain)
-                        print(type(new_row_variables[y][x]), type(domain[0]))
-                    print("child row vars", new_row_variables)
-                    print("child col vars", new_col_variables)
+
+                        print("var", self.row_variables[y][x], "not in", domain)
+                        print(type(self.row_variables[y][x]), type(domain[0]))
+                    print("child row vars", self.row_variables)
+                    print("child col vars", self.col_variables)
                     nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
                     line_children.append(nonogram)
-                best_child = None
+                best_children = []
+                best_heuristic = 99999999999999999999999
                 for child in line_children:
                     if not child is child.parent or None:
                         #children.append(child)
                         #child.print_state(1)
 
-                        if child.h < best_heuristic:
+                        if child.h <= best_heuristic:
                             best_heuristic = child.h
-                            best_child = child
 
-                            children.append(best_child)
-                            child.print_state(1)
+                            children.append(child)
 
+                            print("Best change for", x, y, "with heristic", best_heuristic, "instead of", child.parent.h)
+                            #child.print_state(1)
+                        else:
+                            print(child.h, "more than", best_heuristic)
                 #best_child.print_state(5)
+
+
 
         return children
 
