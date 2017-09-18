@@ -294,10 +294,13 @@ class Nonogram:
 
     def calculate_heuristic(self, row_variables, col_variables, row_functions, col_functions):
         cell_heuristic = self.calculate_cell_heuristics(row_variables, col_variables)
-        row_heuristic = self.calculate_line_heuristics(row_variables, row_functions)
-        # todo:
-        #col h
-        return
+        row_total_heuristic, row_axis_heuristics = self.calculate_line_heuristics(row_variables, row_functions)
+        col_total_heuristic, col_axis_heuristics = self.calculate_line_heuristics(col_variables, col_functions)
+        print("cell h:", cell_heuristic)
+        print("row h:", row_total_heuristic)
+        print("col h:", col_total_heuristic)
+        total_heuristic = cell_heuristic + col_total_heuristic + row_total_heuristic
+        return total_heuristic, row_axis_heuristics, col_axis_heuristics
 
     def calculate_cell_heuristics(self, row_variables, col_variables):
         cell_heuristic = 0
@@ -311,8 +314,11 @@ class Nonogram:
 
     def calculate_line_heuristics(self, variables, functions):
         # todo
+        total_heuristic = 0
+        axis_heuristics = []
         print("line h")
         for con_functions, line_variables in zip(functions, variables):
+            line_heuristic = 0
             for con_function in con_functions:
                 varnames = con_function.__code__.co_varnames
                 parameters = []
@@ -322,8 +328,14 @@ class Nonogram:
                     parameters.append(line_variables[string.ascii_lowercase.index(varnames[i])])
                 print("fparams:", varnames)
                 print("params:", parameters)
-                print("funct:", con_function(*parameters))
-        return
+                if not con_function(*parameters):
+                    print("funct:", False)
+                    line_heuristic += 1
+                else:
+                    print("funct:", True)
+            axis_heuristics.append(line_heuristic)
+            total_heuristic += line_heuristic
+        return total_heuristic, axis_heuristics
 
 
 class Board:
