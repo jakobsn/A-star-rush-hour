@@ -19,7 +19,7 @@ import string
 
 def main():
     ps = GAC("monograms/mono-clover.txt")
-    #ps.solve_problem()
+    ps.solve_problem()
 
     """
     # Takes input from command line
@@ -46,13 +46,15 @@ class GAC(GenSearch):
 
     def solve_problem(self):
         #TODO
+        gen
         pass
 
     def list_contains_board(self, array, board):
         #TODO
-        pass
+        return board in array
 
     def is_solution(self, node):
+        return not node.h
         #TODO
         pass
 
@@ -105,34 +107,40 @@ class Nonogram:
 
 
         self.calculate_heuristic(new_row_vars, new_col_vars, self.row_functions, self.col_functions)
-        self.expand_node(self.nonogram.row_variables, self.nonogram.col_variables)
+        self.nonogram.expand_node(self.nonogram.row_variables, self.nonogram.col_variables)
 
         self.nonogram.print_state(100)
 
-
+    """
     def expand_node(self, row_variables, col_variables):
         #TODO
         children = []
         # maybe need to copy?
         best_heuristic = 99999999999999999999999
-        """
-        Traverse through every possible change and create children that has min conflicts in its domain
-        """
+        #Traverse through every possible change and create children that has min conflicts in its domain
         print("parent row vars", row_variables)
         print("parent col vars", col_variables)
+        new_row_variables = row_variables
+        new_col_variables = col_variables
 
         for line_variables, line_domains, y in zip(self.row_variables, self.row_variables, range(len(row_variables))):
-            for variable, domain, x in zip(line_variables, line_domains, range(len(line_variables))):
+            for domain, x in zip(line_domains, range(len(line_variables))):
                 for domain_variable in domain:
-                    if variable not in domain:
-                        row_variables[y][x] = domain_variable
+                    if not(row_variables[y][x] is domain_variable):
+                        print("Change", x, y, "from", row_variables[y][x], "to", domain_variable)
+                        new_row_variables[y][x] = domain_variable
                         if domain_variable in self.col_variables[x]:
-                            col_variables[x][y] = domain_variable
+                            new_col_variables[x][y] = domain_variable
+                    else:
+                        print("var", row_variables[y][x], "not in", domain)
+                        print(type(row_variables[y][x]), type(domain[0]))
                     print("child row vars", row_variables)
                     print("child col vars", col_variables)
-
+                    nonogram = Board(self, new_row_variables, new_col_variables, None, 0)
+                    #nonogram.print_state(0)
+                    children.append(nonogram)
         return children
-
+    """
     # Guess nonogram shape. Picks the value of each variable to be the first in the domain
     def create_nonogram(self, row_specs, row_variables, col_specs, col_variables, dimensions):
         new_row_variables = []
@@ -312,7 +320,7 @@ class Nonogram:
         # todo
         total_heuristic = 0
         axis_heuristics = []
-        print("line h")
+        #print("line h")
         for con_functions, line_variables in zip(functions, variables):
             line_heuristic = 0
             for con_function in con_functions:
@@ -320,15 +328,15 @@ class Nonogram:
                 parameters = []
                 for i in range(len(varnames)):
                 #for varname in con_function.__code__.co_varnames:
-                    print("varname", varnames[i])
+                    #print("varname", varnames[i])
                     parameters.append(line_variables[string.ascii_lowercase.index(varnames[i])])
-                print("fparams:", varnames)
-                print("params:", parameters)
+                #print("fparams:", varnames)
+                #print("params:", parameters)
                 if not con_function(*parameters):
-                    print("funct:", False)
+                    #print("funct:", False)
                     line_heuristic += 1
-                else:
-                    print("funct:", True)
+                #else:
+                    #print("funct:", True)
             axis_heuristics.append(line_heuristic)
             total_heuristic += line_heuristic
         return total_heuristic, axis_heuristics
@@ -370,6 +378,11 @@ class Board:
 
     # Guess nonogram shape. Picks the value of each variable to be the first in the domain
     def create_colormap(self, row_specs, row_variables, col_specs, col_variables, dimensions):
+        if row_variables == self.csp.row_variables:
+            print("********************FAIL**************************")
+        else:
+            print("not")
+            print(row_variables)
         nonogram = self.initiate_nonogram(dimensions)
         for specs_in_row, variables_in_row, i in zip(row_specs, row_variables, range(len(row_specs))):
             for variable, spec in zip(variables_in_row, specs_in_row):
@@ -395,6 +408,43 @@ class Board:
     def initiate_nonogram(self, dimensions):
         return np.zeros((dimensions[1], dimensions[0]))
 
+    def expand_node(self, row_variables, col_variables):
+        #TODO
+        children = []
+        # maybe need to copy?
+        best_heuristic = 99999999999999999999999
+        """
+        Traverse through every possible change and create children that has min conflicts in its domain
+        """
+        print("parent row vars", row_variables)
+        print("parent col vars", col_variables)
+        new_row_variables = row_variables
+        new_col_variables = col_variables
+
+        for line_variables, line_domains, y in zip(self.csp.row_variables, self.csp.row_variables, range(len(row_variables))):
+            for domain, x in zip(line_domains, range(len(line_variables))):
+                line_children = []
+                for domain_variable in domain:
+                    if not(row_variables[y][x] is domain_variable):
+                        print("Change", x, y, "from", row_variables[y][x], "to", domain_variable)
+                        new_row_variables[y][x] = domain_variable
+                        if domain_variable in self.csp.col_variables[x]:
+                            new_col_variables[x][y] = domain_variable
+                    else:
+                        print("var", row_variables[y][x], "not in", domain)
+                        print(type(row_variables[y][x]), type(domain[0]))
+                    print("child row vars", row_variables)
+                    print("child col vars", col_variables)
+                    nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
+                    line_children.append(nonogram)
+                for child in line_children:
+                    if child.g < best_heuristic:
+                        best_heuristic = child.h
+                        best_child = child
+                print("Best change for", x, y, "with heristic", best_heuristic, "instead of", self.csp.nonogram.h)
+                best_child.print_state(0)
+                children.append(best_child)
+        return children
 
 if __name__ == '__main__':
     main()
