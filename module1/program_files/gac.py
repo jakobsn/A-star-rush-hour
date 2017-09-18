@@ -261,11 +261,13 @@ class Nonogram:
     def create_constraint_function(self, variables, constraint, envir=globals()):
         args = ""
         for i in range(len(variables)):
-            args += ",".join(chr(ord('a') + i))
-            args += ","
+            if (chr(ord('a') + i) in constraint):
+                args += ",".join(chr(ord('a') + i))
+                args += ","
         args = args[:-1]
         #TODO
         print("args", args)
+        print("constraint", constraint)
         return eval("(lambda " + args + ": " + constraint + ")", envir)
 
     # Create both lists of constraints
@@ -311,14 +313,14 @@ class Nonogram:
         # todo
         print("line h")
         for con_functions, line_variables in zip(functions, variables):
-            parameters = []
             for con_function in con_functions:
                 varnames = con_function.__code__.co_varnames
+                parameters = []
                 for i in range(len(varnames)):
                 #for varname in con_function.__code__.co_varnames:
                     print("varname", varnames[i])
                     parameters.append(line_variables[string.ascii_lowercase.index(varnames[i])])
-                print("fparams:", con_function.__code__.co_varnames)
+                print("fparams:", varnames)
                 print("params:", parameters)
                 print("funct:", con_function(*parameters))
         return
