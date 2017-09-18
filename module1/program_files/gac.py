@@ -38,8 +38,7 @@ class GAC(GenSearch):
     def __init__(self, board_file, initial_node=None, algorithm="AStar", show_process=False, show_solution=False, display_time=0.5):
         self.board_file = board_file
         self.nonogram = Nonogram(board_file)
-        #h = self.nonogram.calculate_heuristic(self.nonogram.nonogram)
-        #self.initial_node = Board(self.nonogram.nonogram, self.nonogram.row_variables, self.nonogram.col_variables, None, 0)
+        self.initial_node = self.nonogram.nonogram
         self.algorithm = algorithm
         self.show_process = show_process
         self.show_solution = show_solution
@@ -84,14 +83,13 @@ class Nonogram:
         self.height = int(self.dimensions[1])
         print("WH", self.width, self.height)
         self.row_specs, self.col_specs = self.store_specs(self.lines[1:])
-        #self.nonogram = self.initiate_nonogram([self.width, self.height])
         # Lists containing all the possible states of all rows and columns
         self.row_variables, self.row_constraints = self.store_segments(self.row_specs, self.width)
         self.col_variables, self.col_constraints = self.store_segments(self.col_specs, self.height)
         self.row_functions = self.create_constraint_functions(self.row_variables, self.row_constraints)
         self.col_functions = self.create_constraint_functions(self.col_variables, self.col_constraints)
 
-        self.nonogram, new_row_vars, new_col_vars = self.create_nonogram(self.row_specs, self.row_variables, self.col_specs, self.col_variables, [self.width, self.height])
+        new_row_vars, new_col_vars = self.create_nonogram(self.row_specs, self.row_variables, self.col_specs, self.col_variables, [self.width, self.height])
         self.nonogram = Board(self, new_row_vars, new_col_vars, None, 0)
 
         for variable, constraint in zip(self.row_variables, self.row_constraints):
@@ -100,17 +98,15 @@ class Nonogram:
         print("")
 
         for variable, constraint in zip(self.col_variables, self.col_constraints):
-            print("row:", variable, constraint)
+            print("col:", variable, constraint)
 
         print("")
 
 
-        #print(row_functs)
 
         self.calculate_heuristic(new_row_vars, new_col_vars, self.row_functions, self.col_functions)
         self.nonogram.print_state(100)
 
-        #print(self.nonogram)
 
     def expand_node(self, row_variables, col_variables):
         #TODO
@@ -125,41 +121,21 @@ class Nonogram:
 
     # Guess nonogram shape. Picks the value of each variable to be the first in the domain
     def create_nonogram(self, row_specs, row_variables, col_specs, col_variables, dimensions):
-        nonogram = self.initiate_nonogram(dimensions)
         new_row_variables = []
         for specs_in_row, variables_in_row, i in zip(row_specs, row_variables, range(len(row_specs))):
             new_variables_in_row = []
             for variable, spec in zip(variables_in_row, specs_in_row):
                 new_variables_in_row.append(variable[0])
-                for j in range(variable[0], variable[0] + spec):
-                    nonogram[i][j] = 1
             new_row_variables.append(new_variables_in_row)
-
-        for row in nonogram:
-            pass
 
         new_col_variables = []
         for specs_in_col, variables_in_col, i in zip(col_specs, col_variables, range(len(col_specs))):
             new_variables_in_col = []
             for variable, spec in zip(variables_in_col, specs_in_col):
                 new_variables_in_col.append(variable[0])
-                for j in range(variable[0], variable[0] + spec):
-                    nonogram[i][j] = 1
             new_col_variables.append(new_variables_in_col)
 
-        print("New row variables")
-
-        print(new_row_variables)
-        print(new_col_variables)
-
-
-        print("")
-
-        print(nonogram)
-
-        print("")
-
-        return nonogram, new_row_variables, new_col_variables
+        return new_row_variables, new_col_variables
 
     # Return all segments of one axis
     def store_segments(self, specs, segment_length):
