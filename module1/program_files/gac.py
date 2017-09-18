@@ -105,18 +105,32 @@ class Nonogram:
 
 
         self.calculate_heuristic(new_row_vars, new_col_vars, self.row_functions, self.col_functions)
+        self.expand_node(self.nonogram.row_variables, self.nonogram.col_variables)
+
         self.nonogram.print_state(100)
 
 
     def expand_node(self, row_variables, col_variables):
         #TODO
         children = []
-        best_heuristic = 0 # Large number
+        # maybe need to copy?
+        best_heuristic = 99999999999999999999999
         """
         Traverse through every possible change and create children that has min conflicts in its domain
         """
-        for line_variables in row_variables:
-            pass
+        print("parent row vars", row_variables)
+        print("parent col vars", col_variables)
+
+        for line_variables, line_domains, y in zip(self.row_variables, self.row_variables, range(len(row_variables))):
+            for variable, domain, x in zip(line_variables, line_domains, range(len(line_variables))):
+                for domain_variable in domain:
+                    if variable not in domain:
+                        row_variables[y][x] = domain_variable
+                        if domain_variable in self.col_variables[x]:
+                            col_variables[x][y] = domain_variable
+                    print("child row vars", row_variables)
+                    print("child col vars", col_variables)
+
         return children
 
     # Guess nonogram shape. Picks the value of each variable to be the first in the domain
@@ -134,6 +148,8 @@ class Nonogram:
             for variable, spec in zip(variables_in_col, specs_in_col):
                 new_variables_in_col.append(variable[0])
             new_col_variables.append(new_variables_in_col)
+
+        print("new", new_col_variables, new_col_variables)
 
         return new_row_variables, new_col_variables
 
