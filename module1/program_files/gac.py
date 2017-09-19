@@ -349,7 +349,7 @@ class Nonogram:
                     parameters.append(line_variables[string.ascii_lowercase.index(varnames[i])])
                 if not con_function(*parameters):
                     #print("violating variables in line", i, "is", *parameters)
-                    violated_variable.append(*parameters)
+                    violated_variable.append(parameters)
 
                     line_heuristic += 1
             violated_variables.append(violated_variable)
@@ -432,14 +432,17 @@ class Board:
     def min_value(self):
         pass
 
-    def find_conflicting_axis_variable(self, line):
-        r = list(range(len(line)))
+    def find_conflicting_axis_variable(self, axis_heuristics):
+        r = list(range(len(axis_heuristics)))
         shuffle(r)
         print(r)
         for i in r:
-            if self.row_axis_heuristics[i]:
-                print("found conflicting variable")
-                return r
+            s = list(range(len(axis_heuristics[i])))
+            shuffle(s)
+            for j in s:
+                if axis_heuristics[i][j]:
+                    print("found conflicting variable")
+                    return i, j
 
     def find_conflicting_cross_variable(self):
         x = list(range(self.csp.width))
@@ -454,7 +457,7 @@ class Board:
                     print("violating variable in", i, j)
                     return i, j
         return
-
+    """
     def expand_node(self):
         current = self
         method = 2#randint(0, 3)
@@ -551,7 +554,7 @@ class Board:
                     children.append(best_child)
                     print("Best change for", x, y, "with heristic", best_heuristic, "instead of", best_child.parent.h)
 
-                if not randint(0, 30):
+                """if not randint(0, 30):
                     print("*")
                     print("*")
                     print("*")
@@ -572,9 +575,9 @@ class Board:
                     new_col_variables[x][y] = new_value
                     nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
                     children.append(nonogram)
-
+                """
         return children
-    """
+
 
 if __name__ == '__main__':
     main()
