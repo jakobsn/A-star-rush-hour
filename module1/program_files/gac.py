@@ -483,12 +483,32 @@ class Board:
         # Create child with new value for conflicted variable
 
     """
+
+    def generate_min_successor(self, x, y):
+        return
+
     def expand_node(self):
 
         print("***********************EXPAND*********************")
         #TODO
         children = []
+        current = self
+        method = 2#randint(0, 3)
+        print("************expand**********")
+        if method == 0:
+            conflict_y, conflict_x = self.find_conflicting_axis_variable(self.row_axis_heuristics)
+            if not conflict_x:
+                method = randint(1, 3)
+        if method == 1:
+            conflict_x, conflict_y = self.find_conflicting_axis_variable(self.col_variables_heuristics)
+            if not conflict_x:
+                method = 2
+        if method == 2:
+            conflict_x, conflict_y = self.find_conflicting_cross_variable()
+        print("conflict", conflict_x, conflict_y)
+        # CHILDREN ARE THE SUCCESSORS OF THIS DOMAIN
 
+        children = self.generate_min_successor(conflict_x, conflict_y)
 
         for line_domains, y in zip(self.csp.row_variables, range(len(self.csp.row_variables))):
             # Dette blir feeeeil
