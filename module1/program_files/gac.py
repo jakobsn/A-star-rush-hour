@@ -123,7 +123,7 @@ class Nonogram:
 
         #self.calculate_heuristic(new_row_vars, new_col_vars, self.row_functions, self.col_functions)
 
-        self.nonogram.expand_node()
+        #self.nonogram.expand_node()
 
         #self.nonogram.print_state(100)
 
@@ -497,8 +497,40 @@ class Board:
 
     """
 
-    def generate_min_successor(self, x, y):
-        return
+    def generate_min_successor(self, x, y, axis):
+        best_h = 999999999999
+        new_row_variables = cPickle.loads(cPickle.dumps(self.row_variables, -1))
+        new_col_variables = cPickle.loads(cPickle.dumps(self.col_variables, -1))
+        if axis is "row":
+            print(x, y)
+            print(self.csp.row_variables[y])
+            for i in range(len(self.csp.row_variables[y])):
+                if x in self.csp.row_variables[y][i]:
+                    for variable in self.csp.row_variables[y][i]:
+                        if variable is not x:
+                            new_row_variables[y][i] = variable
+                            total_heuristic, row_axis_heuristics, col_axis_heuristics, row_violated_variables, col_violated_variables = self.csp.calculate_heuristic(new_row_variables, new_col_variables, self.csp.row_functions, self.csp.col_functions)
+                            if total_heuristic < best_h:
+                                best_h = total_heuristic
+                                print("child h:", total_heuristic)
+                                best_row_variables = cPickle.loads(cPickle.dumps(new_row_variables, -1))
+            nonogram = Board(self.csp, best_row_variables, new_col_variables, self, 0)
+
+
+        elif axis is "col":
+            for j in range(len(self.csp.col_variables[x])):
+                if y in self.csp.col_variables[x][j]:
+                    for variable in self.csp.col_variables[x][j]:
+                        if variable is not y:
+                            new_col_variables[x][j] = variable
+                            total_heuristic, row_axis_heuristics, col_axis_heuristics, row_violated_variables, col_violated_variables = self.csp.calculate_heuristic(new_row_variables, new_col_variables, self.csp.row_functions, self.csp.col_functions)
+                            if total_heuristic < best_h:
+                                best_h = total_heuristic
+                                print("child h:", total_heuristic)
+                                best_col_variables = cPickle.loads(cPickle.dumps(new_row_variables, -1))
+            nonogram = Board(self.csp, new_row_variables, best_col_variables, self, 0)
+
+        return nonogram
 
     def expand_node(self):
 
@@ -508,26 +540,32 @@ class Board:
         axis = None
         current = self
         method = randint(0, 2)
-        print("************expand**********")
         print(method, "method")
         if method == 0:
             conflict_y, conflict_x = self.find_conflicting_axis_variable(self.row_violated_variables)
+            axis = "row"
             if not conflict_x:
                 method = randint(1, 2)
         if method == 1:
             conflict_x, conflict_y = self.find_conflicting_axis_variable(self.col_violated_variables)
+            axis = "col"
             if not conflict_x:
                 method = 2
         if method == 2:
             conflict_x, conflict_y, axis = self.find_conflicting_cross_variable()
-        print("conflict", conflict_x, conflict_y)
-        if axis:
-            print(axis)
-        sleep(10)
+        print("conflict", conflict_x, conflict_y, axis)
+
+        #sleep(10)
 
         # CHILDREN ARE THE SUCCESSORS OF THIS DOMAIN
 
-        #children = self.generate_min_successor(conflict_x, conflict_y)
+        children.append(self.generate_min_successor(conflict_x, conflict_y, axis))
+        return children
+
+        """
+        if min_succ:
+            print(min_succ.h)
+            #sleep(3)
 
         for line_domains, y in zip(self.csp.row_variables, range(len(self.csp.row_variables))):
             # Dette blir feeeeil
@@ -594,7 +632,7 @@ class Board:
                     children.append(best_child)
                     print("Best change for", x, y, "with heristic", best_heuristic, "instead of", best_child.parent.h)
 
-                """if not randint(0, 30):
+                if not randint(0, 30):
                     print("*")
                     print("*")
                     print("*")
@@ -615,9 +653,9 @@ class Board:
                     new_col_variables[x][y] = new_value
                     nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
                     children.append(nonogram)
-                """
+                
         return children
-
+    """
 
 if __name__ == '__main__':
     main()
