@@ -230,15 +230,26 @@ class Nonogram:
         return constraints
 
     # Global cell constraint
-    def cell_constraint_violated(self, x, y, row_variables, col_variables):
+    def cell_constraint_violated(self, x, y, row_variables, col_variables, include_axis=False):
         not_satisfied = 0
+        axis_violated = None
         if x in row_variables[y]:
             if y not in col_variables[x]:
-                not_satisfied += 1
+                if not include_axis:
+                    return 1
+                else:
+                    return 1, "row"
         if y in col_variables[x]:
             if x not in row_variables[y]:
-                not_satisfied += 1
-        return not_satisfied
+                if not include_axis:
+                    return 1
+                else:
+                    return 1, "col"
+        if not include_axis:
+            return not_satisfied
+        else:
+            return not_satisfied, None
+
 
     """
     # Guess nonogram shape
@@ -349,9 +360,10 @@ class Nonogram:
                     parameters.append(line_variables[string.ascii_lowercase.index(varnames[i])])
                 if not con_function(*parameters):
                     #print("violating variables in line", i, "is", *parameters)
-                    violated_variable.append(parameters)
-
                     line_heuristic += 1
+
+                violated_variable.append(parameters)
+
             violated_variables.append(violated_variable)
             axis_heuristics.append(line_heuristic)
             total_heuristic += line_heuristic
@@ -453,9 +465,10 @@ class Board:
         print(x)
         for i in x:
             for j in y:
-                if self.csp.cell_constraint_violated(i, j, self.row_variables, self.col_variables):
-                    print("violating variable in", i, j)
-                    return i, j
+                not_satisfied,  axis = self.csp.cell_constraint_violated(i, j, self.row_variables, self.col_variables, True)
+                if axis:
+                    print("violating variable in", i, j, "in", axis)
+                    return i, j, axis
         return
     """
     def expand_node(self):
@@ -492,23 +505,29 @@ class Board:
         print("***********************EXPAND*********************")
         #TODO
         children = []
+        axis = None
         current = self
-        method = 2#randint(0, 3)
+        method = randint(0, 2)
         print("************expand**********")
+        print(method, "method")
         if method == 0:
-            conflict_y, conflict_x = self.find_conflicting_axis_variable(self.row_axis_heuristics)
+            conflict_y, conflict_x = self.find_conflicting_axis_variable(self.row_violated_variables)
             if not conflict_x:
-                method = randint(1, 3)
+                method = randint(1, 2)
         if method == 1:
-            conflict_x, conflict_y = self.find_conflicting_axis_variable(self.col_variables_heuristics)
+            conflict_x, conflict_y = self.find_conflicting_axis_variable(self.col_violated_variables)
             if not conflict_x:
                 method = 2
         if method == 2:
-            conflict_x, conflict_y = self.find_conflicting_cross_variable()
+            conflict_x, conflict_y, axis = self.find_conflicting_cross_variable()
         print("conflict", conflict_x, conflict_y)
+        if axis:
+            print(axis)
+        sleep(10)
+
         # CHILDREN ARE THE SUCCESSORS OF THIS DOMAIN
 
-        children = self.generate_min_successor(conflict_x, conflict_y)
+        #children = self.generate_min_successor(conflict_x, conflict_y)
 
         for line_domains, y in zip(self.csp.row_variables, range(len(self.csp.row_variables))):
             # Dette blir feeeeil
@@ -570,7 +589,8 @@ class Board:
 
 
                 if best_child:
-                    #best_child.print_state(10)
+                    #if best_heuristic < 6:
+                        #best_child.print_state(6)
                     children.append(best_child)
                     print("Best change for", x, y, "with heristic", best_heuristic, "instead of", best_child.parent.h)
 
