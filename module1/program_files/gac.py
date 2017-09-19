@@ -442,13 +442,17 @@ class Board:
                 return r
 
     def find_conflicting_cross_variable(self):
-        x = shuffle(list(range(self.csp.width)))
-        y = shuffle(list(range(self.csp.height)))
+        x = list(range(self.csp.width))
+        shuffle(x)
+        y = list(range(self.csp.height))
+        shuffle(y)
 
-        for i, j in zip(x, y):
-            if self.csp.cell_constraint_violated(i, j, self.row_variables, self.col_variables):
-                print("violating variable in", i, j)
-                pass
+        print(x)
+        for i in x:
+            for j in y:
+                if self.csp.cell_constraint_violated(i, j, self.row_variables, self.col_variables):
+                    print("violating variable in", i, j)
+                    return i, j
         return
 
     def expand_node(self):
@@ -464,7 +468,8 @@ class Board:
             if not conflict:
                 method = 2
         if method == 2:
-            conflict = self.find_conflicting_cross_variable()
+            conflict_x, conflict_y = self.find_conflicting_cross_variable()
+            print("conflict", conflict_x, conflict_y)
 
 
         # find min value for conflict
