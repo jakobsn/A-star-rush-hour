@@ -448,30 +448,39 @@ class Board:
             # Dette blir feeeeil
             for domain, x in zip(line_domains, range(len(line_domains))):
                 line_children = []
+                changed = False
                 for domain_variable in domain:
                     new_row_variables = cPickle.loads(cPickle.dumps(self.row_variables, -1))
                     new_col_variables = cPickle.loads(cPickle.dumps(self.col_variables, -1))
                     if not(new_row_variables[y][x] is domain_variable):
-                        print("Change", x, y, "from", new_row_variables[y][x], "to", domain_variable)
-
-                        for col_domain, k in zip(self.csp.col_variables[domain_variable], range(len(new_col_variables))):
-                        #if domain_variable in self.csp.col_variables[x]:
-                            if y in col_domain:
-                                print("**********************col var change***************************")
-                                print(domain_variable, "in", self.csp.col_variables[domain_variable], "cor", x, y)
-                                print(len(new_col_variables))
-                                new_row_variables[y][x] = domain_variable
-                                new_col_variables[domain_variable][k] = y
-                                #print(len(new_col_variables[x]))
-                                #print(new_col_variables[x][y])
+                        changed = True
+                        print("Change", new_row_variables[y][x], y, "from", new_row_variables[y][x], "to", domain_variable)
+                        new_row_variables[y][x] = domain_variable
+                    for col_domain, k in zip(self.csp.col_variables[domain_variable], range(len(new_col_variables))):
+                    #if domain_variable in self.csp.col_variables[x]:
+                        if y in col_domain:
+                            changed = True
+                            print("**********************col var change***************************")
+                            print(domain_variable, "in", self.csp.col_variables[domain_variable], "cor", x, y)
+                            print(len(new_col_variables))
+                            new_col_variables[domain_variable][k] = y
+                            print("change", k, y)
+                            #print(len(new_col_variables[x]))
+                            #print(new_col_variables[x][y])
                             #new_col_variables[x][y] = domain_variable
 
-                            else:
-                                print(domain_variable, "not in", self.csp.col_variables[x], "cor", x, y)
+                    if not changed:
+                        print(domain_variable, "not in", self.csp.col_variables[x], "cor", x, y)
+                        for i in range(self.csp.width):
+                            for j in range(self.csp.height):
+                                if self.csp.cell_constraint_violated(i, j, new_row_variables, new_col_variables):
+                                    print("------------violated----------")
+                                    #new_row_variables[j][i] =
 
-                        nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
-                        line_children.append(nonogram)
-                    else:
+
+                    nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
+                    line_children.append(nonogram)
+                    """else:
                         for i in range(self.csp.width):
                             for j in range(self.csp.height):
                                 if self.csp.cell_constraint_violated(i, j, new_row_variables, new_col_variables):
@@ -479,7 +488,7 @@ class Board:
                                     #if
 
                         pass
-
+                    """
 
                 best_child = None
                 best_heuristic = 99999999999999999999999
@@ -493,7 +502,7 @@ class Board:
 
 
                 if best_child:
-                    #best_child.print_state(0.0)
+                    best_child.print_state(10)
 
                     children.append(best_child)
                     print("Best change for", x, y, "with heristic", best_heuristic, "instead of", best_child.parent.h)
