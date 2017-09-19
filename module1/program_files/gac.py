@@ -468,6 +468,9 @@ class Board:
 
                             else:
                                 print(domain_variable, "not in", self.csp.col_variables[x], "cor", x, y)
+
+                        nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
+                        line_children.append(nonogram)
                     else:
                         for i in range(self.csp.width):
                             for j in range(self.csp.height):
@@ -476,8 +479,7 @@ class Board:
                                     #if
 
                         pass
-                    nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
-                    line_children.append(nonogram)
+
 
                 best_child = None
                 best_heuristic = 99999999999999999999999
