@@ -435,14 +435,9 @@ class Board:
         print("***********************EXPAND*********************")
         #TODO
         children = []
-        # maybe need to copy?
         """
         Traverse through every possible change and create children that has min conflicts in its domain
         """
-        #print("parent row vars", row_variables)
-        #print("parent col vars", col_variables)
-        #new_row_variables = self.row_variables
-        #new_col_variables = self.col_variables
 
         for line_domains, y in zip(self.csp.row_variables, range(len(self.csp.row_variables))):
             # Dette blir feeeeil
@@ -469,9 +464,6 @@ class Board:
                                 print(len(new_col_variables))
                                 new_col_variables[domain_variable][k] = y
                                 print("change", k, y)
-                                #print(len(new_col_variables[x]))
-                                #print(new_col_variables[x][y])
-                                #new_col_variables[x][y] = domain_variable
                                 nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
                                 line_children.append(nonogram)
 
@@ -481,19 +473,8 @@ class Board:
                             for j in range(self.csp.height):
                                 if self.csp.cell_constraint_violated(i, j, new_row_variables, new_col_variables):
                                     print("------------violated----------")
-                                    #new_row_variables[j][i] = self.csp.row_variables[j][randint(0, len(self.csp.row_variables[j]) - 1)]
                                     for p in range(len(self.csp.row_variables[j])):
                                         if i in self.csp.row_variables[j][p] and not self.row_variables[j][p] is i:
-                                            """
-                                            for variable in new_col_variables[i]:
-                                                if i is variable:
-                                                    new_row_variables[j][p] = variable
-
-                                                    # Do this only for best value?
-
-                                                    nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
-                                                    line_children.append(nonogram)
-                                            """
                                             nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
                                             new_row_variables[j][p] = i
                                             line_children.append(nonogram)
@@ -501,29 +482,17 @@ class Board:
                                             for o in range(len(self.csp.col_variables[i])):
                                                 if j in self.csp.col_variables[i][o] and not self.col_variables[i][o] is j:
                                                     new_col_variables[i][o] = j
-                                                    #nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
-
                                                     nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
                                                     line_children.append(nonogram)
 
                     #nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
                     #line_children.append(nonogram)
-                    """else:
-                        for i in range(self.csp.width):
-                            for j in range(self.csp.height):
-                                if self.csp.cell_constraint_violated(i, j, new_row_variables, new_col_variables):
-                                    print("PUPPUPPUP")
-                                    #if
 
-                        pass
-                    """
 
                 best_child = None
                 best_heuristic = 99999999999999999999999
                 for child in line_children:
                     if not child is child.parent or None:
-                        #children.append(child)
-                        #child.print_state(0)
                         if child.h <= best_heuristic:
                             best_heuristic = child.h
                             best_child = child
@@ -531,20 +500,11 @@ class Board:
 
                 if best_child:
                     #best_child.print_state(10)
-
                     children.append(best_child)
                     print("Best change for", x, y, "with heristic", best_heuristic, "instead of", best_child.parent.h)
 
                 else:
-
-                    child = line_children[randint(0, len(line_children))]
-                    children.append(child)
-                    print(child.h, "more than", best_heuristic)
-                    #child.print_state(0.50)
-
-                #best_child.print_state(5)
-
-
+                    new_col_variables[x][y] = randint(self.csp.col_variables[x][y][0], self.csp.col_variables[x][y][0])
 
         return children
 
