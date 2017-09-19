@@ -483,7 +483,8 @@ class Board:
                                     print("------------violated----------")
                                     #new_row_variables[j][i] = self.csp.row_variables[j][randint(0, len(self.csp.row_variables[j]) - 1)]
                                     for p in range(len(self.csp.row_variables[j])):
-                                        if i in self.csp.row_variables[j][p]:
+                                        if i in self.csp.row_variables[j][p] and not self.row_variables[j][p] is i:
+                                            """
                                             for variable in new_col_variables[i]:
                                                 if i is variable:
                                                     new_row_variables[j][p] = variable
@@ -492,8 +493,18 @@ class Board:
 
                                                     nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
                                                     line_children.append(nonogram)
-                                        # Else if in cols
+                                            """
+                                            nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
+                                            new_row_variables[j][p] = i
+                                            line_children.append(nonogram)
+                                        else:
+                                            for o in range(len(self.csp.col_variables[i])):
+                                                if j in self.csp.col_variables[i][o] and not self.col_variables[i][o] is j:
+                                                    new_col_variables[i][o] = j
+                                                    #nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
 
+                                                    nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
+                                                    line_children.append(nonogram)
 
                     #nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
                     #line_children.append(nonogram)
@@ -511,7 +522,7 @@ class Board:
                 best_heuristic = 99999999999999999999999
                 for child in line_children:
                     if not child is child.parent or None:
-                        children.append(child)
+                        #children.append(child)
                         #child.print_state(0)
                         if child.h <= best_heuristic:
                             best_heuristic = child.h
