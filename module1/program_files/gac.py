@@ -16,13 +16,13 @@ import numpy as np
 from gen_search import GenSearch
 from time import sleep
 import string
-from random import randint
+from random import randint, shuffle
 import six.moves.cPickle as cPickle
 
 def main():
 
     #ps = GAC("monograms/mono-cat.txt")
-    ps = GAC(None, "AStar", "monograms/mono-cat.txt", True, False, 50)
+    ps = GAC(None, "AStar", "monograms/mono-cat.txt", True, False, 3)
     ps.solve_problem()
     #ps = RushHour(args.algorithm, args.board, args.display_path, args.display_agenda, args.display_time)
 
@@ -123,7 +123,7 @@ class Nonogram:
 
         #self.calculate_heuristic(new_row_vars, new_col_vars, self.row_functions, self.col_functions)
 
-        #self.nonogram.expand_node(self.nonogram.row_variables, self.nonogram.col_variables)
+        self.nonogram.expand_node()
 
         #self.nonogram.print_state(100)
 
@@ -338,23 +338,15 @@ class Nonogram:
         # todo
         total_heuristic = 0
         axis_heuristics = []
-        #print("line h")
         for con_functions, line_variables in zip(functions, variables):
             line_heuristic = 0
             for con_function in con_functions:
                 varnames = con_function.__code__.co_varnames
                 parameters = []
                 for i in range(len(varnames)):
-                #for varname in con_function.__code__.co_varnames:
-                    #print("varname", varnames[i])
                     parameters.append(line_variables[string.ascii_lowercase.index(varnames[i])])
-                #print("fparams:", varnames)
-                #print("params:", parameters)
                 if not con_function(*parameters):
-                    #print("funct:", False)
                     line_heuristic += 1
-                #else:
-                    #print("funct:", True)
             axis_heuristics.append(line_heuristic)
             total_heuristic += line_heuristic
         return total_heuristic, axis_heuristics
@@ -430,14 +422,51 @@ class Board:
     def initiate_nonogram(self, dimensions):
         return np.zeros((dimensions[1], dimensions[0]))
 
+
+    def min_value(self):
+        pass
+
+    def find_conflicting_axis_variable(self, line):
+        r = list(range(len(line)))
+        shuffle(r)
+        print(r)
+        for i in r:
+            if self.row_axis_heuristics[i]:
+                print("found conflicting variable")
+                return r
+
+    def find_conflicting_cross_variable(self):
+        return
+
+    def expand_node(self):
+        current = self
+        method = 0#randint(0, 3)
+        print("************expand**********")
+        if method == 0:
+            conflict = self.find_conflicting_axis_variable(self.row_axis_heuristics)
+            if not conflict:
+                method = randint(1, 3)
+        if method == 1:
+            conflict = self.find_conflicting_axis_variable(self.col_variables_heuristics)
+            if not conflict:
+                method = 2
+        if method == 2:
+            conflict = self.find_conflicting_cross_variable()
+
+        # find min value for conflict
+
+
+        # Choose random conflicted variable
+        # Choose value for variable that minimizes the conflicts of the variable
+        # Create child with new value for conflicted variable
+
+    """
     def expand_node(self):
 
         print("***********************EXPAND*********************")
         #TODO
         children = []
-        """
-        Traverse through every possible change and create children that has min conflicts in its domain
-        """
+
 
         for line_domains, y in zip(self.csp.row_variables, range(len(self.csp.row_variables))):
             # Dette blir feeeeil
@@ -454,12 +483,12 @@ class Board:
                         nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
                         line_children.append(nonogram)
 
+
                     for col_domain, k in zip(self.csp.col_variables[domain_variable], range(len(new_col_variables))):
                     #if domain_variable in self.csp.col_variables[x]:
                         if y in col_domain:
                             if not(new_col_variables[domain_variable][k] is domain_variable):
                                 changed = True
-                                print("**********************col var change***************************")
                                 print(domain_variable, "in", self.csp.col_variables[domain_variable], "cor", x, y)
                                 print(len(new_col_variables))
                                 new_col_variables[domain_variable][k] = y
@@ -503,10 +532,30 @@ class Board:
                     children.append(best_child)
                     print("Best change for", x, y, "with heristic", best_heuristic, "instead of", best_child.parent.h)
 
-                else:
-                    new_col_variables[x][y] = randint(self.csp.col_variables[x][y][0], self.csp.col_variables[x][y][0])
+                if not randint(0, 30):
+                    print("*")
+                    print("*")
+                    print("*")
+                    print("*")
+                    print("*")
+                    print("*")
+                    print("*")
+                    print("*")
+                    print("*")
+                    print("*")
+                    print("*")
+                    print("*")
+                    print(x, y)
+
+                    x = randint(0, len(new_col_variables))
+                    y = randint(0, len(new_col_variables))
+                    new_value = randint(self.csp.col_variables[y][x][0], self.csp.col_variables[y][x][-1])
+                    new_col_variables[x][y] = new_value
+                    nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
+                    children.append(nonogram)
 
         return children
+    """
 
 if __name__ == '__main__':
     main()
