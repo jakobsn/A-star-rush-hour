@@ -456,18 +456,24 @@ class Board:
                         changed = True
                         print("Change", new_row_variables[y][x], y, "from", new_row_variables[y][x], "to", domain_variable)
                         new_row_variables[y][x] = domain_variable
+                        nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
+                        line_children.append(nonogram)
+
                     for col_domain, k in zip(self.csp.col_variables[domain_variable], range(len(new_col_variables))):
                     #if domain_variable in self.csp.col_variables[x]:
                         if y in col_domain:
-                            changed = True
-                            print("**********************col var change***************************")
-                            print(domain_variable, "in", self.csp.col_variables[domain_variable], "cor", x, y)
-                            print(len(new_col_variables))
-                            new_col_variables[domain_variable][k] = y
-                            print("change", k, y)
-                            #print(len(new_col_variables[x]))
-                            #print(new_col_variables[x][y])
-                            #new_col_variables[x][y] = domain_variable
+                            if not(new_col_variables[domain_variable][k] is domain_variable):
+                                changed = True
+                                print("**********************col var change***************************")
+                                print(domain_variable, "in", self.csp.col_variables[domain_variable], "cor", x, y)
+                                print(len(new_col_variables))
+                                new_col_variables[domain_variable][k] = y
+                                print("change", k, y)
+                                #print(len(new_col_variables[x]))
+                                #print(new_col_variables[x][y])
+                                #new_col_variables[x][y] = domain_variable
+                                nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
+                                line_children.append(nonogram)
 
                     if not changed:
                         print(domain_variable, "not in", self.csp.col_variables[x], "cor", x, y)
@@ -475,11 +481,22 @@ class Board:
                             for j in range(self.csp.height):
                                 if self.csp.cell_constraint_violated(i, j, new_row_variables, new_col_variables):
                                     print("------------violated----------")
-                                    #new_row_variables[j][i] =
+                                    #new_row_variables[j][i] = self.csp.row_variables[j][randint(0, len(self.csp.row_variables[j]) - 1)]
+                                    for p in range(len(self.csp.row_variables[j])):
+                                        if i in self.csp.row_variables[j][p]:
+                                            for variable in new_col_variables[i]:
+                                                if i is variable:
+                                                    new_row_variables[j][p] = variable
+
+                                                    # Do this only for best value?
+
+                                                    nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
+                                                    line_children.append(nonogram)
+                                        # Else if in cols
 
 
-                    nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
-                    line_children.append(nonogram)
+                    #nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
+                    #line_children.append(nonogram)
                     """else:
                         for i in range(self.csp.width):
                             for j in range(self.csp.height):
@@ -502,7 +519,7 @@ class Board:
 
 
                 if best_child:
-                    best_child.print_state(10)
+                    #best_child.print_state(10)
 
                     children.append(best_child)
                     print("Best change for", x, y, "with heristic", best_heuristic, "instead of", best_child.parent.h)
