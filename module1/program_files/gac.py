@@ -314,15 +314,15 @@ class Nonogram:
 
     def calculate_heuristic(self, row_variables, col_variables, row_functions, col_functions):
         cell_heuristic = self.calculate_cell_heuristics(row_variables, col_variables)
-        row_total_heuristic, row_axis_heuristics = self.calculate_line_heuristics(row_variables, row_functions)
-        col_total_heuristic, col_axis_heuristics = self.calculate_line_heuristics(col_variables, col_functions)
+        row_total_heuristic, row_axis_heuristics, row_violated_variables = self.calculate_line_heuristics(row_variables, row_functions)
+        col_total_heuristic, col_axis_heuristics, col_violated_variables = self.calculate_line_heuristics(col_variables, col_functions)
         row_total_heuristic = row_total_heuristic
         col_total_heuristic = col_total_heuristic
         print("cell h:", cell_heuristic)
         print("row h:", row_total_heuristic)
         print("col h:", col_total_heuristic)
         total_heuristic = cell_heuristic + col_total_heuristic + row_total_heuristic
-        return total_heuristic, row_axis_heuristics, col_axis_heuristics
+        return total_heuristic, row_axis_heuristics, col_axis_heuristics, row_violated_variables, col_violated_variables
 
     def calculate_cell_heuristics(self, row_variables, col_variables):
         cell_heuristic = 0
@@ -338,7 +338,9 @@ class Nonogram:
         # todo
         total_heuristic = 0
         axis_heuristics = []
+        violated_variables = []
         for con_functions, line_variables in zip(functions, variables):
+            violated_variable = []
             line_heuristic = 0
             for con_function in con_functions:
                 varnames = con_function.__code__.co_varnames
@@ -346,10 +348,14 @@ class Nonogram:
                 for i in range(len(varnames)):
                     parameters.append(line_variables[string.ascii_lowercase.index(varnames[i])])
                 if not con_function(*parameters):
+                    #print("violating variables in line", i, "is", *parameters)
+                    violated_variable.append(*parameters)
+
                     line_heuristic += 1
+            violated_variables.append(violated_variable)
             axis_heuristics.append(line_heuristic)
             total_heuristic += line_heuristic
-        return total_heuristic, axis_heuristics
+        return total_heuristic, axis_heuristics, violated_variables
 
 
 class Board:
@@ -359,7 +365,7 @@ class Board:
         self.row_variables = row_variables
         self.col_variables = col_variables
         self.g = g
-        self.h, self.row_axis_heuristics, self.col_variables_heuristics = self.csp.calculate_heuristic(self.row_variables, self.col_variables, csp.row_functions, csp.col_functions)
+        self.h, self.row_axis_heuristics, self.col_variables_heuristics, self.row_violated_variables, self.col_violated_variables = self.csp.calculate_heuristic(self.row_variables, self.col_variables, csp.row_functions, csp.col_functions)
         self.f = self.g + self.h
         self.children = []
         self.parent = parent
@@ -436,11 +442,18 @@ class Board:
                 return r
 
     def find_conflicting_cross_variable(self):
+        x = shuffle(list(range(self.csp.width)))
+        y = shuffle(list(range(self.csp.height)))
+
+        for i, j in zip(x, y):
+            if self.csp.cell_constraint_violated(i, j, self.row_variables, self.col_variables):
+                print("violating variable in", i, j)
+                pass
         return
 
     def expand_node(self):
         current = self
-        method = 0#randint(0, 3)
+        method = 2#randint(0, 3)
         print("************expand**********")
         if method == 0:
             conflict = self.find_conflicting_axis_variable(self.row_axis_heuristics)
@@ -452,6 +465,7 @@ class Board:
                 method = 2
         if method == 2:
             conflict = self.find_conflicting_cross_variable()
+
 
         # find min value for conflict
 
