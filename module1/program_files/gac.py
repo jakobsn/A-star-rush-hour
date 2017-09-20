@@ -458,7 +458,7 @@ class Board:
                     nonogram[j][i] += 2
 
 
-
+        """
         print("vars:")
         print("row", row_variables)
         print("col", col_variables)
@@ -466,7 +466,7 @@ class Board:
         print(nonogram)
 
         print("")
-
+        """
         return nonogram
 
     # Create empty matrix
@@ -480,13 +480,13 @@ class Board:
     def find_conflicting_axis_variable(self, axis_heuristics):
         r = list(range(len(axis_heuristics)))
         shuffle(r)
-        print(r)
+        #print(r)
         for i in r:
             s = list(range(len(axis_heuristics[i])))
             shuffle(s)
             for j in s:
                 if axis_heuristics[i][j]:
-                    print("found conflicting variable")
+                    #print("found conflicting variable")
                     return i, j
 
     def find_conflicting_cross_variable(self):
@@ -495,12 +495,12 @@ class Board:
         y = list(range(self.csp.height))
         shuffle(y)
 
-        print(x)
+        #print(x)
         for i in x:
             for j in y:
                 not_satisfied,  axis = self.csp.cell_constraint_violated(i, j, self.row_variables, self.col_variables, True)
                 if axis:
-                    print("violating variable in", i, j, "in", axis)
+                    #print("violating variable in", i, j, "in", axis)
                     return i, j, axis
         return
     """
@@ -536,12 +536,12 @@ class Board:
             for j in range(len(self.row_violated_variables)):
                 if x in self.row_violated_variables[y]:
                     cell_heuristic += 1
-                    print("row violation")
+                    #print("row violation")
         if (not axis or axis == "col"): #and y in self.col_violated_variables[x]:
             for i in range(len(self.col_violated_variables[x])):
                 if y in self.col_violated_variables[x][i]:
                     cell_heuristic += 1
-                    print("col violation")
+                    #print("col violation")
         return cell_heuristic
 
     def generate_min_successors(self, x, y, axis):
@@ -553,31 +553,17 @@ class Board:
         nonogram = None
         isolated_nonogram = None
         if axis == "row":
-            print(x, y)
-            print(self.csp.row_variables[y])
+            #print(x, y)
+            #print(self.csp.row_variables[y])
             for i in range(len(self.csp.row_variables[y])):
                 if x in self.csp.row_variables[y][i]:
-                    print("old cell h:", old_cell_heuristic)
-
+                    #print("old cell h:", old_cell_heuristic)
                     for variable in self.csp.row_variables[y][i]:
                         if variable is not x:
                             new_row_variables[y][i] = variable
-                            total_heuristic, row_axis_heuristics, col_axis_heuristics, row_violated_variables, col_violated_variables = self.csp.calculate_heuristic(new_row_variables, new_col_variables, self.csp.row_functions, self.csp.col_functions)
-                            cell_heuristic = self.calculate_isolated_cell_heuristic(variable, y, new_row_variables, new_col_variables, axis)
-                            print("cell h:", cell_heuristic)
+                            successors.append(Board(self.csp, new_row_variables, new_col_variables, self, 0))
+                            new_row_variables = cPickle.loads(cPickle.dumps(self.row_variables, -1))
 
-                            #sleep(3)
-                            if total_heuristic < best_h:
-                                best_h = total_heuristic
-                                print("child h:", total_heuristic)
-                                best_row_variables = cPickle.loads(cPickle.dumps(new_row_variables, -1))
-                                nonogram = Board(self.csp, best_row_variables, new_col_variables, self, 0)
-
-                            elif cell_heuristic < old_cell_heuristic:
-                                old_cell_heuristic = cell_heuristic
-                                print("child h:", total_heuristic)
-                                best_row_variables = cPickle.loads(cPickle.dumps(new_row_variables, -1))
-                                isolated_nonogram = Board(self.csp, best_row_variables, new_col_variables, self, 0)
 
         elif axis == "col":
             for j in range(len(self.csp.col_variables[x])):
@@ -585,27 +571,12 @@ class Board:
                     for variable in self.csp.col_variables[x][j]:
                         if variable is not y:
                             new_col_variables[x][j] = variable
-                            total_heuristic, row_axis_heuristics, col_axis_heuristics, row_violated_variables, col_violated_variables = self.csp.calculate_heuristic(new_row_variables, new_col_variables, self.csp.row_functions, self.csp.col_functions)
-                            cell_heuristic = self.calculate_isolated_cell_heuristic(x, variable, new_row_variables, new_col_variables, axis)
-                            if total_heuristic < best_h:
-                                best_h = total_heuristic
-                                print("child h:", total_heuristic)
-                                best_col_variables = cPickle.loads(cPickle.dumps(new_col_variables, -1))
-                                nonogram = Board(self.csp, new_row_variables, best_col_variables, self, 0)
+
+                            successors.append(Board(self.csp, new_row_variables, new_col_variables, self, 0))
+                            new_col_variables = cPickle.loads(cPickle.dumps(self.col_variables, -1))
 
 
-                            elif cell_heuristic < old_cell_heuristic:
-                                old_cell_heuristic = cell_heuristic
-                                print("child h:", total_heuristic)
-                                best_col_variables = cPickle.loads(cPickle.dumps(new_col_variables, -1))
-                                isolated_nonogram = Board(self.csp, new_row_variables, best_col_variables, self, 0)
-
-        if nonogram:
-            successors.append(nonogram)
-
-        if isolated_nonogram:
-            successors.append(isolated_nonogram)
-            #nonogram = Board(self.csp, new_row_variables, best_col_variables, self, 0)
+                            #nonogram = Board(self.csp, new_row_variables, best_col_variables, self, 0)
         #if not nonogram:
         #    self.print_state(10)
         #    return None
@@ -615,6 +586,18 @@ class Board:
     def most_conflicted_variable(self):
         most_conflicts = 0
 
+        for x in range(len(self.col_variables)):
+            for i in range(len(self.col_variables[x])):
+                col_conflicts = 0
+                for y in range(self.col_variables[x][i], self.col_variables[x][i] + self.csp.col_specs[x][i]):
+                    col_conflicts = self.csp.cell_constraint_violated(x, y, self.row_variables, self.col_variables)
+                if self.col_variables[x][i] in self.col_violated_variables[x]:
+                    col_conflicts += 1
+                if col_conflicts > most_conflicts:
+                    most_conflicts = col_conflicts
+                    conflict_x = x
+                    conflict_y = self.row_variables[x][i]
+                    axis = "col"
         #most_conflicted_row = None
         #most_conflicted_col = None
         for y in range(len(self.row_variables)):
@@ -623,7 +606,7 @@ class Board:
             for i in range(len(self.row_variables[y])):
                 row_conflicts = 0
                 for x in range(self.row_variables[y][i], self.row_variables[y][i] + self.csp.row_specs[y][i]):
-                    row_conflicts += self.csp.cell_constraint_violated(x, y, self.row_variables, self.col_variables)
+                    row_conflicts = self.csp.cell_constraint_violated(x, y, self.row_variables, self.col_variables)
                 # +1 conflict for every local constraint violated by the variable
                 if self.row_variables[y][i] in self.row_violated_variables[y]:
                     row_conflicts += 1
@@ -633,18 +616,6 @@ class Board:
                     conflict_y = y
                     axis = "row"
 
-        for x in range(len(self.col_variables)):
-            for i in range(len(self.col_variables[x])):
-                col_conflicts = 0
-                for y in range(self.col_variables[x][i], self.col_variables[x][i] + self.csp.col_specs[x][i]):
-                    col_conflicts += self.csp.cell_constraint_violated(x, y, self.row_variables, self.col_variables)
-                if self.col_variables[x][i] in self.col_violated_variables[x]:
-                    col_conflicts += 1
-                if col_conflicts > most_conflicts:
-                    most_conflicts = col_conflicts
-                    conflict_x = x
-                    conflict_y = self.row_variables[x][i]
-                    axis = "col"
 
         print("most conflicting variable", conflict_x, conflict_y, axis, "with", most_conflicts, "conflicts")
         #self.print_state(100)
@@ -660,8 +631,9 @@ class Board:
         axis = None
         current = self
         method = randint(0, 2)
-        print(method, "method")
+        #print(method, "method")
         conflict_x = 0
+        """
         if method == 0:
 
             #conflict_y, conflict_x = self.find_conflicting_axis_variable(self.row_violated_variables)
@@ -676,7 +648,7 @@ class Board:
         if method == 2:
             conflict_x, conflict_y, axis = self.find_conflicting_cross_variable()
         print("conflict", conflict_x, conflict_y, axis)
-
+        """
         #sleep(10)
         #self.print_state(2)
         # CHILDREN ARE THE SUCCESSORS OF THIS DOMAIN
@@ -684,7 +656,7 @@ class Board:
         print("most conflicting variable", conflict_x, conflict_y, axis)
 
         children = self.generate_min_successors(conflict_x, conflict_y, axis)
-        print(children, "children")
+        #print(children, "children")
         return children
 
 
