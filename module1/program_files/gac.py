@@ -21,9 +21,28 @@ import six.moves.cPickle as cPickle
 
 def main():
 
-    #ps = GAC("monograms/mono-cat.txt")
-    ps = GAC(None, "AStar", "monograms/mono-clover.txt", True, False, 1)
+    parser = argparse.ArgumentParser(description='Solve Rush Hour')
+    parser.add_argument('algorithm', type=str, help='Algorithm of choice (AStar, BFS or DFS)')
+    parser.add_argument('board', type=str, help='Board text file')
+    parser.add_argument('display_path', type=str2bool,
+                        help='True if you want to see the solution path',
+                        nargs='?')
+    parser.add_argument('display_agenda', type=str2bool,
+                        help='True if you want to see the entire process of the nodes expanded', nargs = '?')
+    parser.add_argument('display_time', type=float,
+                        help='Specify how many seconds to display each frame when in display mode', nargs = '?')
+    args = parser.parse_args()
+
+    # Solve specific problem
+    if args.display_time:
+        ps = GAC(None, args.algorithm, args.board, args.display_path, args.display_agenda, args.display_time)
+    else:
+        ps = GAC(None, args.algorithm, args.board, args.display_path, args.display_agenda)
     ps.solve_problem()
+
+    #ps = GAC("monograms/mono-cat.txt")
+    #ps = GAC(None, "AStar", "monograms/mono-clover.txt", True, False, 1)
+    #ps.solve_problem()
     #ps = RushHour(args.algorithm, args.board, args.display_path, args.display_agenda, args.display_time)
 
     """
@@ -36,6 +55,14 @@ def main():
     # Solve specific problem
     ps = ProblemSolver(args.nonogram)
     ps.solve_problem()"""
+# Returns string input as boolean
+def str2bool(v):
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 
 class GAC(GenSearch):
