@@ -361,8 +361,7 @@ class Nonogram:
                 if not con_function(*parameters):
                     #print("violating variables in line", i, "is", *parameters)
                     line_heuristic += 1
-
-                violated_variable.append(parameters)
+                    violated_variable.append(parameters)
 
             violated_variables.append(violated_variable)
             axis_heuristics.append(line_heuristic)
@@ -579,6 +578,23 @@ class Board:
 
         return successors
 
+    def most_conflicted_variable(self):
+        most_conflicts = 0
+        """
+        for x in range(self.csp.width):
+            for y in range(self.csp.height):
+                conflicts,  axis = self.csp.cell_constraint_violated(x, y, self.row_variables, self.col_variables, True)
+        """
+        most_conflicted_row = None
+        #most_conflicted_col =
+        for y in range(len(self.row_variables)):
+            # Find most conflicting variable
+            # +1 conflict for every part of segment that violates a cell constraint
+            # +1 conflict for every local constraint violated bt the constraint
+
+
+        return x, y, axis
+
     def expand_node(self):
 
         print("***********************EXPAND*********************")
@@ -588,13 +604,15 @@ class Board:
         current = self
         method = randint(0, 2)
         print(method, "method")
+        conflict_x = 0
         if method == 0:
-            conflict_y, conflict_x = self.find_conflicting_axis_variable(self.row_violated_variables)
+
+            #conflict_y, conflict_x = self.find_conflicting_axis_variable(self.row_violated_variables)
             axis = "row"
             if not conflict_x:
                 method = randint(1, 2)
         if method == 1:
-            conflict_x, conflict_y = self.find_conflicting_axis_variable(self.col_violated_variables)
+            #conflict_x, conflict_y = self.find_conflicting_axis_variable(self.col_violated_variables)
             axis = "col"
             if not conflict_x:
                 method = 2
@@ -605,8 +623,10 @@ class Board:
         #sleep(10)
 
         # CHILDREN ARE THE SUCCESSORS OF THIS DOMAIN
+        #conflict_x, conflict_y, axis = self.most_conflicted_variable()
 
         children = self.generate_min_successors(conflict_x, conflict_y, axis)
+        print(children, "children")
         return children
 
 
