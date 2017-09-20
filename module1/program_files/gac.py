@@ -22,7 +22,7 @@ import six.moves.cPickle as cPickle
 def main():
 
     #ps = GAC("monograms/mono-cat.txt")
-    ps = GAC(None, "AStar", "monograms/mono-cat.txt", True, True, 1)
+    ps = GAC(None, "AStar", "monograms/mono-cat.txt", True, False, 1)
     ps.solve_problem()
     #ps = RushHour(args.algorithm, args.board, args.display_path, args.display_agenda, args.display_time)
 
@@ -630,32 +630,46 @@ class Board:
         children = []
         axis = None
         current = self
-        method = randint(0, 2)
+        method = randint(0, 3)
         #print(method, "method")
         conflict_x = 0
-        """
-        if method == 0:
 
-            #conflict_y, conflict_x = self.find_conflicting_axis_variable(self.row_violated_variables)
-            axis = "row"
-            if not conflict_x:
-                method = randint(1, 2)
-        if method == 1:
-            #conflict_x, conflict_y = self.find_conflicting_axis_variable(self.col_violated_variables)
-            axis = "col"
-            if not conflict_x:
-                method = 2
-        if method == 2:
-            conflict_x, conflict_y, axis = self.find_conflicting_cross_variable()
+        #if method == 0:
+        print(type(self.col_violated_variables))
+        for value in self.row_violated_variables:
+            if value:
+                conflict_y, conflict_x = self.find_conflicting_axis_variable(self.row_violated_variables)
+                axis = "row"
+                break
+            #if not conflict_x:
+                #method = randint(1, 3)
+        #if method == 1:
+        for value in self.col_violated_variables:
+            if value:
+                conflict_x, conflict_y = self.find_conflicting_axis_variable(self.col_violated_variables)
+                axis = "col"
+                children += self.generate_min_successors(conflict_x, conflict_y, axis)
+                break
+            #if not conflict_x:
+            #    method = randint(2, 3)
+        #if method == 2:
+        conflict_x, conflict_y, axis = self.find_conflicting_cross_variable()
+        if conflict_x:
+            children += self.generate_min_successors(conflict_x, conflict_y, axis)
+                #method = 3
+        #if method == 3:
+        conflict_x, conflict_y, axis = self.most_conflicted_variable()
+        if conflict_x:
+            children += self.generate_min_successors(conflict_x, conflict_y, axis)
+
         print("conflict", conflict_x, conflict_y, axis)
-        """
+
         #sleep(10)
         #self.print_state(2)
         # CHILDREN ARE THE SUCCESSORS OF THIS DOMAIN
-        conflict_x, conflict_y, axis = self.most_conflicted_variable()
-        print("most conflicting variable", conflict_x, conflict_y, axis)
+        #
+        #print("most conflicting variable", conflict_x, conflict_y, axis)
 
-        children = self.generate_min_successors(conflict_x, conflict_y, axis)
         #print(children, "children")
         return children
 
@@ -664,9 +678,7 @@ class Board:
 
 
         """
-        if min_succ:
-            print(min_succ.h)
-            #sleep(3)
+
 
         for line_domains, y in zip(self.csp.row_variables, range(len(self.csp.row_variables))):
             # Dette blir feeeeil
