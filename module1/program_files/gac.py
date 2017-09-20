@@ -236,6 +236,7 @@ class Nonogram:
 
         exists_in_row = False
         exists_in_col = False
+        axis = None
 
         for i in range(len(row_variables[y])):
             for j in range(row_variables[y][i], row_variables[y][i] + self.row_specs[y][i]):
@@ -246,11 +247,6 @@ class Nonogram:
                 break
 
         for i in range(len(col_variables[x])):
-            value = col_variables[x][i]
-            print(col_variables)
-            print(self.col_specs)
-            print(x, i)
-            spec = self.col_specs[x][i]
             for j in range(col_variables[x][i], col_variables[x][i] + self.col_specs[x][i]):
                 if j is y:
                     exists_in_col = True
@@ -258,6 +254,19 @@ class Nonogram:
             if exists_in_col:
                 break
 
+        if exists_in_row and not exists_in_col:
+            axis = "row"
+            not_satisfied = 1
+        elif not exists_in_row and exists_in_col:
+            axis = "col"
+            not_satisfied = 1
+
+        if include_axis:
+            return not_satisfied, axis
+        else:
+            return not_satisfied
+
+        """
         if x in row_variables[y]:
             if y not in col_variables[x]:
                 if not include_axis:
@@ -275,7 +284,7 @@ class Nonogram:
         else:
             return not_satisfied, None
 
-
+        """
     """
     # Guess nonogram shape
     def create_nonogram(self):
@@ -607,20 +616,25 @@ class Board:
         most_conflicts = 0
 
         most_conflicted_row = None
-        #most_conflicted_col =
+        #most_conflicted_col = None
         for y in range(len(self.row_variables)):
-            row_conflicts = 0
             # Find most conflicting variable
             # +1 conflict for every part of segment that violates a cell constraint
             for i in range(len(self.row_variables[y])):
+                row_conflicts = 0
                 for x in range(self.row_variables[y][i], self.row_variables[y][i] + self.csp.row_specs[y][i]):
                     row_conflicts += self.csp.cell_constraint_violated(x, y, self.row_variables, self.col_variables)
-        #self.print_state(9)
-            # +1 conflict for every local constraint violated by the variable
-
-
-
-        return x, y, None#, axis
+                # +1 conflict for every local constraint violated by the variable
+                if self.row_variables[y][i] in self.row_violated_variables[y]:
+                    row_conflicts += 1
+                if row_conflicts > most_conflicts:
+                    most_conflicts = row_conflicts
+                    conflict_x = self.row_variables[y][i]
+                    conflict_y = y
+                    axis = "row"
+        print("most conflictig variable", conflict_x, conflict_y, axis, "whith", most_conflicts, "conflicts")
+        self.print_state(100)
+        return x, y, axis
 
     def expand_node(self):
 
@@ -648,9 +662,9 @@ class Board:
         print("conflict", conflict_x, conflict_y, axis)
 
         #sleep(10)
-
+        #self.print_state(2)
         # CHILDREN ARE THE SUCCESSORS OF THIS DOMAIN
-        #conflict_x, conflict_y, axis = self.most_conflicted_variable()
+        self.most_conflicted_variable()
 
         children = self.generate_min_successors(conflict_x, conflict_y, axis)
         print(children, "children")
