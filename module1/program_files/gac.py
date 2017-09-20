@@ -615,7 +615,7 @@ class Board:
     def most_conflicted_variable(self):
         most_conflicts = 0
 
-        most_conflicted_row = None
+        #most_conflicted_row = None
         #most_conflicted_col = None
         for y in range(len(self.row_variables)):
             # Find most conflicting variable
@@ -632,9 +632,25 @@ class Board:
                     conflict_x = self.row_variables[y][i]
                     conflict_y = y
                     axis = "row"
-        print("most conflictig variable", conflict_x, conflict_y, axis, "whith", most_conflicts, "conflicts")
-        self.print_state(100)
-        return x, y, axis
+
+        for x in range(len(self.col_variables)):
+            for i in range(len(self.col_variables[x])):
+                col_conflicts = 0
+                for y in range(self.col_variables[x][i], self.col_variables[x][i] + self.csp.col_specs[x][i]):
+                    col_conflicts += self.csp.cell_constraint_violated(x, y, self.row_variables, self.col_variables)
+                if self.col_variables[x][i] in self.col_violated_variables[x]:
+                    col_conflicts += 1
+                if col_conflicts > most_conflicts:
+                    most_conflicts = col_conflicts
+                    conflict_x = x
+                    conflict_y = self.row_variables[x][i]
+                    axis = "col"
+
+        print("most conflicting variable", conflict_x, conflict_y, axis, "with", most_conflicts, "conflicts")
+        #self.print_state(100)
+
+
+        return conflict_x, conflict_y, axis
 
     def expand_node(self):
 
@@ -664,7 +680,8 @@ class Board:
         #sleep(10)
         #self.print_state(2)
         # CHILDREN ARE THE SUCCESSORS OF THIS DOMAIN
-        self.most_conflicted_variable()
+        conflict_x, conflict_y, axis = self.most_conflicted_variable()
+        print("most conflicting variable", conflict_x, conflict_y, axis)
 
         children = self.generate_min_successors(conflict_x, conflict_y, axis)
         print(children, "children")
