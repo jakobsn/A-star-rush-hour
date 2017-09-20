@@ -233,6 +233,31 @@ class Nonogram:
     def cell_constraint_violated(self, x, y, row_variables, col_variables, include_axis=False):
         not_satisfied = 0
         axis_violated = None
+
+        exists_in_row = False
+        exists_in_col = False
+
+        for i in range(len(row_variables[y])):
+            for j in range(row_variables[y][i], row_variables[y][i] + self.row_specs[y][i]):
+                if j is x:
+                    exists_in_row = True
+                    break
+            if exists_in_row:
+                break
+
+        for i in range(len(col_variables[x])):
+            value = col_variables[x][i]
+            print(col_variables)
+            print(self.col_specs)
+            print(x, i)
+            spec = self.col_specs[x][i]
+            for j in range(col_variables[x][i], col_variables[x][i] + self.col_specs[x][i]):
+                if j is y:
+                    exists_in_col = True
+                    break
+            if exists_in_col:
+                break
+
         if x in row_variables[y]:
             if y not in col_variables[x]:
                 if not include_axis:
@@ -556,7 +581,7 @@ class Board:
                             if total_heuristic < best_h:
                                 best_h = total_heuristic
                                 print("child h:", total_heuristic)
-                                best_col_variables = cPickle.loads(cPickle.dumps(new_row_variables, -1))
+                                best_col_variables = cPickle.loads(cPickle.dumps(new_col_variables, -1))
                                 nonogram = Board(self.csp, new_row_variables, best_col_variables, self, 0)
 
 
@@ -595,7 +620,7 @@ class Board:
 
 
 
-        return x, y#, axis
+        return x, y, None#, axis
 
     def expand_node(self):
 
@@ -625,7 +650,7 @@ class Board:
         #sleep(10)
 
         # CHILDREN ARE THE SUCCESSORS OF THIS DOMAIN
-        conflict_x, conflict_y, axis = self.most_conflicted_variable()
+        #conflict_x, conflict_y, axis = self.most_conflicted_variable()
 
         children = self.generate_min_successors(conflict_x, conflict_y, axis)
         print(children, "children")
