@@ -516,8 +516,9 @@ class Board:
         successors = []
         new_row_variables = cPickle.loads(cPickle.dumps(self.row_variables, -1))
         new_col_variables = cPickle.loads(cPickle.dumps(self.col_variables, -1))
-        old_cell_heuristic = self.calculate_isolated_cell_heuristic(x, y, new_row_variables, new_col_variables)
-        #nonogram = None
+        old_cell_heuristic = self.calculate_isolated_cell_heuristic(x, y, new_row_variables, new_col_variables, axis)
+        nonogram = None
+        isolated_nonogram = None
         if axis == "row":
             print(x, y)
             print(self.csp.row_variables[y])
@@ -529,7 +530,7 @@ class Board:
                         if variable is not x:
                             new_row_variables[y][i] = variable
                             total_heuristic, row_axis_heuristics, col_axis_heuristics, row_violated_variables, col_violated_variables = self.csp.calculate_heuristic(new_row_variables, new_col_variables, self.csp.row_functions, self.csp.col_functions)
-                            cell_heuristic = self.calculate_isolated_cell_heuristic(variable, y, new_row_variables, new_col_variables)
+                            cell_heuristic = self.calculate_isolated_cell_heuristic(variable, y, new_row_variables, new_col_variables, axis)
                             print("cell h:", cell_heuristic)
 
                             #sleep(3)
@@ -538,15 +539,12 @@ class Board:
                                 print("child h:", total_heuristic)
                                 best_row_variables = cPickle.loads(cPickle.dumps(new_row_variables, -1))
                                 nonogram = Board(self.csp, best_row_variables, new_col_variables, self, 0)
-                                successors.append(nonogram)
 
                             elif cell_heuristic < old_cell_heuristic:
                                 old_cell_heuristic = cell_heuristic
                                 print("child h:", total_heuristic)
                                 best_row_variables = cPickle.loads(cPickle.dumps(new_row_variables, -1))
-                                nonogram = Board(self.csp, best_row_variables, new_col_variables, self, 0)
-                                successors.append(nonogram)
-
+                                isolated_nonogram = Board(self.csp, best_row_variables, new_col_variables, self, 0)
 
         elif axis == "col":
             for j in range(len(self.csp.col_variables[x])):
@@ -555,22 +553,25 @@ class Board:
                         if variable is not y:
                             new_col_variables[x][j] = variable
                             total_heuristic, row_axis_heuristics, col_axis_heuristics, row_violated_variables, col_violated_variables = self.csp.calculate_heuristic(new_row_variables, new_col_variables, self.csp.row_functions, self.csp.col_functions)
-                            cell_heuristic = self.calculate_isolated_cell_heuristic(x, variable, new_row_variables, new_col_variables)
+                            cell_heuristic = self.calculate_isolated_cell_heuristic(x, variable, new_row_variables, new_col_variables, axis)
                             if total_heuristic < best_h:
                                 best_h = total_heuristic
                                 print("child h:", total_heuristic)
                                 best_col_variables = cPickle.loads(cPickle.dumps(new_row_variables, -1))
                                 nonogram = Board(self.csp, new_row_variables, best_col_variables, self, 0)
 
-                                successors.append(nonogram)
 
                             elif cell_heuristic < old_cell_heuristic:
                                 old_cell_heuristic = cell_heuristic
                                 print("child h:", total_heuristic)
                                 best_col_variables = cPickle.loads(cPickle.dumps(new_col_variables, -1))
-                                nonogram = Board(self.csp, new_row_variables, best_col_variables, self, 0)
-                                successors.append(nonogram)
+                                isolated_nonogram = Board(self.csp, new_row_variables, best_col_variables, self, 0)
 
+        if nonogram:
+            successors.append(nonogram)
+
+        if isolated_nonogram:
+            successors.append(isolated_nonogram)
             #nonogram = Board(self.csp, new_row_variables, best_col_variables, self, 0)
         #if not nonogram:
         #    self.print_state(10)
