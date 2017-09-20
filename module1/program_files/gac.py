@@ -18,12 +18,13 @@ from time import sleep
 import string
 from random import randint, shuffle
 import six.moves.cPickle as cPickle
+from copy import deepcopy
 
 def main():
 
     #ps = GAC("monograms/mono-cat.txt")
     ps = GAC(None, "AStar", "monograms/mono-clover.txt", True, False, 1)
-    ps.solve_problem()
+    ps.backtrack(ps.nonogram)
     #ps = RushHour(args.algorithm, args.board, args.display_path, args.display_agenda, args.display_time)
 
     """
@@ -43,34 +44,108 @@ class GAC(GenSearch):
     def __init__(self, initial_node, algorithm, board_file, show_solution=False, show_process=False, display_time=0.5):
         self.board_file = board_file
         self.nonogram = Nonogram(board_file)
-        self.initial_node = self.nonogram.nonogram
+        #self.initial_node = self.nonogram.nonogram
         self.algorithm = algorithm
         self.show_process = show_process
         self.show_solution = show_solution
         self.display_time = display_time
+        self.row_functions = self.nonogram.create_constraint_functions(self.nonogram.row_variables, self.nonogram.row_constraints)
+        self.col_functions = self.nonogram.create_constraint_functions(self.nonogram.col_variables, self.nonogram.col_constraints)
 
 #    def solve_problem(self):
 #        #TODO
 #        gen
 #        pass
 
+    def backtrack(self, nonogram):
+        if self.is_solution(nonogram):
+            return nonogram
+        i, j, axis = self.select_unnassigned_variable(nonogram)
+        print(i, j, axis)
+        if axis == "col":
+            domain = nonogram.col_variables[i][j]
+        elif axis == "row":
+            domain = nonogram.row_variables[i][j]
+
+        for value in domain:
+            new_nonogram = cPickle.loads(cPickle.dumps(self.nonogram, -1))
+
+            if axis == "col":
+                new_nonogram.col_variables[i][j] = value
+            elif axis == "row":
+                new_nonogram.row_variables[i][j] = value
+
+            arcs = self.get_all_neighboring_arcs(i, j, axis)
+            #inferences = self.inference(new_nonogram, self.get_all_neighboring_arcs(i, j, axis))
+            print(self.cell_constraint_satisfied(i, j, axis, new_nonogram))
+            print("")
+
+    def get_all_neighboring_arcs(self, i, j, axis):
+        arcs = []
+        if axis == "row":
+            if len(self.nonogram.row_constraints[i]) > j:
+                arcs.append(self.row_functions[i][j])
+            if j - 1 >= 0:
+                arcs.append(self.row_functions[i][j-1])
+            arcs.append(self.cell_constraint_satisfied)
+
+        if axis == "col":
+            if len(self.nonogram.col_constraints[i]) > j:
+                arcs.append(self.col_functions[i][j])
+            if j - 1 >= 0:
+                arcs.append(self.col_functions[i][j-1])
+            arcs.append(self.cell_constraint_satisfied)
+        return arcs
+
+    def cell_constraint_satisfied(self, i, j, axis, nonogram):
+        if axis == "row":
+            for row_value in range(nonogram.row_variables[i][j], nonogram.row_variables[i][j] + nonogram.row_specs[i][j]):
+                for k in range(len(nonogram.col_variables[row_value])):
+                    for variable in nonogram.col_variables[row_value][k]:
+                        for l in range(variable, nonogram.col_specs[row_value][k]):
+                            if k == l:
+                                return True
+
+        if axis == "col":
+            for col_value in range(nonogram.col_variables[i][j], nonogram.col_variables[i][j] + nonogram.col_specs[i][j]):
+                for k in range(len(nonogram.row_variables[col_value])):
+                    for variable in nonogram.row_variables[col_value][k]:
+                        for l in range(variable, nonogram.row_specs[col_value][k]):
+                            if k == l:
+                                return True
+
+        return False
+
+    def select_unnassigned_variable(self, nonogram):
+        for i in range(len(nonogram.row_variables)):
+            for j in range(len(nonogram.row_variables[i])):
+                if len(nonogram.row_variables[i][j]) > 1:
+                    return i, j, "row"
+        for i in range(len(nonogram.col_variables)):
+            for j in range(len(nonogram.col_variables[i])):
+                if len(nonogram.col_variables[i][j]) > 1:
+                    return i, j, "col"
 
     def list_contains_board(self, array, board):
         #TODO
         if not len(array):
-            #print("============================= FALSE ===============================")
             return False
         for j in range(len(array)):
             if array[j].col_variables is board.col_variables and array[j].row_variables is board.row_variables:
-                #print("============================= TRUE ===============================")
                 return j
-        #print("============================= FALSE ===============================")
         return False
 
     def is_solution(self, node):
-        return not node.h
-        #TODO
-        pass
+        for row in node.row_variables:
+            for domain in row:
+                if len(domain) is not 1:
+                    return False
+        for col in node.col_variables:
+            for domain in col:
+                if len(domain) is not 1:
+                    return False
+
+        return True
 
     def min_conflicts(self, csp):
         #TODO
@@ -97,66 +172,13 @@ class Nonogram:
         self.dimensions = self.lines[0].split(" ")
         self.width = int(self.dimensions[0])
         self.height = int(self.dimensions[1])
-        print("WH", self.width, self.height)
         self.row_specs, self.col_specs = self.store_specs(self.lines[1:])
-        # Lists containing all the possible states of all rows and columns
         self.row_variables, self.row_constraints = self.store_segments(self.row_specs, self.width)
         self.col_variables, self.col_constraints = self.store_segments(self.col_specs, self.height)
-        self.row_functions = self.create_constraint_functions(self.row_variables, self.row_constraints)
-        self.col_functions = self.create_constraint_functions(self.col_variables, self.col_constraints)
 
-        new_row_vars, new_col_vars = self.create_nonogram(self.row_specs, self.row_variables, self.col_specs, self.col_variables, [self.width, self.height])
-        self.nonogram = Board(self, new_row_vars, new_col_vars, None, 0)
-        #self.nonogram.print_state(10)
+        #new_row_vars, new_col_vars = self.create_nonogram(self.row_specs, self.row_variables, self.col_specs, self.col_variables, [self.width, self.height])
+        #self.nonogram = Board(self, new_row_vars, new_col_vars, None, 0)
 
-        for variable, constraint in zip(self.row_variables, self.row_constraints):
-            print("row:", variable, constraint)
-
-        print("")
-
-        for variable, constraint in zip(self.col_variables, self.col_constraints):
-            print("col:", variable, constraint)
-
-        print("")
-
-
-
-        #self.calculate_heuristic(new_row_vars, new_col_vars, self.row_functions, self.col_functions)
-
-        #self.nonogram.expand_node()
-
-        #self.nonogram.print_state(100)
-
-    """
-    def expand_node(self, row_variables, col_variables):
-        #TODO
-        children = []
-        # maybe need to copy?
-        best_heuristic = 99999999999999999999999
-        #Traverse through every possible change and create children that has min conflicts in its domain
-        print("parent row vars", row_variables)
-        print("parent col vars", col_variables)
-        new_row_variables = row_variables
-        new_col_variables = col_variables
-
-        for line_variables, line_domains, y in zip(self.row_variables, self.row_variables, range(len(row_variables))):
-            for domain, x in zip(line_domains, range(len(line_variables))):
-                for domain_variable in domain:
-                    if not(row_variables[y][x] is domain_variable):
-                        print("Change", x, y, "from", row_variables[y][x], "to", domain_variable)
-                        new_row_variables[y][x] = domain_variable
-                        if domain_variable in self.col_variables[x]:
-                            new_col_variables[x][y] = domain_variable
-                    else:
-                        print("var", row_variables[y][x], "not in", domain)
-                        print(type(row_variables[y][x]), type(domain[0]))
-                    print("child row vars", row_variables)
-                    print("child col vars", col_variables)
-                    nonogram = Board(self, new_row_variables, new_col_variables, None, 0)
-                    #nonogram.print_state(0)
-                    children.append(nonogram)
-        return children
-    """
     # Guess nonogram shape. Picks the value of each variable to be the first in the domain
     def create_nonogram(self, row_specs, row_variables, col_specs, col_variables, dimensions):
         new_row_variables = []
@@ -179,23 +201,13 @@ class Nonogram:
 
     # Return all segments of one axis
     def store_segments(self, specs, segment_length):
-        #segments = []
         variables = []
         constraints = []
         for segment in specs:
-            #segments.append(self.store_segments(segment, segment_length))
             variables.append(self.store_segment_variables(segment, segment_length))
             constraints.append(self.store_segment_constraints(segment))
         return variables, constraints
 
-    """
-    # Return segments of one line with variables and local constraints
-    def store_segments(self, segment, segment_length):
-        #todo
-        variables = self.store_segment_variables(segment, segment_length)
-        constraints = self.store_segment_constraints(segment)
-        return variables, constraints
-    """
     # Return vars with domains for a segment
     def store_segment_variables(self, segment, segment_length):
         #todo?
@@ -232,8 +244,6 @@ class Nonogram:
     # Global cell constraint
     def cell_constraint_violated(self, x, y, row_variables, col_variables, include_axis=False):
         not_satisfied = 0
-        axis_violated = None
-
         exists_in_row = False
         exists_in_col = False
         axis = None
@@ -266,54 +276,6 @@ class Nonogram:
         else:
             return not_satisfied
 
-        """
-        if x in row_variables[y]:
-            if y not in col_variables[x]:
-                if not include_axis:
-                    return 1
-                else:
-                    return 1, "row"
-        if y in col_variables[x]:
-            if x not in row_variables[y]:
-                if not include_axis:
-                    return 1
-                else:
-                    return 1, "col"
-        if not include_axis:
-            return not_satisfied
-        else:
-            return not_satisfied, None
-
-        """
-    """
-    # Guess nonogram shape
-    def create_nonogram(self):
-        # todo:
-
-        row_cons = []
-        column_cons = []
-        print(nonogram)
-        # Every row spec
-        for i in range(1, height+1):
-            print(lines[i])
-            # Every value in each row spec
-            row_con = []
-            for j in range(0, len(lines[i]), 2):
-                #print(lines[i][j])
-                row_con.append(lines[i][j])
-                for k in range(int(lines[i][j])):
-                    nonogram[height - i][k] = 1
-            row_cons.append(row_con)
-        # Every column spec
-        for i in range(height + 1, width + 1):
-            pass
-
-#                print(char)
-        print("rows", row_cons)
-        print(nonogram)
-        return nonogram, row_cons#, column
-    """
-
     def create_constraint_functions(self, variables, constraints):
         constraint_functions = []
         for line_variables, line_constraints in zip(variables, constraints):
@@ -331,16 +293,12 @@ class Nonogram:
                 args += ","
         args = args[:-1]
         #TODO
-        print("args", args)
-        print("constraint", constraint)
         return eval("(lambda " + args + ": " + constraint + ")", envir)
 
     # Create both lists of constraints
     def store_specs(self, lines):
         row_constraints = self.store_spec(lines[:self.height])
         col_constraints = self.store_spec(lines[self.height:])
-        print("row_cons", row_constraints)
-        print("col_cons", col_constraints)
         return row_constraints, col_constraints
 
     # Create a list of constraints
@@ -363,9 +321,6 @@ class Nonogram:
         col_total_heuristic, col_axis_heuristics, col_violated_variables = self.calculate_line_heuristics(col_variables, col_functions)
         row_total_heuristic = row_total_heuristic
         col_total_heuristic = col_total_heuristic
-        print("cell h:", cell_heuristic)
-        print("row h:", row_total_heuristic)
-        print("col h:", col_total_heuristic)
         total_heuristic = cell_heuristic + col_total_heuristic + row_total_heuristic
         return total_heuristic, row_axis_heuristics, col_axis_heuristics, row_violated_variables, col_violated_variables
 
@@ -373,14 +328,10 @@ class Nonogram:
         cell_heuristic = 0
         for x in range(len(col_variables)):
             for y in range(len(row_variables)):
-                #print(w, h, ":", self.cell_constraint_violated(w, h, new_row_vars, new_col_vars))
-
                 cell_heuristic += self.cell_constraint_violated(x, y, row_variables, col_variables)
-        print("cell heuristic", cell_heuristic)
         return cell_heuristic
 
     def calculate_line_heuristics(self, variables, functions):
-        # todo
         total_heuristic = 0
         axis_heuristics = []
         violated_variables = []
@@ -393,7 +344,6 @@ class Nonogram:
                 for i in range(len(varnames)):
                     parameters.append(line_variables[string.ascii_lowercase.index(varnames[i])])
                 if not con_function(*parameters):
-                    #print("violating variables in line", i, "is", *parameters)
                     line_heuristic += 1
                     violated_variable.append(parameters)
 
@@ -434,10 +384,6 @@ class Board:
         sleep(sleep_time)
         plt.close()
 
-#    def expand_node(self):
-#        print("vars:", self.row_variables, self.col_variables)
-#        return self.csp.expand_node(self.row_variables, self.col_variables)
-
     # Guess nonogram shape. Picks the value of each variable to be the first in the domain
     def create_colormap(self, row_specs, row_variables, col_specs, col_variables, dimensions):
         if row_variables == self.csp.row_variables:
@@ -457,16 +403,6 @@ class Board:
                 for j in range(variable, variable + spec):
                     nonogram[j][i] += 2
 
-
-        """
-        print("vars:")
-        print("row", row_variables)
-        print("col", col_variables)
-        print("colormap")
-        print(nonogram)
-
-        print("")
-        """
         return nonogram
 
     # Create empty matrix
@@ -497,41 +433,12 @@ class Board:
         shuffle(x)
         y = list(range(self.csp.height))
         shuffle(y)
-
-        #print(x)
         for i in x:
             for j in y:
                 not_satisfied,  axis = self.csp.cell_constraint_violated(i, j, self.row_variables, self.col_variables, True)
                 if axis:
-                    #print("violating variable in", i, j, "in", axis)
                     return i, j, axis
         return
-    """
-    def expand_node(self):
-        current = self
-        method = 2#randint(0, 3)
-        print("************expand**********")
-        if method == 0:
-            conflict = self.find_conflicting_axis_variable(self.row_axis_heuristics)
-            if not conflict:
-                method = randint(1, 3)
-        if method == 1:
-            conflict = self.find_conflicting_axis_variable(self.col_variables_heuristics)
-            if not conflict:
-                method = 2
-        if method == 2:
-            conflict_x, conflict_y = self.find_conflicting_cross_variable()
-            print("conflict", conflict_x, conflict_y)
-
-
-        # find min value for conflict
-
-
-        # Choose random conflicted variable
-        # Choose value for variable that minimizes the conflicts of the variable
-        # Create child with new value for conflicted variable
-
-    """
 
     def calculate_isolated_cell_heuristic(self, x, y, row_variables, col_variables, axis=None):
         cell_heuristic = self.csp.cell_constraint_violated(x, y, row_variables, col_variables)
@@ -552,21 +459,16 @@ class Board:
         successors = []
         new_row_variables = cPickle.loads(cPickle.dumps(self.row_variables, -1))
         new_col_variables = cPickle.loads(cPickle.dumps(self.col_variables, -1))
-        #old_cell_heuristic = self.calculate_isolated_cell_heuristic(x, y, new_row_variables, new_col_variables, axis)
         nonogram = None
         isolated_nonogram = None
         if axis == "row":
-            #print(x, y)
-            #print(self.csp.row_variables[y])
             for i in range(len(self.csp.row_variables[y])):
                 if x in self.csp.row_variables[y][i]:
-                    #print("old cell h:", old_cell_heuristic)
                     for variable in self.csp.row_variables[y][i]:
                         if variable is not x:
                             new_row_variables[y][i] = variable
                             successors.append(Board(self.csp, new_row_variables, new_col_variables, self, 0))
                             new_row_variables = cPickle.loads(cPickle.dumps(self.row_variables, -1))
-
 
         elif axis == "col":
             for j in range(len(self.csp.col_variables[x])):
@@ -577,9 +479,6 @@ class Board:
 
                             successors.append(Board(self.csp, new_row_variables, new_col_variables, self, 0))
                             new_col_variables = cPickle.loads(cPickle.dumps(self.col_variables, -1))
-
-
-                            #nonogram = Board(self.csp, new_row_variables, best_col_variables, self, 0)
         #if not nonogram:
         #    self.print_state(10)
         #    return None
@@ -601,8 +500,6 @@ class Board:
                     conflict_x = x
                     conflict_y = self.row_variables[x][i]
                     axis = "col"
-        #most_conflicted_row = None
-        #most_conflicted_col = None
         for y in range(len(self.row_variables)):
             # Find most conflicting variable
             # +1 conflict for every part of segment that violates a cell constraint
@@ -618,26 +515,16 @@ class Board:
                     conflict_x = self.row_variables[y][i]
                     conflict_y = y
                     axis = "row"
-
-
         print("most conflicting variable", conflict_x, conflict_y, axis, "with", most_conflicts, "conflicts")
-        #self.print_state(100)
-
 
         return conflict_x, conflict_y, axis
 
     def expand_node(self):
 
         print("***********************EXPAND*********************")
-        #TODO
         children = []
-        axis = None
-        current = self
-        method = randint(0, 3)
-        #print(method, "method")
         conflict_x = 0
 
-        #if method == 0:
         print(type(self.col_violated_variables))
         for value in self.row_violated_variables:
             if value:
@@ -646,9 +533,7 @@ class Board:
                 for conflict in conflicts:
                     children += self.generate_min_successors(conflict[0], conflict[1], axis)
                 break
-            #if not conflict_x:
-                #method = randint(1, 3)
-        #if method == 1:
+
         for value in self.col_violated_variables:
             if value:
                 conflicts = self.find_conflicting_axis_variable(self.col_violated_variables)
@@ -656,128 +541,18 @@ class Board:
                 for conflict in conflicts:
                     children += self.generate_min_successors(conflict[0], conflict[1], axis)
                 break
-            #if not conflict_x:
-            #    method = randint(2, 3)
-        #if method == 2:
+
         conflict_x, conflict_y, axis = self.find_conflicting_cross_variable()
         if conflict_x:
             children += self.generate_min_successors(conflict_x, conflict_y, axis)
-                #method = 3
-        #if method == 3:
+
         conflict_x, conflict_y, axis = self.most_conflicted_variable()
         if conflict_x:
             children += self.generate_min_successors(conflict_x, conflict_y, axis)
 
-        print("conflict", conflict_x, conflict_y, axis)
 
-        #sleep(10)
-        #self.print_state(2)
-        # CHILDREN ARE THE SUCCESSORS OF THIS DOMAIN
-        #
-        #print("most conflicting variable", conflict_x, conflict_y, axis)
-
-        #print(children, "children")
-        for child in children:
-            if child.h < 57:
-                child.print_state(0.1)
         return children
 
-
-
-
-
-        """
-
-
-        for line_domains, y in zip(self.csp.row_variables, range(len(self.csp.row_variables))):
-            # Dette blir feeeeil
-            for domain, x in zip(line_domains, range(len(line_domains))):
-                line_children = []
-                changed = False
-                for domain_variable in domain:
-                    new_row_variables = cPickle.loads(cPickle.dumps(self.row_variables, -1))
-                    new_col_variables = cPickle.loads(cPickle.dumps(self.col_variables, -1))
-                    if not(new_row_variables[y][x] is domain_variable):
-                        changed = True
-                        print("Change", new_row_variables[y][x], y, "from", new_row_variables[y][x], "to", domain_variable)
-                        new_row_variables[y][x] = domain_variable
-                        nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
-                        line_children.append(nonogram)
-
-
-                    for col_domain, k in zip(self.csp.col_variables[domain_variable], range(len(new_col_variables))):
-                    #if domain_variable in self.csp.col_variables[x]:
-                        if y in col_domain:
-                            if not(new_col_variables[domain_variable][k] is domain_variable):
-                                changed = True
-                                print(domain_variable, "in", self.csp.col_variables[domain_variable], "cor", x, y)
-                                print(len(new_col_variables))
-                                new_col_variables[domain_variable][k] = y
-                                print("change", k, y)
-                                nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
-                                line_children.append(nonogram)
-
-                    if not changed:
-                        print(domain_variable, "not in", self.csp.col_variables[x], "cor", x, y)
-                        for i in range(self.csp.width):
-                            for j in range(self.csp.height):
-                                if self.csp.cell_constraint_violated(i, j, new_row_variables, new_col_variables):
-                                    print("------------violated----------")
-                                    for p in range(len(self.csp.row_variables[j])):
-                                        if i in self.csp.row_variables[j][p] and not self.row_variables[j][p] is i:
-                                            nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
-                                            new_row_variables[j][p] = i
-                                            line_children.append(nonogram)
-                                        else:
-                                            for o in range(len(self.csp.col_variables[i])):
-                                                if j in self.csp.col_variables[i][o] and not self.col_variables[i][o] is j:
-                                                    new_col_variables[i][o] = j
-                                                    nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
-                                                    line_children.append(nonogram)
-
-                    #nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
-                    #line_children.append(nonogram)
-
-
-                best_child = None
-                best_heuristic = 99999999999999999999999
-                for child in line_children:
-                    if not child is child.parent or None:
-                        if child.h <= best_heuristic:
-                            best_heuristic = child.h
-                            best_child = child
-
-
-                if best_child:
-                    #if best_heuristic < 6:
-                        #best_child.print_state(6)
-                    children.append(best_child)
-                    print("Best change for", x, y, "with heristic", best_heuristic, "instead of", best_child.parent.h)
-
-                if not randint(0, 30):
-                    print("*")
-                    print("*")
-                    print("*")
-                    print("*")
-                    print("*")
-                    print("*")
-                    print("*")
-                    print("*")
-                    print("*")
-                    print("*")
-                    print("*")
-                    print("*")
-                    print(x, y)
-
-                    x = randint(0, len(new_col_variables))
-                    y = randint(0, len(new_col_variables))
-                    new_value = randint(self.csp.col_variables[y][x][0], self.csp.col_variables[y][x][-1])
-                    new_col_variables[x][y] = new_value
-                    nonogram = Board(self.csp, new_row_variables, new_col_variables, self, 0)
-                    children.append(nonogram)
-                
-        return children
-    """
 
 if __name__ == '__main__':
     main()
