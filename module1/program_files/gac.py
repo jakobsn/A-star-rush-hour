@@ -497,40 +497,86 @@ class Board:
 
     """
 
-    def generate_min_successor(self, x, y, axis):
+    def calculate_isolated_cell_heuristic(self, x, y, row_variables, col_variables, axis=None):
+        cell_heuristic = self.csp.cell_constraint_violated(x, y, row_variables, col_variables)
+        if (not axis or axis == "row"): #and x in self.row_violated_variables[y]:
+            for j in range(len(self.row_violated_variables)):
+                if x in self.row_violated_variables[y]:
+                    cell_heuristic += 1
+                    print("row violation")
+        if (not axis or axis == "col"): #and y in self.col_violated_variables[x]:
+            for i in range(len(self.col_violated_variables[x])):
+                if y in self.col_violated_variables[x][i]:
+                    cell_heuristic += 1
+                    print("col violation")
+        return cell_heuristic
+
+    def generate_min_successors(self, x, y, axis):
         best_h = 999999999999
+        successors = []
         new_row_variables = cPickle.loads(cPickle.dumps(self.row_variables, -1))
         new_col_variables = cPickle.loads(cPickle.dumps(self.col_variables, -1))
-        if axis is "row":
+        old_cell_heuristic = self.calculate_isolated_cell_heuristic(x, y, new_row_variables, new_col_variables)
+        #nonogram = None
+        if axis == "row":
             print(x, y)
             print(self.csp.row_variables[y])
             for i in range(len(self.csp.row_variables[y])):
                 if x in self.csp.row_variables[y][i]:
+                    print("old cell h:", old_cell_heuristic)
+
                     for variable in self.csp.row_variables[y][i]:
                         if variable is not x:
                             new_row_variables[y][i] = variable
                             total_heuristic, row_axis_heuristics, col_axis_heuristics, row_violated_variables, col_violated_variables = self.csp.calculate_heuristic(new_row_variables, new_col_variables, self.csp.row_functions, self.csp.col_functions)
+                            cell_heuristic = self.calculate_isolated_cell_heuristic(variable, y, new_row_variables, new_col_variables)
+                            print("cell h:", cell_heuristic)
+
+                            #sleep(3)
                             if total_heuristic < best_h:
                                 best_h = total_heuristic
                                 print("child h:", total_heuristic)
                                 best_row_variables = cPickle.loads(cPickle.dumps(new_row_variables, -1))
-            nonogram = Board(self.csp, best_row_variables, new_col_variables, self, 0)
+                                nonogram = Board(self.csp, best_row_variables, new_col_variables, self, 0)
+                                successors.append(nonogram)
+
+                            elif cell_heuristic < old_cell_heuristic:
+                                old_cell_heuristic = cell_heuristic
+                                print("child h:", total_heuristic)
+                                best_row_variables = cPickle.loads(cPickle.dumps(new_row_variables, -1))
+                                nonogram = Board(self.csp, best_row_variables, new_col_variables, self, 0)
+                                successors.append(nonogram)
 
 
-        elif axis is "col":
+        elif axis == "col":
             for j in range(len(self.csp.col_variables[x])):
                 if y in self.csp.col_variables[x][j]:
                     for variable in self.csp.col_variables[x][j]:
                         if variable is not y:
                             new_col_variables[x][j] = variable
                             total_heuristic, row_axis_heuristics, col_axis_heuristics, row_violated_variables, col_violated_variables = self.csp.calculate_heuristic(new_row_variables, new_col_variables, self.csp.row_functions, self.csp.col_functions)
+                            cell_heuristic = self.calculate_isolated_cell_heuristic(x, variable, new_row_variables, new_col_variables)
                             if total_heuristic < best_h:
                                 best_h = total_heuristic
                                 print("child h:", total_heuristic)
                                 best_col_variables = cPickle.loads(cPickle.dumps(new_row_variables, -1))
-            nonogram = Board(self.csp, new_row_variables, best_col_variables, self, 0)
+                                nonogram = Board(self.csp, new_row_variables, best_col_variables, self, 0)
 
-        return nonogram
+                                successors.append(nonogram)
+
+                            elif cell_heuristic < old_cell_heuristic:
+                                old_cell_heuristic = cell_heuristic
+                                print("child h:", total_heuristic)
+                                best_col_variables = cPickle.loads(cPickle.dumps(new_col_variables, -1))
+                                nonogram = Board(self.csp, new_row_variables, best_col_variables, self, 0)
+                                successors.append(nonogram)
+
+            #nonogram = Board(self.csp, new_row_variables, best_col_variables, self, 0)
+        #if not nonogram:
+        #    self.print_state(10)
+        #    return None
+
+        return successors
 
     def expand_node(self):
 
@@ -559,8 +605,12 @@ class Board:
 
         # CHILDREN ARE THE SUCCESSORS OF THIS DOMAIN
 
-        children.append(self.generate_min_successor(conflict_x, conflict_y, axis))
+        children = self.generate_min_successors(conflict_x, conflict_y, axis)
         return children
+
+
+
+
 
         """
         if min_succ:
