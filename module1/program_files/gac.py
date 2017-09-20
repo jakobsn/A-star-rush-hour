@@ -22,7 +22,7 @@ import six.moves.cPickle as cPickle
 def main():
 
     #ps = GAC("monograms/mono-cat.txt")
-    ps = GAC(None, "AStar", "monograms/mono-cat.txt", True, False, 1)
+    ps = GAC(None, "AStar", "monograms/mono-clover.txt", True, False, 1)
     ps.solve_problem()
     #ps = RushHour(args.algorithm, args.board, args.display_path, args.display_agenda, args.display_time)
 
@@ -478,6 +478,7 @@ class Board:
         pass
 
     def find_conflicting_axis_variable(self, axis_heuristics):
+        conflicts = []
         r = list(range(len(axis_heuristics)))
         shuffle(r)
         #print(r)
@@ -487,7 +488,9 @@ class Board:
             for j in s:
                 if axis_heuristics[i][j]:
                     #print("found conflicting variable")
-                    return i, j
+                    conflicts.append([i, j])
+        return conflicts
+
 
     def find_conflicting_cross_variable(self):
         x = list(range(self.csp.width))
@@ -549,7 +552,7 @@ class Board:
         successors = []
         new_row_variables = cPickle.loads(cPickle.dumps(self.row_variables, -1))
         new_col_variables = cPickle.loads(cPickle.dumps(self.col_variables, -1))
-        old_cell_heuristic = self.calculate_isolated_cell_heuristic(x, y, new_row_variables, new_col_variables, axis)
+        #old_cell_heuristic = self.calculate_isolated_cell_heuristic(x, y, new_row_variables, new_col_variables, axis)
         nonogram = None
         isolated_nonogram = None
         if axis == "row":
@@ -638,17 +641,20 @@ class Board:
         print(type(self.col_violated_variables))
         for value in self.row_violated_variables:
             if value:
-                conflict_y, conflict_x = self.find_conflicting_axis_variable(self.row_violated_variables)
+                conflicts = self.find_conflicting_axis_variable(self.row_violated_variables)
                 axis = "row"
+                for conflict in conflicts:
+                    children += self.generate_min_successors(conflict[0], conflict[1], axis)
                 break
             #if not conflict_x:
                 #method = randint(1, 3)
         #if method == 1:
         for value in self.col_violated_variables:
             if value:
-                conflict_x, conflict_y = self.find_conflicting_axis_variable(self.col_violated_variables)
+                conflicts = self.find_conflicting_axis_variable(self.col_violated_variables)
                 axis = "col"
-                children += self.generate_min_successors(conflict_x, conflict_y, axis)
+                for conflict in conflicts:
+                    children += self.generate_min_successors(conflict[0], conflict[1], axis)
                 break
             #if not conflict_x:
             #    method = randint(2, 3)
@@ -671,6 +677,9 @@ class Board:
         #print("most conflicting variable", conflict_x, conflict_y, axis)
 
         #print(children, "children")
+        for child in children:
+            if child.h < 57:
+                child.print_state(0.1)
         return children
 
 
