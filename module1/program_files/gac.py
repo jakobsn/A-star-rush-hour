@@ -22,7 +22,7 @@ import six.moves.cPickle as cPickle
 def main():
 
     #ps = GAC("monograms/mono-cat.txt")
-    ps = GAC(None, "AStar", "monograms/mono-cat.txt", True, False, 3)
+    ps = GAC(None, "AStar", "monograms/mono-cat.txt", True, True, 1)
     ps.solve_problem()
     #ps = RushHour(args.algorithm, args.board, args.display_path, args.display_agenda, args.display_time)
 
