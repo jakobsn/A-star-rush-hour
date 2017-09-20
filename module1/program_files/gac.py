@@ -76,9 +76,12 @@ class GAC(GenSearch):
                 new_nonogram.row_variables[i][j] = value
 
             arcs = self.get_all_neighboring_arcs(i, j, axis)
-            #inferences = self.inference(new_nonogram, self.get_all_neighboring_arcs(i, j, axis))
+            #inferences = self.inference(new_nonogram, self.get_all_neighboring_arcs(i, j, axis), axis)
             print(self.cell_constraint_satisfied(i, j, axis, new_nonogram))
             print("")
+
+    def inference(self, nonogram, arcs, axis):
+
 
     def get_all_neighboring_arcs(self, i, j, axis):
         arcs = []
