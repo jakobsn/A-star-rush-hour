@@ -704,9 +704,9 @@ class Board:
         #print("most conflicting variable", conflict_x, conflict_y, axis)
 
         #print(children, "children")
-        for child in children:
-            if child.h < 57:
-                child.print_state(0.1)
+        #for child in children:
+        #    if child.h < 57:
+        #        child.print_state(0.1)
         return children
 
 
