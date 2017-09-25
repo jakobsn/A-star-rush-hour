@@ -131,6 +131,7 @@ class Nonogram:
         self.col_variables, self.col_constraints = self.store_segments(self.col_specs, self.height)
         self.row_functions = self.create_constraint_functions(self.row_variables, self.row_constraints)
         self.col_functions = self.create_constraint_functions(self.col_variables, self.col_constraints)
+        self.best_h = 999999999999999999
 
         new_row_vars, new_col_vars = self.create_nonogram(self.row_specs, self.row_variables, self.col_specs, self.col_variables, [self.width, self.height])
         self.nonogram = Board(self, new_row_vars, new_col_vars, None, 0)
@@ -704,9 +705,13 @@ class Board:
         #print("most conflicting variable", conflict_x, conflict_y, axis)
 
         #print(children, "children")
-        #for child in children:
-        #    if child.h < 57:
-        #        child.print_state(0.1)
+
+        for child in children:
+            if child.h < self.csp.best_h:
+                print("best h so far", child.h)
+                print("=====================================")
+                self.csp.best_h = child.h
+                sleep(0.5)
         return children
 
 

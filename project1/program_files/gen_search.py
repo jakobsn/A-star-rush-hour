@@ -63,6 +63,7 @@ class GenSearch:
                 print("Nodes generated:", nodes_generated)
                 path = self.backtrack_path(current_node)
                 print("Path length:", len(path)-1)
+                current_node.print_state(10)
                 if show_solution:
                     self.print_path(path, display_time)
                 return path
