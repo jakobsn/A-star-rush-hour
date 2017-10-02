@@ -262,6 +262,7 @@ def gen_segmented_vector_cases(vectorlen,count,minsegs,maxsegs,poptargs=True):
 
 def segment_count(vect,onval=1,offval=0):
     lastval = offval; count = 0
+    lastval = offval; count = 0
     for elem in vect:
         if elem == onval and lastval == offval: count += 1
         lastval = elem
