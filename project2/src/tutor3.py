@@ -296,5 +296,35 @@ def parity(epochs=100,nbits=2,lrate=0.03,showint=100,mbs=None,vfrac=0.1,tfrac=0.
     ann.runmore(epochs*2)
     return ann
 
-parity()
+def readFile(targetFile):
+    with open(targetFile) as file:
+        data = []
+        for line in file:
+            row = []
+            elements = []
+            for element in line.replace("\n", "").split(","):
+                elements.append(float(element))
+            row.append(elements)
+            row.append([elements.pop()])
+            data.append(row)
+    return data
+
+def datasets(epochs=100,nbits=4,lrate=0.03,showint=100,mbs=None,vfrac=0.1,tfrac=0.1,vint=100,sm=False,targetFile="../data/glass.txt"):
+    size = 2**nbits
+    mbs = mbs if mbs else size
+    case_generator = (lambda : readFile(targetFile))
+    cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac)
+    ann = Gann(dims=[size, nbits, size],cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,softmax=sm)
+    ann.gen_probe(0,'wgt',('hist','avg'))  # Plot a histogram and avg of the incoming weights to module 0.
+    ann.gen_probe(1,'out',('avg','max'))  # Plot average and max value of module 1's output vector
+    ann.add_grabvar(0,'wgt') # Add a grabvar (to be displayed in its own matplotlib window).
+    ann.run(epochs)
+    ann.runmore(epochs*2)
+    return ann
+
+#parity()
 #autoex()
+#data=readFile("../data/glass.txt")
+datasets()
+#for line in data:
+#    print(line)
