@@ -111,5 +111,3 @@ def autoex1(epochs=2000,num_bits=3,lrate=0.5,tint=25,showint=100):
     PLT.ioff()
     TFT.close_session(ann.current_session)
     return ann
-
-

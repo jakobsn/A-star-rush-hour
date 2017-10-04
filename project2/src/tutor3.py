@@ -13,7 +13,7 @@ class Gann():
         self.learning_rate = lrate
         self.layer_sizes = dims # Sizes of each layer of neurons
         self.show_interval = showint # Frequency of showing grabbed variables
-        self.global_training_step = 100 # Enables coherent data-storage during extra training runs (see runmore).
+        self.global_training_step = 1000 # Enables coherent data-storage during extra training runs (see runmore).
         self.grabvars = []  # Variables to be monitored (by gann code) during a run.
         self.grabvar_figures = [] # One matplotlib figure for each grabvar
         self.minibatch_size = mbs
@@ -150,18 +150,19 @@ class Gann():
         for i, v in enumerate(grabbed_vals):
             if names: print("   " + names[i] + " = ", end="\n")
             if type(v) == np.ndarray and len(v.shape) > 1: # If v is a matrix, use hinton plotting
+                print("plotting this matrix", names[i], ":")
+                for row in v:
+                    print(row)
                 TFT.hinton_plot(v,fig=self.grabvar_figures[fig_index],title= names[i]+ ' at step '+ str(step))
                 fig_index += 1
+            # Print graphical visialization of the bias vector in the module
             elif "bias" in names[i]:
-
+                #TODO: Support long vectors
                 v = np.array([v])
                 print("v inn",v)
-
                 TFT.display_matrix(v, title=names[i] + ' at step ' + str(step))
                 fig_index += 1
             else:
-                print(names)
-                print("hehe")
                 print(v, end="\n\n")
 
 
@@ -272,7 +273,7 @@ class Caseman():
 
     def organize_cases(self):
         ca = np.array(self.cases)
-        np.random.shuffle(ca) # Randomly shuffle all cases
+        #np.random.shuffle(ca) # Randomly shuffle all cases
         separator1 = round(len(self.cases) * self.training_fraction)
         separator2 = separator1 + round(len(self.cases)*self.validation_fraction)
         self.training_cases = ca[0:separator1]
@@ -288,7 +289,7 @@ class Caseman():
 
 # After running this, open a Tensorboard (Go to localhost:6006 in your Chrome Browser) and check the
 # 'scalar', 'distribution' and 'histogram' menu options to view the probed variables.
-def autoex(epochs=100,nbits=4,lrate=0.03,showint=100,mbs=None,vfrac=0.1,tfrac=0.1,vint=100,sm=True):
+def autoex(epochs=100,nbits=3,lrate=0.03,showint=100,mbs=None,vfrac=0.1,tfrac=0.1,vint=100,sm=True):
     size = 2**nbits
     mbs = mbs if mbs else size
     case_generator = (lambda : TFT.gen_all_one_hot_cases(2**nbits))
@@ -305,7 +306,7 @@ def autoex(epochs=100,nbits=4,lrate=0.03,showint=100,mbs=None,vfrac=0.1,tfrac=0.
 
 
     ann.run(epochs)
-    #ann.runmore(epochs*2)
+    ann.runmore(epochs*2)
     return ann
 
 
@@ -317,8 +318,11 @@ def parity(epochs=100,nbits=2,lrate=0.03,showint=100,mbs=None,vfrac=0.1,tfrac=0.
     ann = Gann(dims=[size, nbits, size+1],cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,softmax=sm)
     ann.gen_probe(0,'wgt',('hist','avg'))  # Plot a histogram and avg of the incoming weights to module 0.
     ann.gen_probe(1,'out',('avg','max'))  # Plot average and max value of module 1's output vector
-    ann.add_grabvar(0,'wgt') # Add a grabvar (to be displayed in its own matplotlib window).
+    #ann.add_grabvar(0,'wgt') # Add a grabvar (to be displayed in its own matplotlib window).
 
+    ann.add_grabvar(0,'in') # Add a grabvar (to be displayed in its own matplotlib window).
+    ann.add_grabvar(1,'in') # Add a grabvar (to be displayed in its own matplotlib window).
+    ann.add_grabvar(1,'out') # Add a grabvar (to be displayed in its own matplotlib window).
 
     ann.run(epochs)
     ann.runmore(epochs*2)
@@ -350,16 +354,20 @@ def datasets(epochs=100,nbits=4,lrate=0.03,showint=100,mbs=None,vfrac=0.1,tfrac=
     ann.runmore(epochs*2)
     return ann
 
-def main(epochs, dims, hl_activation_funct, op_activation_funct, loss_funct, lrate, weight_range,
-         data_params, data_funct, case_fraction=1, validation_fraction=1, test_fraction=1, minibatch_size=10,
-         map_batch_size=0, steps=10, map_layers=0, map_dendrograms=[0], display_weights=[0], display_biases=[0]):
+def main(epochs=100, nbits=4, dims=[5, 2, 5], lrate=0.03, weight_range=None, data_params=10, data_funct=TFT.gen_all_one_hot_cases,
+         steps=10, loss_funct=None, hl_activation_funct=None, op_activation_funct=None, case_fraction=1, vfrac=0.1, tfrac=0.1, mbs=10,
+         map_batch_size=0, map_layers=0, map_dendrograms=[0], display_weights=[0], display_biases=[0]):
+    #TODO: Find dims automaticly
+    size = 2 ** nbits
+    mbs = mbs if mbs else size
+    case_generator = (lambda: data_funct(data_params))
 
-    autoex()
+
     return
 
 """
 TODO:
-- activation_functs: hyperbolic tangent, sigmoid, relu or softmax
+- support activation_functs: hyperbolic tangent, sigmoid, relu or softmax
 - hl_activation_funct: must be set in output < build < gannmodule
 - op_activation_funct: must replace softmax parameter, and set in output < build < gann
 - loss function: must be set in error < configure_learning < gann, either mean-squared error or cross entropy (mean-squared atm)
@@ -367,6 +375,10 @@ TODO:
 - datasource: specify function and param for case generator
 - casefraction: length of sublist ca of cases < organize cases < caseman
 - implement do_mapping, use ann.grabvar()
+- how to  show graphical visualization of output layer
+- support long bias vectors
+- visualize dendrograms
+- Find dims automaticly
 
 Qs:
 - Steps == global_training_step/epochs?
@@ -375,6 +387,7 @@ Qs:
 
 #parity()
 autoex()
+Gann.reopen_current_session()
 #data=readFile("../data/glass.txt")
 #datasets()
 #for line in data:
