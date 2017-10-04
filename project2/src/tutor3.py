@@ -355,14 +355,14 @@ def datasets(epochs=100,nbits=4,lrate=0.03,showint=100,mbs=None,vfrac=0.1,tfrac=
     return ann
 
 def main(epochs=100, nbits=4, dims=[10, 2, 10], lrate=0.03, weight_range=None, showint=100, vint=100, data_params=10, data_funct=TFT.gen_all_one_hot_cases,
-         steps=10, loss_funct=False, hl_activation_funct=False, op_activation_funct=False, case_fraction=1, vfrac=0.1, tfrac=0.1, mbs=10,
+         steps=10, loss_funct=False, hl_activation_funct=False, op_activation_funct=True, case_fraction=1, vfrac=0.1, tfrac=0.1, mbs=10,
          map_batch_size=0, map_layers=0, map_dendrograms=[0], display_weights=[0], display_biases=[0]):
     #TODO: Find dims automaticly
     size = 2 ** nbits
     mbs = mbs if mbs else size
     case_generator = (lambda: data_funct(data_params))
     cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac)
-    ann = Gann(dims=dims,cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,softmax=hl_activation_funct)
+    ann = Gann(dims=dims,cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,softmax=op_activation_funct)
     ann.gen_probe(0,'wgt',('hist','avg'))  # Plot a histogram and avg of the incoming weights to module 0.
     ann.gen_probe(1,'out',('avg','max'))  # Plot average and max value of module 1's output vector
     ann.add_grabvar(0,'wgt') # Add a grabvar (to be displayed in its own matplotlib window).
@@ -373,6 +373,10 @@ def main(epochs=100, nbits=4, dims=[10, 2, 10], lrate=0.03, weight_range=None, s
     ann.run(epochs)
     ann.runmore(epochs*2)
     return ann
+
+main(epochs=100, nbits=4, dims=[10, 2, 10+1], lrate=0.03, weight_range=None, showint=100, vint=100, data_params=10, data_funct=TFT.gen_vector_count_cases,
+         steps=10, loss_funct=False, hl_activation_funct=False, op_activation_funct=True, case_fraction=1, vfrac=0.1, tfrac=0.1, mbs=10,
+         map_batch_size=0, map_layers=0, map_dendrograms=[0], display_weights=[0], display_biases=[0])
 
 """
 TODO:
@@ -393,7 +397,7 @@ Qs:
 - Steps == global_training_step/epochs?
 """
 
-main()
+#main()
 #parity()
 #autoex()
 #Gann.reopen_current_session()
