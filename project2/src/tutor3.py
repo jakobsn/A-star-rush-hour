@@ -13,7 +13,7 @@ class Gann():
         self.learning_rate = lrate
         self.layer_sizes = dims # Sizes of each layer of neurons
         self.show_interval = showint # Frequency of showing grabbed variables
-        self.global_training_step = 0 # Enables coherent data-storage during extra training runs (see runmore).
+        self.global_training_step = 100 # Enables coherent data-storage during extra training runs (see runmore).
         self.grabvars = []  # Variables to be monitored (by gann code) during a run.
         self.grabvar_figures = [] # One matplotlib figure for each grabvar
         self.minibatch_size = mbs
@@ -31,8 +31,17 @@ class Gann():
     # Grabvars are displayed by my own code, so I have more control over the display format.  Each
     # grabvar gets its own matplotlib figure in which to display its value.
     def add_grabvar(self,module_index,type='wgt'):
+        print("************grabvar**************")
+        print("modules length:", len(self.modules))
+        print("modules:", self.modules)
+        for module in self.modules:
+            print("GANN MODULE:")
+            print("in:", module.getvar("in"))
+            print("out:", module.getvar("out"))
+            print("biases:", module.getvar("bias"))
         self.grabvars.append(self.modules[module_index].getvar(type))
         self.grabvar_figures.append(PLT.figure())
+        print("*********************************")
 
     def roundup_probes(self):
         self.probes = tf.summary.merge_all()
@@ -92,6 +101,9 @@ class Gann():
         print('%s Set Error = %f ' % (msg, error))
         return error  # self.error uses MSE, so this is a per-case value
 
+    def do_mapping(self):
+        #TODO
+        return
 
     def training_session(self,epochs,sess=None,dir="probeview",continued=False):
         self.roundup_probes()
@@ -121,10 +133,6 @@ class Gann():
                   session=None, feed_dict=None, step=1, show_interval=1):
         sess = session if session else TFT.gen_initialized_session(dir=dir)
         if probed_vars is not None:
-            print("operators:", operators)
-            print("grabbed vars:", grabbed_vars)
-            print("probed vars:", probed_vars)
-            print("feed dict:", feed_dict)
             results = sess.run([operators, grabbed_vars, probed_vars], feed_dict=feed_dict)
             sess.probe_stream.add_summary(results[2], global_step=step)
         else:
@@ -138,13 +146,23 @@ class Gann():
         msg = "Grabbed Variables at Step " + str(step)
         print("\n" + msg, end="\n")
         fig_index = 0
+        #print("grabvals:", grabbed_vals)
         for i, v in enumerate(grabbed_vals):
             if names: print("   " + names[i] + " = ", end="\n")
             if type(v) == np.ndarray and len(v.shape) > 1: # If v is a matrix, use hinton plotting
                 TFT.hinton_plot(v,fig=self.grabvar_figures[fig_index],title= names[i]+ ' at step '+ str(step))
                 fig_index += 1
+            elif "bias" in names[i]:
+                print("v",v)
+                v=[v]
+                v = np.array(v, ndmin=2)
+                TFT.hinton_plot(v, fig=self.grabvar_figures[fig_index], title=names[i] + ' at step ' + str(step))
+                fig_index += 1
             else:
+                print(names)
+                print("hehe")
                 print(v, end="\n\n")
+
 
     def run(self,epochs=100,sess=None,continued=False):
         PLT.ion()
@@ -269,7 +287,7 @@ class Caseman():
 
 # After running this, open a Tensorboard (Go to localhost:6006 in your Chrome Browser) and check the
 # 'scalar', 'distribution' and 'histogram' menu options to view the probed variables.
-def autoex(epochs=300,nbits=4,lrate=0.03,showint=100,mbs=None,vfrac=0.1,tfrac=0.1,vint=100,sm=True):
+def autoex(epochs=100,nbits=4,lrate=0.03,showint=100,mbs=None,vfrac=0.1,tfrac=0.1,vint=100,sm=True):
     size = 2**nbits
     mbs = mbs if mbs else size
     case_generator = (lambda : TFT.gen_all_one_hot_cases(2**nbits))
@@ -277,9 +295,16 @@ def autoex(epochs=300,nbits=4,lrate=0.03,showint=100,mbs=None,vfrac=0.1,tfrac=0.
     ann = Gann(dims=[size, nbits, size],cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,softmax=sm)
     ann.gen_probe(0,'wgt',('hist','avg'))  # Plot a histogram and avg of the incoming weights to module 0.
     ann.gen_probe(1,'out',('avg','max'))  # Plot average and max value of module 1's output vector
-    ann.add_grabvar(0,'wgt') # Add a grabvar (to be displayed in its own matplotlib window).
+    #ann.add_grabvar(0,'wgt') # Add a grabvar (to be displayed in its own matplotlib window).
+
+    #ann.add_grabvar(0,'in') # Add a grabvar (to be displayed in its own matplotlib window).
+    #ann.add_grabvar(1,'in') # Add a grabvar (to be displayed in its own matplotlib window).
+    #ann.add_grabvar(1,'out') # Add a grabvar (to be displayed in its own matplotlib window).
+    ann.add_grabvar(1,'bias') # Add a grabvar (to be displayed in its own matplotlib window).
+
+
     ann.run(epochs)
-    ann.runmore(epochs*2)
+    #ann.runmore(epochs*2)
     return ann
 
 
@@ -292,6 +317,8 @@ def parity(epochs=100,nbits=2,lrate=0.03,showint=100,mbs=None,vfrac=0.1,tfrac=0.
     ann.gen_probe(0,'wgt',('hist','avg'))  # Plot a histogram and avg of the incoming weights to module 0.
     ann.gen_probe(1,'out',('avg','max'))  # Plot average and max value of module 1's output vector
     ann.add_grabvar(0,'wgt') # Add a grabvar (to be displayed in its own matplotlib window).
+
+
     ann.run(epochs)
     ann.runmore(epochs*2)
     return ann
@@ -322,9 +349,32 @@ def datasets(epochs=100,nbits=4,lrate=0.03,showint=100,mbs=None,vfrac=0.1,tfrac=
     ann.runmore(epochs*2)
     return ann
 
+def main(epochs, dims, hl_activation_funct, op_activation_funct, loss_funct, lrate, weight_range,
+         data_params, data_funct, case_fraction=1, validation_fraction=1, test_fraction=1, minibatch_size=10,
+         map_batch_size=0, steps=10, map_layers=0, map_dendrograms=[0], display_weights=[0], display_biases=[0]):
+
+    autoex()
+    return
+
+"""
+TODO:
+- activation_functs: hyperbolic tangent, sigmoid, relu or softmax
+- hl_activation_funct: must be set in output < build < gannmodule
+- op_activation_funct: must replace softmax parameter, and set in output < build < gann
+- loss function: must be set in error < configure_learning < gann, either mean-squared error or cross entropy (mean-squared atm)
+- initial weight range: must be set in weights < build < gannmodule
+- datasource: specify function and param for case generator
+- casefraction: length of sublist ca of cases < organize cases < caseman
+- implement do_mapping, use ann.grabvar()
+
+Qs:
+- Steps == global_training_step/epochs?
+"""
+
+
 #parity()
-#autoex()
+autoex()
 #data=readFile("../data/glass.txt")
-datasets()
+#datasets()
 #for line in data:
 #    print(line)
