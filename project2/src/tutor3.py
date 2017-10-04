@@ -146,7 +146,7 @@ class Gann():
         msg = "Grabbed Variables at Step " + str(step)
         print("\n" + msg, end="\n")
         fig_index = 0
-        #print("grabvals:", grabbed_vals)
+        print("grabvals:", grabbed_vals)
         for i, v in enumerate(grabbed_vals):
             if names: print("   " + names[i] + " = ", end="\n")
             if type(v) == np.ndarray and len(v.shape) > 1: # If v is a matrix, use hinton plotting
@@ -273,7 +273,7 @@ class Caseman():
 
     def organize_cases(self):
         ca = np.array(self.cases)
-        #np.random.shuffle(ca) # Randomly shuffle all cases
+        np.random.shuffle(ca) # Randomly shuffle all cases
         separator1 = round(len(self.cases) * self.training_fraction)
         separator2 = separator1 + round(len(self.cases)*self.validation_fraction)
         self.training_cases = ca[0:separator1]
@@ -354,7 +354,7 @@ def datasets(epochs=100,nbits=4,lrate=0.03,showint=100,mbs=None,vfrac=0.1,tfrac=
     ann.runmore(epochs*2)
     return ann
 
-def main(epochs=100, nbits=4, dims=[10, 2, 10], lrate=0.03, weight_range=None, showint=100, vint=100, data_params=10, data_funct=TFT.gen_all_one_hot_cases,
+def main(epochs=100, nbits=3, dims=[9, 3, 9], lrate=0.03, weight_range=None, showint=100, vint=100, data_params=(9,), data_funct=TFT.gen_all_one_hot_cases,
          steps=10, loss_funct=False, hl_activation_funct=False, op_activation_funct=True, case_fraction=1, vfrac=0.1, tfrac=0.1, mbs=10,
          map_batch_size=0, map_layers=0, map_dendrograms=[0], display_weights=[0], display_biases=[0]):
     #TODO: Find dims automaticly
@@ -375,9 +375,9 @@ def main(epochs=100, nbits=4, dims=[10, 2, 10], lrate=0.03, weight_range=None, s
     return ann
 
 #parity
-main(epochs=100, nbits=4, dims=[10, 2, 10+1], lrate=0.03, weight_range=None, showint=100, vint=100, data_params=(10, 10), data_funct=TFT.gen_vector_count_cases,
-         steps=10, loss_funct=False, hl_activation_funct=False, op_activation_funct=True, case_fraction=1, vfrac=0.1, tfrac=0.1, mbs=10,
-         map_batch_size=0, map_layers=0, map_dendrograms=[0], display_weights=[0], display_biases=[0])
+#main(epochs=100, nbits=4, dims=[10, 2, 10+1], lrate=0.03, weight_range=None, showint=100, vint=100, data_params=(10, 10), data_funct=TFT.gen_vector_count_cases,
+#         steps=10, loss_funct=False, hl_activation_funct=False, op_activation_funct=True, case_fraction=1, vfrac=0.1, tfrac=0.1, mbs=10,
+#         map_batch_size=0, map_layers=0, map_dendrograms=[0], display_weights=[0], display_biases=[0])
 
 """
 TODO:
@@ -398,7 +398,7 @@ Qs:
 - Steps == global_training_step/epochs?
 """
 
-#main()
+main()
 #parity()
 #autoex()
 #Gann.reopen_current_session()
