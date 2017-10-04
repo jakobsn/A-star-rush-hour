@@ -153,10 +153,11 @@ class Gann():
                 TFT.hinton_plot(v,fig=self.grabvar_figures[fig_index],title= names[i]+ ' at step '+ str(step))
                 fig_index += 1
             elif "bias" in names[i]:
-                print("v",v)
-                v=[v]
-                v = np.array(v, ndmin=2)
-                TFT.hinton_plot(v, fig=self.grabvar_figures[fig_index], title=names[i] + ' at step ' + str(step))
+
+                v = np.array([v])
+                print("v inn",v)
+
+                TFT.display_matrix(v, title=names[i] + ' at step ' + str(step))
                 fig_index += 1
             else:
                 print(names)
@@ -297,10 +298,10 @@ def autoex(epochs=100,nbits=4,lrate=0.03,showint=100,mbs=None,vfrac=0.1,tfrac=0.
     ann.gen_probe(1,'out',('avg','max'))  # Plot average and max value of module 1's output vector
     #ann.add_grabvar(0,'wgt') # Add a grabvar (to be displayed in its own matplotlib window).
 
-    #ann.add_grabvar(0,'in') # Add a grabvar (to be displayed in its own matplotlib window).
-    #ann.add_grabvar(1,'in') # Add a grabvar (to be displayed in its own matplotlib window).
-    #ann.add_grabvar(1,'out') # Add a grabvar (to be displayed in its own matplotlib window).
-    ann.add_grabvar(1,'bias') # Add a grabvar (to be displayed in its own matplotlib window).
+    ann.add_grabvar(0,'in') # Add a grabvar (to be displayed in its own matplotlib window).
+    ann.add_grabvar(1,'in') # Add a grabvar (to be displayed in its own matplotlib window).
+    ann.add_grabvar(1,'out') # Add a grabvar (to be displayed in its own matplotlib window).
+    #ann.add_grabvar(0,'bias') # Add a grabvar (to be displayed in its own matplotlib window).
 
 
     ann.run(epochs)
