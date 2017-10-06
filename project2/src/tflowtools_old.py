@@ -83,8 +83,6 @@ def int_to_one_hot(int,size,off_val=0, on_val=1,floats=False):
         v[int] = on_val
         return v
 
-def one_hot_to_int(vect,on_val=1): return vect.index(on_val)
-
 # Generate all one-hot vectors of length len
 def all_one_hots(len, floats=False):
     return [int_to_one_hot(i,len,floats=floats) for i in range(len)]
@@ -263,6 +261,7 @@ def gen_segmented_vector_cases(vectorlen,count,minsegs,maxsegs,poptargs=True):
     return cases
 
 def segment_count(vect,onval=1,offval=0):
+    lastval = offval; count = 0
     lastval = offval; count = 0
     for elem in vect:
         if elem == onval and lastval == offval: count += 1

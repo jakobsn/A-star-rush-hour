@@ -3,6 +3,7 @@ import numpy as np
 import math
 import matplotlib.pyplot as PLT
 import tflowtools as TFT
+from time import sleep
 
 # ******* A General Artificial Neural Network ********
 # This is the original GANN, which has been improved in the file gann.py
@@ -170,6 +171,7 @@ class Gann():
         self.test_on_trains(sess=self.current_session,bestk=bestk)
         self.testing_session(sess=self.current_session,bestk=bestk)
         self.close_current_session(view=False)
+        sleep(3)
         PLT.ioff()
 
     # After a run is complete, runmore allows us to do additional training on the network, picking up where we
@@ -295,7 +297,7 @@ def autoex(epochs=300,nbits=4,lrate=0.03,showint=100,mbs=None,vfrac=0.1,tfrac=0.
     ann = Gann(dims=[size,nbits,size],cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,softmax=sm)
     #ann.gen_probe(0,'wgt',('hist','avg'))  # Plot a histogram and avg of the incoming weights to module 0.
     #ann.gen_probe(1,'out',('avg','max'))  # Plot average and max value of module 1's output vector
-    #ann.add_grabvar(0,'wgt') # Add a grabvar (to be displayed in its own matplotlib window).
+    ann.add_grabvar(0,'wgt') # Add a grabvar (to be displayed in its own matplotlib window).
     ann.run(epochs,bestk=bestk)
     ann.runmore(epochs*2,bestk=bestk)
     return ann
@@ -307,4 +309,5 @@ def countex(epochs=5000,nbits=10,ncases=500,lrate=0.5,showint=500,mbs=20,vfrac=0
     ann.run(epochs,bestk=bestk)
     return ann
 
-
+#autoex()
+countex()
