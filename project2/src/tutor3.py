@@ -316,7 +316,7 @@ def countex(epochs=5000,nbits=10,ncases=5000,lrate=0.5,showint=5000,mbs=20,vfrac
     ann.run(epochs,bestk=bestk)
     return ann
 
-def parity(epochs=100,nbits=2,lrate=0.03,showint=100,mbs=None,vfrac=0.1,tfrac=0.1,vint=100,sm=False):
+def parity(epochs=10000,nbits=2,lrate=0.1,showint=10000,mbs=None,vfrac=0.1,tfrac=0.1,vint=10000,sm=True, bestk=1):
     size = 2**nbits
     mbs = mbs if mbs else size
     case_generator = (lambda : TFT.gen_vector_count_cases(2, 2**nbits))
@@ -331,8 +331,8 @@ def parity(epochs=100,nbits=2,lrate=0.03,showint=100,mbs=None,vfrac=0.1,tfrac=0.
     ann.add_grabvar(1,'in') # Add a grabvar (to be displayed in its own matplotlib window).
     ann.add_grabvar(1,'out') # Add a grabvar (to be displayed in its own matplotlib window).
 
-    ann.run(epochs)
-    ann.runmore(epochs*2)
+    ann.run(epochs, bestk=bestk)
+    ann.runmore(epochs*2, bestk=bestk)
     return ann
 
 def readFile(targetFile):
@@ -367,5 +367,5 @@ def datasets(epochs=1000,nbits=4,lrate=0.1,showint=1000,mbs=27,vfrac=0.1,tfrac=0
 
 #autoex()
 #countex()
-#parity()
-datasets()
+parity()
+#datasets()
