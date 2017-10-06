@@ -316,7 +316,7 @@ def countex(epochs=5000,nbits=10,ncases=5000,lrate=0.5,showint=5000,mbs=20,vfrac
     ann.run(epochs,bestk=bestk)
     return ann
 
-def parity(epochs=10000,nbits=2,lrate=0.1,showint=10000,mbs=None,vfrac=0.1,tfrac=0.1,vint=10000,sm=True, bestk=1):
+def parity(epochs=5000,nbits=2,lrate=0.1,showint=10000,mbs=None,vfrac=0.1,tfrac=0.1,vint=10000,sm=True, bestk=1):
     size = 2**nbits
     mbs = mbs if mbs else size
     case_generator = (lambda : TFT.gen_vector_count_cases(2, 2**nbits))
@@ -351,13 +351,34 @@ def readFile(targetFile):
         print(row)
     return data
 
-def datasets(epochs=1000,nbits=4,lrate=0.1,showint=1000,mbs=27,vfrac=0.1,tfrac=0.1,vint=1000,sm=True,targetFile="../data/glass.txt", bestk=1):
+# TODO: HOWTO DO THIS?
+def segment(epochs=5000,nbits=2,lrate=0.1,showint=10000,mbs=None,vfrac=0.1,tfrac=0.1,vint=10000,sm=True, bestk=1):
+    size = 2**nbits
+    mbs = mbs if mbs else size
+    case_generator = (lambda : TFT.gen_segmented_vector_cases(25, 10, 0, 5))
+    cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac)
+    print(cman.cases)
+    ann = Gann(dims=[size, nbits, size+1],cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,softmax=sm)
+    ann.gen_probe(0,'wgt',('hist','avg'))  # Plot a histogram and avg of the incoming weights to module 0.
+    ann.gen_probe(1,'out',('avg','max'))  # Plot average and max value of module 1's output vector
+    #ann.add_grabvar(0,'wgt') # Add a grabvar (to be displayed in its own matplotlib window).
+
+    ann.add_grabvar(0,'in') # Add a grabvar (to be displayed in its own matplotlib window).
+    ann.add_grabvar(1,'in') # Add a grabvar (to be displayed in its own matplotlib window).
+    ann.add_grabvar(1,'out') # Add a grabvar (to be displayed in its own matplotlib window).
+
+    ann.run(epochs, bestk=bestk)
+    ann.runmore(epochs*2, bestk=bestk)
+    return ann
+
+# TODO: Does not run good, or run with bestk=1
+def datasets(epochs=10000,nbits=9,lrate=0.1,showint=1000,mbs=27,vfrac=0.1,tfrac=0.1,vint=1000,sm=True,targetFile="../data/glass.txt", bestk=1):
     size = 2**nbits
     mbs = mbs if mbs else size
     case_generator = (lambda : readFile(targetFile))
     cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac)
     print(cman.cases)
-    ann = Gann(dims=[9, nbits, 1],cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,softmax=sm)
+    ann = Gann(dims=[nbits, nbits, 1],cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,softmax=sm)
     ann.gen_probe(0,'wgt',('hist','avg'))  # Plot a histogram and avg of the incoming weights to module 0.
     ann.gen_probe(1,'out',('avg','max'))  # Plot average and max value of module 1's output vector
     ann.add_grabvar(0,'wgt') # Add a grabvar (to be displayed in its own matplotlib window).
@@ -367,5 +388,25 @@ def datasets(epochs=1000,nbits=4,lrate=0.1,showint=1000,mbs=27,vfrac=0.1,tfrac=0
 
 #autoex()
 #countex()
-parity()
+#parity()
 #datasets()
+#segment()
+
+"""
+TODO:
+- support activation_functs: hyperbolic tangent, sigmoid, relu or softmax
+- hl_activation_funct: must be set in output < build < gannmodule
+- op_activation_funct: must replace softmax parameter, and set in output < build < gann
+- loss function: must be set in error < configure_learning < gann, either mean-squared error or cross entropy (mean-squared atm)
+- initial weight range: must be set in weights < build < gannmodule
+- datasource: specify function and param for case generator
+- casefraction: length of sublist ca of cases < organize cases < caseman
+- implement do_mapping, use ann.grabvar()
+- how to  show graphical visualization of output layer
+- support long bias vectors
+- visualize dendrograms
+- Find dims automaticly
+
+Qs:
+- Steps == global_training_step/epochs?
+"""
