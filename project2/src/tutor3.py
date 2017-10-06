@@ -321,6 +321,7 @@ def parity(epochs=100,nbits=2,lrate=0.03,showint=100,mbs=None,vfrac=0.1,tfrac=0.
     mbs = mbs if mbs else size
     case_generator = (lambda : TFT.gen_vector_count_cases(2, 2**nbits))
     cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac)
+    print(cman.cases)
     ann = Gann(dims=[size, nbits, size+1],cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,softmax=sm)
     ann.gen_probe(0,'wgt',('hist','avg'))  # Plot a histogram and avg of the incoming weights to module 0.
     ann.gen_probe(1,'out',('avg','max'))  # Plot average and max value of module 1's output vector
@@ -345,14 +346,18 @@ def readFile(targetFile):
             row.append(elements)
             row.append([elements.pop()])
             data.append(row)
+
+    for row in data:
+        print(row)
     return data
 
-def datasets(epochs=100,nbits=4,lrate=0.03,showint=100,mbs=None,vfrac=0.1,tfrac=0.1,vint=100,sm=False,targetFile="../data/glass.txt"):
+def datasets(epochs=1000,nbits=4,lrate=0.1,showint=1000,mbs=27,vfrac=0.1,tfrac=0.1,vint=1000,sm=True,targetFile="../data/glass.txt", bestk=1):
     size = 2**nbits
     mbs = mbs if mbs else size
     case_generator = (lambda : readFile(targetFile))
     cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac)
-    ann = Gann(dims=[size, nbits, size],cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,softmax=sm)
+    print(cman.cases)
+    ann = Gann(dims=[9, nbits, 1],cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,softmax=sm)
     ann.gen_probe(0,'wgt',('hist','avg'))  # Plot a histogram and avg of the incoming weights to module 0.
     ann.gen_probe(1,'out',('avg','max'))  # Plot average and max value of module 1's output vector
     ann.add_grabvar(0,'wgt') # Add a grabvar (to be displayed in its own matplotlib window).
@@ -362,3 +367,5 @@ def datasets(epochs=100,nbits=4,lrate=0.03,showint=100,mbs=None,vfrac=0.1,tfrac=
 
 #autoex()
 #countex()
+#parity()
+datasets()
