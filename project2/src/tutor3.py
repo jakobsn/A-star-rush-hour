@@ -301,7 +301,9 @@ def autoex(epochs=10000,nbits=4,lrate=0.1,showint=10000,mbs=None,vfrac=0.1,tfrac
     ann.add_grabvar(1,'in') # Add a grabvar (to be displayed in its own matplotlib window).
     ann.add_grabvar(1,'out') # Add a grabvar (to be displayed in its own matplotlib window).
     ann.run(epochs,bestk=bestk)
+    sleep(10)
     ann.runmore(epochs*2,bestk=bestk)
+    sleep(10)
     return ann
 
 def countex(epochs=5000,nbits=10,ncases=500,lrate=0.5,showint=500,mbs=20,vfrac=0.1,tfrac=0.1,vint=500,sm=True,bestk=1):
@@ -350,13 +352,13 @@ def readFile(targetFile):
     return data
 
 # TODO: HOWTO DO THIS?
-def segment(epochs=5000,nbits=2,lrate=0.1,showint=10000,mbs=None,vfrac=0.1,tfrac=0.1,vint=10000,sm=True, bestk=1):
-    size = 2**nbits
+def segment(epochs=2000,nbits=2,lrate=0.1,showint=1000,mbs=None,vfrac=0.1,tfrac=0.1,vint=1000,sm=True, bestk=1):
+    size = 9
     mbs = mbs if mbs else size
     case_generator = (lambda : TFT.gen_segmented_vector_cases(25, 1000, 0, 8))
     cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac)
     print(cman.cases)
-    ann = Gann(dims=[size+2, nbits, size],cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,softmax=sm)
+    ann = Gann(dims=[25, nbits, size],cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,softmax=sm)
     ann.gen_probe(0,'wgt',('hist','avg'))  # Plot a histogram and avg of the incoming weights to module 0.
     ann.gen_probe(1,'out',('avg','max'))  # Plot average and max value of module 1's output vector
     #ann.add_grabvar(0,'wgt') # Add a grabvar (to be displayed in its own matplotlib window).
@@ -369,7 +371,8 @@ def segment(epochs=5000,nbits=2,lrate=0.1,showint=10000,mbs=None,vfrac=0.1,tfrac
     return ann
 
 # TODO: Does not run good, or run with bestk=1
-def datasets(epochs=1000,nbits=9,lrate=0.1,showint=1000,mbs=10,vfrac=0.1,tfrac=0.1,vint=1000,sm=True,targetFile="../data/glass.txt", bestk=1):
+# Change target vector to counting vector with the same range as possible answer
+def datasets(epochs=1000,nbits=9,lrate=0.1,showint=1000,mbs=10,vfrac=0.1,tfrac=0.1,vint=1000,sm=True,targetFile="../data/glass.txt", bestk=2):
     size = 2**nbits
     mbs = mbs if mbs else size
     case_generator = (lambda : readFile(targetFile))
@@ -383,8 +386,8 @@ def datasets(epochs=1000,nbits=9,lrate=0.1,showint=1000,mbs=10,vfrac=0.1,tfrac=0
     ann.runmore(epochs*2, bestk=bestk)
     return ann
 
-#autoex()
-countex()
+autoex()
+#countex()
 #parity()
 #datasets()
 #segment()
