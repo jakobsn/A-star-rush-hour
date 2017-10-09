@@ -10,7 +10,7 @@ from time import sleep
 
 class Gann():
 
-    def __init__(self, dims, cman,lrate=.1,showint=None,mbs=10,vint=None,softmax=False, hl_funct=tf.nn.relu):
+    def __init__(self, dims, cman,lrate=.1,showint=None,mbs=10,vint=None,ol_funct=tf.nn.softmax, hl_funct=tf.nn.relu):
         self.learning_rate = lrate
         self.layer_sizes = dims # Sizes of each layer of neurons
         self.show_interval = showint # Frequency of showing grabbed variables
@@ -21,7 +21,7 @@ class Gann():
         self.validation_interval = vint
         self.validation_history = []
         self.caseman = cman
-        self.softmax_outputs = softmax
+        self.ol_funct = ol_funct
         self.hl_funct = hl_funct
         self.modules = []
         self.build()
@@ -48,13 +48,12 @@ class Gann():
         invar = self.input; insize = num_inputs
         # Build all of the modules
         for i,outsize in enumerate(self.layer_sizes[1:]):
-            if i < (len(self.layer_sizes) - 1):
-                gmod = Gannmodule(self,i,invar,insize,outsize, hl_funct=self.hl_funct)
+            if i < (len(self.layer_sizes) - 2):
+                gmod = Gannmodule(self,i,invar,insize,outsize, a_funct=self.hl_funct)
             else:
-                gmod = Gannmodule(self,i,invar,insize,outsize, hl_funct=None)
+                gmod = Gannmodule(self,i,invar,insize,outsize, a_funct=self.ol_funct)
             invar = gmod.output; insize = gmod.outsize
         self.output = gmod.output # Output of last module is output of whole network
-        if self.softmax_outputs: self.output = tf.nn.softmax(self.output)
         self.target = tf.placeholder(tf.float64,shape=(None,gmod.outsize),name='Target')
         self.configure_learning()
 
@@ -220,15 +219,14 @@ class Gann():
 # A general ann module = a layer of neurons (the output) plus its incoming weights and biases.
 class Gannmodule():
 
-    def __init__(self,ann,index,invariable,insize,outsize, hl_funct):
+    def __init__(self,ann,index,invariable,insize,outsize, a_funct):
         self.ann = ann
         self.insize=insize  # Number of neurons feeding into this module
         self.outsize=outsize # Number of neurons in this module
         self.input = invariable  # Either the gann's input variable or the upstream module's output
         self.index = index
         self.name = "Module-"+str(self.index)
-        self
-        self.hl_funct = hl_funct
+        self.a_funct = a_funct
         self.build()
 
     def build(self):
@@ -237,10 +235,10 @@ class Gannmodule():
                                    name=mona+'-wgt',trainable=True) # True = default for trainable anyway
         self.biases = tf.Variable(np.random.uniform(-.1, .1, size=n),
                                   name=mona+'-bias', trainable=True)  # First bias vector
-        if self.hl_funct:
-            self.output = tf.nn.relu(tf.matmul(self.input,self.weights)+self.biases,name=mona+'-out')
+        if self.a_funct:
+            self.output = self.a_funct(tf.matmul(self.input,self.weights)+self.biases,name=mona+'-out')
         else:
-            self.output = tf.matmul(self.input,self.weights)
+            self.output = tf.matmul(self.input, self.weights)
         self.ann.add_module(self)
 
     def getvar(self,type):  # type = (in,out,wgt,bias)
@@ -297,12 +295,12 @@ class Caseman():
 
 # After running this, open a Tensorboard (Go to localhost:6006 in your Chrome Browser) and check the
 # 'scalar', 'distribution' and 'histogram' menu options to view the probed variables.
-def autoex(epochs=10000,nbits=4,lrate=0.1,showint=10000,mbs=None,vfrac=0.1,tfrac=0.1,vint=10000,sm=False, hl_funct=tf.nn.relu,bestk=1):
+def autoex(epochs=10000,nbits=4,lrate=0.1,showint=10000,mbs=None,vfrac=0.1,tfrac=0.1,vint=10000,ol_funct=tf.nn.relu , hl_funct=tf.nn.relu,bestk=1):
     size = 2**nbits
     mbs = mbs if mbs else size
     case_generator = (lambda : TFT.gen_all_one_hot_cases(2**nbits))
     cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac)
-    ann = Gann(dims=[size,nbits,size],cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,softmax=sm, hl_funct=hl_funct)
+    ann = Gann(dims=[size,nbits,size],cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,ol_funct=ol_funct, hl_funct=hl_funct)
     #ann.gen_probe(0,'wgt',('hist','avg'))  # Plot a histogram and avg of the incoming weights to module 0.
     #ann.gen_probe(1,'out',('avg','max'))  # Plot average and max value of module 1's output vector
     #ann.add_grabvar(0,'wgt') # Add a grabvar (to be displayed in its own matplotlib window).
@@ -313,10 +311,10 @@ def autoex(epochs=10000,nbits=4,lrate=0.1,showint=10000,mbs=None,vfrac=0.1,tfrac
     ann.runmore(epochs*2,bestk=bestk)
     return ann
 
-def countex(epochs=5000,nbits=10,ncases=5000,lrate=0.5,showint=5000,mbs=20,vfrac=0.1,tfrac=0.1,vint=5000,sm=True,bestk=1):
+def countex(epochs=5000,nbits=10,ncases=5000,lrate=0.5,showint=5000,mbs=20,vfrac=0.1,tfrac=0.1,vint=5000,ol_funct=tf.nn.softmax , hl_funct=tf.nn.relu,bestk=1):
     case_generator = (lambda: TFT.gen_vector_count_cases(ncases,nbits))
     cman = Caseman(cfunc=case_generator, vfrac=vfrac, tfrac=tfrac)
-    ann = Gann(dims=[nbits, nbits*3, nbits+1], cman=cman, lrate=lrate, showint=showint, mbs=mbs, vint=vint, softmax=sm)
+    ann = Gann(dims=[nbits, nbits*3, nbits+1], cman=cman, lrate=lrate, showint=showint, mbs=mbs, vint=vint, ol_funct=ol_funct, hl_funct=hl_funct)
     ann.add_grabvar(0,'in') # Add a grabvar (to be displayed in its own matplotlib window).
     ann.add_grabvar(1,'in') # Add a grabvar (to be displayed in its own matplotlib window).
     ann.add_grabvar(1,'out') # Add a grabvar (to be displayed in its own matplotlib window).
@@ -392,8 +390,8 @@ def datasets(epochs=1000,nbits=9,lrate=0.1,showint=1000,mbs=10,vfrac=0.1,tfrac=0
     ann.runmore(epochs*2, bestk=bestk)
     return ann
 
-autoex()
-#countex()
+#autoex()
+countex()
 #parity()
 #datasets()
 #segment()
