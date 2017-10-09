@@ -171,7 +171,6 @@ class Gann():
         self.test_on_trains(sess=self.current_session,bestk=bestk)
         self.testing_session(sess=self.current_session,bestk=bestk)
         self.close_current_session(view=False)
-        sleep(3)
         PLT.ioff()
 
     # After a run is complete, runmore allows us to do additional training on the network, picking up where we
@@ -305,7 +304,7 @@ def autoex(epochs=10000,nbits=4,lrate=0.1,showint=10000,mbs=None,vfrac=0.1,tfrac
     ann.runmore(epochs*2,bestk=bestk)
     return ann
 
-def countex(epochs=5000,nbits=10,ncases=5000,lrate=0.5,showint=5000,mbs=20,vfrac=0.1,tfrac=0.1,vint=5000,sm=True,bestk=1):
+def countex(epochs=5000,nbits=10,ncases=500,lrate=0.5,showint=500,mbs=20,vfrac=0.1,tfrac=0.1,vint=500,sm=True,bestk=1):
     case_generator = (lambda: TFT.gen_vector_count_cases(ncases,nbits))
     cman = Caseman(cfunc=case_generator, vfrac=vfrac, tfrac=tfrac)
     ann = Gann(dims=[nbits, nbits*3, nbits+1], cman=cman, lrate=lrate, showint=showint, mbs=mbs, vint=vint, softmax=sm)
@@ -385,7 +384,7 @@ def datasets(epochs=1000,nbits=9,lrate=0.1,showint=1000,mbs=10,vfrac=0.1,tfrac=0
     return ann
 
 #autoex()
-#countex()
+countex()
 #parity()
 #datasets()
 #segment()
