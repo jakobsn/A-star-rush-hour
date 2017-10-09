@@ -295,7 +295,7 @@ class Caseman():
 
 # After running this, open a Tensorboard (Go to localhost:6006 in your Chrome Browser) and check the
 # 'scalar', 'distribution' and 'histogram' menu options to view the probed variables.
-def autoex(epochs=10000,nbits=4,lrate=0.1,showint=10000,mbs=None,vfrac=0.1,tfrac=0.1,vint=10000,ol_funct=tf.nn.relu , hl_funct=tf.nn.relu,bestk=1):
+def autoex(epochs=10000,nbits=4,lrate=0.1,showint=10000,mbs=None,vfrac=0.1,tfrac=0.1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,bestk=1):
     size = 2**nbits
     mbs = mbs if mbs else size
     case_generator = (lambda : TFT.gen_all_one_hot_cases(2**nbits))
@@ -388,9 +388,9 @@ def datasets(epochs=1000,nbits=9,lrate=0.1,showint=1000,mbs=10,vfrac=0.1,tfrac=0
     ann.add_grabvar(0,'wgt') # Add a grabvar (to be displayed in its own matplotlib window).
     ann.run(epochs, bestk=bestk)
     ann.runmore(epochs*2, bestk=bestk)
-    return ann
+    retur
 
-#autoex()
+autoex()
 #ountex()
 #parity()
 #datasets()
