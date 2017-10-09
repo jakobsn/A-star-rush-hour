@@ -311,7 +311,7 @@ def autoex(epochs=10000,nbits=4,lrate=0.1,showint=10000,mbs=None,vfrac=0.1,tfrac
     ann.runmore(epochs*2,bestk=bestk)
     return ann
 
-def countex(epochs=5000,nbits=10,ncases=5000,lrate=0.5,showint=5000,mbs=20,vfrac=0.1,tfrac=0.1,vint=5000,ol_funct=tf.nn.softmax , hl_funct=tf.nn.relu,bestk=1):
+def countex(epochs=500,nbits=10,ncases=500,lrate=0.5,showint=5000,mbs=20,vfrac=0.1,tfrac=0.1,vint=5000,ol_funct=tf.nn.softmax , hl_funct=tf.nn.relu,bestk=1):
     case_generator = (lambda: TFT.gen_vector_count_cases(ncases,nbits))
     cman = Caseman(cfunc=case_generator, vfrac=vfrac, tfrac=tfrac)
     ann = Gann(dims=[nbits, nbits*3, nbits+1], cman=cman, lrate=lrate, showint=showint, mbs=mbs, vint=vint, ol_funct=ol_funct, hl_funct=hl_funct)
