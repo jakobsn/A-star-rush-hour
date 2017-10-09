@@ -12,7 +12,7 @@
   <component name="CoverageDataManager">
     <SUITE FILE_PATH="coverage/src$tutor2.coverage" NAME="tutor2 Coverage Results" MODIFIED="1507126027063" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/src$tutor3_old.coverage" NAME="tutor3_old Coverage Results" MODIFIED="1507288130550" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/src$tutor3.coverage" NAME="tutor3 Coverage Results" MODIFIED="1507300091709" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/src$tutor3.coverage" NAME="tutor3 Coverage Results" MODIFIED="1507547835010" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="FavoritesManager">
     <favorites_list name="src" />
@@ -32,7 +32,7 @@
       <file leaf-file-name="tflowtools.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tflowtools.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="206">
+            <state relative-caret-position="1422">
               <caret line="85" column="0" lean-forward="false" selection-start-line="85" selection-start-column="0" selection-end-line="85" selection-end-column="0" />
               <folding>
                 <element signature="e#91#114#0" expanded="true" />
@@ -44,8 +44,8 @@
       <file leaf-file-name="tutor1.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tutor1.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="286">
-              <caret line="137" column="58" lean-forward="true" selection-start-line="137" selection-start-column="58" selection-end-line="137" selection-end-column="58" />
+            <state relative-caret-position="2430">
+              <caret line="137" column="58" lean-forward="false" selection-start-line="137" selection-start-column="58" selection-end-line="137" selection-end-column="58" />
               <folding />
             </state>
           </provider>
@@ -54,8 +54,8 @@
       <file leaf-file-name="tutor3.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/tutor3.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1310">
-              <caret line="401" column="47" lean-forward="false" selection-start-line="401" selection-start-column="47" selection-end-line="401" selection-end-column="47" />
+            <state relative-caret-position="344">
+              <caret line="390" column="1" lean-forward="false" selection-start-line="390" selection-start-column="1" selection-end-line="390" selection-end-column="1" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
               </folding>
@@ -66,7 +66,7 @@
       <file leaf-file-name="numeric.py" pinned="false" current-in-tab="false">
         <entry file="file://$USER_HOME$/.local/lib/python3.5/site-packages/numpy/core/numeric.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="317">
+            <state relative-caret-position="9198">
               <caret line="530" column="0" lean-forward="false" selection-start-line="530" selection-start-column="0" selection-end-line="530" selection-end-column="0" />
               <folding />
             </state>
@@ -76,7 +76,7 @@
       <file leaf-file-name="session.py" pinned="false" current-in-tab="false">
         <entry file="file:///usr/local/lib/python3.5/dist-packages/tensorflow/python/client/session.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="598">
+            <state relative-caret-position="19440">
               <caret line="1099" column="0" lean-forward="false" selection-start-line="1099" selection-start-column="0" selection-end-line="1099" selection-end-column="0" />
               <folding />
             </state>
@@ -86,7 +86,7 @@
       <file leaf-file-name="tflowtools_old.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tflowtools_old.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-7022">
+            <state relative-caret-position="0">
               <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
               <folding />
             </state>
@@ -96,7 +96,7 @@
       <file leaf-file-name="tutor3_old.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tutor3_old.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="352">
+            <state relative-caret-position="7272">
               <caret line="408" column="0" lean-forward="false" selection-start-line="390" selection-start-column="0" selection-end-line="408" selection-end-column="0" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
@@ -108,7 +108,7 @@
       <file leaf-file-name="tflow_interface.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tflow_interface.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="252">
+            <state relative-caret-position="162">
               <caret line="14" column="0" lean-forward="false" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
               <folding>
                 <element signature="e#1#24#0" expanded="true" />
@@ -181,9 +181,10 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="y" value="-4" />
+    <option name="x" value="667" />
+    <option name="y" value="1436" />
     <option name="width" value="960" />
-    <option name="height" value="1084" />
+    <option name="height" value="1076" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -298,7 +299,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="-4" width="1920" height="1084" extended-state="6" />
+    <frame x="226" y="1436" width="1920" height="1084" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24958813" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -307,7 +308,7 @@
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3122449" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.5040816" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3294893" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
@@ -370,7 +371,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -396,9 +396,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1926">
           <caret line="110" column="14" lean-forward="true" selection-start-line="110" selection-start-column="14" selection-end-line="110" selection-end-column="14" />
-          <folding>
-            <element signature="e#0#23#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -442,7 +439,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -486,9 +482,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1926">
           <caret line="110" column="14" lean-forward="true" selection-start-line="110" selection-start-column="14" selection-end-line="110" selection-end-column="14" />
-          <folding>
-            <element signature="e#0#23#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -524,9 +517,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1638">
           <caret line="94" column="0" lean-forward="false" selection-start-line="94" selection-start-column="0" selection-end-line="94" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#23#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -570,7 +560,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -594,7 +583,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -620,9 +608,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#23#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -658,9 +643,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#23#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -694,7 +676,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -702,7 +683,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -717,9 +697,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="538">
           <caret line="113" column="0" lean-forward="false" selection-start-line="113" selection-start-column="0" selection-end-line="113" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#23#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -733,7 +710,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/tflow_interface.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="252">
+        <state relative-caret-position="162">
           <caret line="14" column="0" lean-forward="false" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
           <folding>
             <element signature="e#1#24#0" expanded="true" />
@@ -743,7 +720,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/tflowtools_old.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-7022">
+        <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
@@ -751,7 +728,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/tflowtools.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="206">
+        <state relative-caret-position="1422">
           <caret line="85" column="0" lean-forward="false" selection-start-line="85" selection-start-column="0" selection-end-line="85" selection-end-column="0" />
           <folding>
             <element signature="e#91#114#0" expanded="true" />
@@ -761,7 +738,7 @@
     </entry>
     <entry file="file://$USER_HOME$/.local/lib/python3.5/site-packages/numpy/core/numeric.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="317">
+        <state relative-caret-position="9198">
           <caret line="530" column="0" lean-forward="false" selection-start-line="530" selection-start-column="0" selection-end-line="530" selection-end-column="0" />
           <folding />
         </state>
@@ -769,15 +746,15 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/tutor1.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="286">
-          <caret line="137" column="58" lean-forward="true" selection-start-line="137" selection-start-column="58" selection-end-line="137" selection-end-column="58" />
+        <state relative-caret-position="2430">
+          <caret line="137" column="58" lean-forward="false" selection-start-line="137" selection-start-column="58" selection-end-line="137" selection-end-column="58" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file:///usr/local/lib/python3.5/dist-packages/tensorflow/python/client/session.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="598">
+        <state relative-caret-position="19440">
           <caret line="1099" column="0" lean-forward="false" selection-start-line="1099" selection-start-column="0" selection-end-line="1099" selection-end-column="0" />
           <folding />
         </state>
@@ -793,7 +770,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/tutor3_old.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="352">
+        <state relative-caret-position="7272">
           <caret line="408" column="0" lean-forward="false" selection-start-line="390" selection-start-column="0" selection-end-line="408" selection-end-column="0" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
@@ -803,8 +780,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/tutor3.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1310">
-          <caret line="401" column="47" lean-forward="false" selection-start-line="401" selection-start-column="47" selection-end-line="401" selection-end-column="47" />
+        <state relative-caret-position="344">
+          <caret line="390" column="1" lean-forward="false" selection-start-line="390" selection-start-column="1" selection-end-line="390" selection-end-column="1" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
           </folding>
