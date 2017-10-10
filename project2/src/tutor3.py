@@ -393,9 +393,9 @@ def datasets(epochs=1000,nbits=9,lrate=0.1,showint=1000,mbs=10,vfrac=0.1,tfrac=0
 
 #autoex()
 #countex()
-#parity()
+parity()
 #datasets()
-segment()
+#segment()
 
 """
 TODO:
