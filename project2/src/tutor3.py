@@ -64,7 +64,7 @@ class Gann():
     # of the weight array.
 
     def configure_learning(self):
-        self.error = self.loss_funct(self.target - self.output, name='MSE')
+        self.error = self.loss_funct(self.target, self.output, name='MSE')
         self.predictor = self.output  # Simple prediction runs will request the value of output neurons
         # Defining the training operator
         optimizer = tf.train.GradientDescentOptimizer(self.learning_rate)
@@ -323,7 +323,7 @@ def countex(epochs=500,nbits=10,ncases=500,lrate=0.5,showint=50,mbs=20,vfrac=0.1
     ann.run(epochs,bestk=bestk)
     return ann
 
-def parity(epochs=5000,nbits=2,lrate=0.1,showint=1000,mbs=None,vfrac=0.1,tfrac=0.1,vint=1000,ol_funct=tf.nn.softmax , hl_funct=tf.nn.relu, loss_funct=cross_entropy, bestk=1):
+def parity(epochs=5000,nbits=2,lrate=0.1,showint=1000,mbs=None,vfrac=0.1,tfrac=0.1,vint=1000,ol_funct=tf.nn.softmax , hl_funct=tf.nn.sigmoid, loss_funct=cross_entropy, bestk=1):
     size = 2**nbits
     mbs = mbs if mbs else size
     case_generator = (lambda : TFT.gen_vector_count_cases(2, 2**nbits))
@@ -403,3 +403,8 @@ x op_activation_funct: must replace softmax parameter, and set in output < build
 Qs:
 - Steps == global_training_step/epochs?
 """
+
+# IMPORTANT TFLOW FUNCTIONS:
+# tf.nn.sigmoid
+# tf.nn.relu
+# tf.nn.tanh

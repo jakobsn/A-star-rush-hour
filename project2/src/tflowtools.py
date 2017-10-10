@@ -444,9 +444,9 @@ def readFile(targetFile):
         print(row)
     return data
 
-def meanSquaredError(value, name):
-    return tf.reduce_mean(tf.square(value), name=name)
+def meanSquaredError(target, output, name):
+    return tf.reduce_mean(tf.square(target - output), name=name)
 
-
-def cross_entropy(value, name):
-    return tf.nn.sparse_softmax_cross_entropy_with_logits(value, name=name)
+# TODO: Q, IS THIS CORRECT?
+def cross_entropy(target, output, name):
+    return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=target, logits=output), name=name)
