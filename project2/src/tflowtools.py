@@ -424,3 +424,29 @@ def dendrogram(features,labels,metric='euclidean',mode='average',ax=None,title='
     ax.set_title(title)
     ax.set_ylabel(metric + ' distance')
     PLT.show()
+
+
+#   **** Helping functions ****
+
+def readFile(targetFile):
+    with open(targetFile) as file:
+        data = []
+        for line in file:
+            row = []
+            elements = []
+            for element in line.replace("\n", "").split(","):
+                elements.append(float(element))
+            row.append(elements)
+            row.append([elements.pop()])
+            data.append(row)
+
+    for row in data:
+        print(row)
+    return data
+
+def meanSquaredError(value, name):
+    return tf.reduce_mean(tf.square(value), name=name)
+
+
+def cross_entropy(value, name):
+    return tf.nn.sparse_softmax_cross_entropy_with_logits(value, name=name)

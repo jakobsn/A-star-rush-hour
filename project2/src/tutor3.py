@@ -3,6 +3,7 @@ import numpy as np
 import math
 import matplotlib.pyplot as PLT
 import tflowtools as TFT
+from tflowtools import meanSquaredError, cross_entropy, readFile
 from time import sleep
 
 # ******* A General Artificial Neural Network ********
@@ -10,7 +11,7 @@ from time import sleep
 
 class Gann():
 
-    def __init__(self, dims, cman,lrate=.1,showint=None,mbs=10,vint=None,ol_funct=tf.nn.softmax, hl_funct=tf.nn.relu):
+    def __init__(self, dims, cman,lrate=.1,showint=None,mbs=10,vint=None,ol_funct=tf.nn.softmax, hl_funct=tf.nn.relu, loss_funct=meanSquaredError):
         self.learning_rate = lrate
         self.layer_sizes = dims # Sizes of each layer of neurons
         self.show_interval = showint # Frequency of showing grabbed variables
@@ -23,6 +24,7 @@ class Gann():
         self.caseman = cman
         self.ol_funct = ol_funct
         self.hl_funct = hl_funct
+        self.loss_funct = loss_funct
         self.modules = []
         self.build()
 
@@ -62,7 +64,7 @@ class Gann():
     # of the weight array.
 
     def configure_learning(self):
-        self.error = tf.reduce_mean(tf.square(self.target - self.output),name='MSE')
+        self.error = self.loss_funct(self.target - self.output, name='MSE')
         self.predictor = self.output  # Simple prediction runs will request the value of output neurons
         # Defining the training operator
         optimizer = tf.train.GradientDescentOptimizer(self.learning_rate)
@@ -321,13 +323,13 @@ def countex(epochs=500,nbits=10,ncases=500,lrate=0.5,showint=50,mbs=20,vfrac=0.1
     ann.run(epochs,bestk=bestk)
     return ann
 
-def parity(epochs=5000,nbits=2,lrate=0.1,showint=1000,mbs=None,vfrac=0.1,tfrac=0.1,vint=1000,ol_funct=tf.nn.softmax , hl_funct=tf.nn.relu, bestk=1):
+def parity(epochs=5000,nbits=2,lrate=0.1,showint=1000,mbs=None,vfrac=0.1,tfrac=0.1,vint=1000,ol_funct=tf.nn.softmax , hl_funct=tf.nn.relu, loss_funct=cross_entropy, bestk=1):
     size = 2**nbits
     mbs = mbs if mbs else size
     case_generator = (lambda : TFT.gen_vector_count_cases(2, 2**nbits))
     cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac)
     print(cman.cases)
-    ann = Gann(dims=[size, nbits, size+1],cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,ol_funct=ol_funct,hl_funct=hl_funct)
+    ann = Gann(dims=[size, nbits, size+1],cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,ol_funct=ol_funct,hl_funct=hl_funct, loss_funct=loss_funct)
     ann.gen_probe(0,'wgt',('hist','avg'))  # Plot a histogram and avg of the incoming weights to module 0.
     ann.gen_probe(1,'out',('avg','max'))  # Plot average and max value of module 1's output vector
     #ann.add_grabvar(0,'wgt') # Add a grabvar (to be displayed in its own matplotlib window).
@@ -340,21 +342,6 @@ def parity(epochs=5000,nbits=2,lrate=0.1,showint=1000,mbs=None,vfrac=0.1,tfrac=0
     ann.runmore(epochs*2, bestk=bestk)
     return ann
 
-def readFile(targetFile):
-    with open(targetFile) as file:
-        data = []
-        for line in file:
-            row = []
-            elements = []
-            for element in line.replace("\n", "").split(","):
-                elements.append(float(element))
-            row.append(elements)
-            row.append([elements.pop()])
-            data.append(row)
-
-    for row in data:
-        print(row)
-    return data
 
 # TODO: HOWTO DO THIS?
 def segment(epochs=2000,nbits=2,lrate=0.1,showint=1000,mbs=None,vfrac=0.1,tfrac=0.1,vint=1000, ol_funct=tf.nn.softmax , hl_funct=tf.nn.relu, bestk=1):
@@ -390,6 +377,7 @@ def datasets(epochs=1000,nbits=9,lrate=0.1,showint=1000,mbs=10,vfrac=0.1,tfrac=0
     ann.run(epochs, bestk=bestk)
     ann.runmore(epochs*2, bestk=bestk)
     return ann
+
 
 #autoex()
 #countex()
