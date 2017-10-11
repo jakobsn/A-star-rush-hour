@@ -299,6 +299,66 @@ class Caseman():
 
 #   ****  MAIN functions ****
 
+def main(data_funct=readFile, data_params=("../data/glass.txt",), epochs=1000, nbits=9, dims=[9, 9, 7], lrate=0.1, mbs=10,
+         vfrac=0.1, tfrac=0.1,showint=1000, vint=1000,hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, weight_range=[-.1, .1],
+         cfrac=0.9, map_batch_size=0, steps=10,map_layers=0, map_dendrograms=[0], display_weights=[0], display_biases=[0], bestk=1):
+    case_generator = (lambda : data_funct(*data_params))
+    cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac,cfrac=cfrac)
+    ann = Gann(dims=dims,cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,ol_funct=ol_funct, hl_funct=hl_funct, loss_funct=loss_funct, weight_range=weight_range)
+    doMapping(ann)
+    ann.run(epochs,bestk=bestk)
+    ann.runmore(epochs*2,bestk=bestk)
+    return ann
+
+#autoex()
+#countex()
+#parity()
+#datasets()
+#segment()
+#countex(epochs=500,nbits=10,data_params=(500,10),lrate=0.5,showint=50,mbs=20,vfrac=0.1,tfrac=0.1,vint=50,ol_funct=tf.nn.softmax , hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1):
+
+#parity
+#main(data_funct=TFT.gen_vector_count_cases, data_params=(2, 4), epochs=200, nbits=9, dims=[4, 2, 5])
+
+#countex
+#main(TFT.gen_vector_count_cases, (500, 10), 30, 10, [10, 30, 11])
+
+#autoencoder
+#main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=5000,nbits=4, dims=[2**4, 4, 2**4],lrate=0.1,showint=10000,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1)
+
+#segment counter
+#main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=1000, nbits=2, dims=[25, 2, 9], lrate=0.1,mbs=9,vfrac=0.1,tfrac=0.1,cfrac=1, showint=1000,vint=1000,ol_funct=tf.nn.relu , hl_funct=tf.nn.sigmoid, loss_funct=crossEntropy, weight_range=[0, 1], bestk=1)
+
+#defaults to dataset
+#main()
+
+"""
+TODO:
+x support activation_functs: hyperbolic tangent, sigmoid, relu or softmax
+x hl_activation_funct: must be set in output < build < gannmodule
+x op_activation_funct: must replace softmax parameter, and set in output < build < gann
+x loss function: must be set in error < configure_learning < gann, either mean-squared error or cross entropy (mean-squared atm)
+x initial weight range: must be set in weights < build < gannmodule
+x datasource: specify function and param for case generator
+x casefraction: length of sublist ca of cases < organize cases < caseman
+~ implement do_mapping, use ann.grabvar()
+x how to  show graphical visualization of output layer
+x support long bias vectors (maximize window...)
+- visualize dendrograms
+? Find dims automaticly (or not?)
+
+Qs:
+- Steps == global_training_step/epochs?
+"""
+
+# IMPORTANT TFLOW FUNCTIONS:
+# tf.nn.sigmoid
+# tf.nn.relu
+# tf.nn.tanh
+
+
+"""Old functions replaced by main funct"""
+
 # After running this, open a Tensorboard (Go to localhost:6006 in your Chrome Browser) and check the
 # 'scalar', 'distribution' and 'histogram' menu options to view the probed variables.
 def autoex(data_params=(2**4,), epochs=10000,nbits=4, dims=[2*4,4,2**4],lrate=0.1,showint=10000,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1):
@@ -314,9 +374,6 @@ def countex(epochs=500,nbits=10,data_params=(500,10),lrate=0.5,showint=50,mbs=20
     case_generator = (lambda: TFT.gen_vector_count_cases(*data_params))
     cman = Caseman(cfunc=case_generator, vfrac=vfrac, tfrac=tfrac)
     ann = Gann(dims=[nbits, nbits*3, nbits+1], cman=cman, lrate=lrate, showint=showint, mbs=mbs, vint=vint, ol_funct=ol_funct, hl_funct=hl_funct,loss_funct=loss_funct, weight_range=weight_range)
-    ann.add_grabvar(0,'in') # Add a grabvar (to be displayed in its own matplotlib window).
-    ann.add_grabvar(1,'in') # Add a grabvar (to be displayed in its own matplotlib window).
-    ann.add_grabvar(1,'out') # Add a grabvar (to be displayed in its own matplotlib window).
     ann.run(epochs,bestk=bestk)
     return ann
 
@@ -362,49 +419,3 @@ def datasets(epochs=2000,nbits=9,dims=[9, 9, 7], lrate=0.1,showint=1000,mbs=30,v
     ann.run(epochs, bestk=bestk)
     ann.runmore(epochs*2, bestk=bestk)
     return ann
-
-
-def main(data_funct=readFile, data_params=("../data/glass.txt",), epochs=1000, nbits=9, dims=[9, 9, 7], lrate=0.1, mbs=10,
-         vfrac=0.1, tfrac=0.1,showint=1000, vint=1000,hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, weight_range=[-.1, .1],
-         cfrac=0.9, map_batch_size=0, steps=10,map_layers=0, map_dendrograms=[0], display_weights=[0], display_biases=[0], bestk=1):
-    case_generator = (lambda : data_funct(*data_params))
-    cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac,cfrac=cfrac)
-    ann = Gann(dims=dims,cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,ol_funct=ol_funct, hl_funct=hl_funct, loss_funct=loss_funct, weight_range=weight_range)
-    doMapping(ann)
-    ann.run(epochs,bestk=bestk)
-    ann.runmore(epochs*2,bestk=bestk)
-    return ann
-
-#autoex()
-#countex()
-#parity()
-#datasets()
-#segment()
-
-#main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=5000,nbits=4, dims=[2**4, 4, 2**4],lrate=0.1,showint=10000,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1)
-main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=1000, nbits=2, dims=[25, 2, 9], lrate=0.1,mbs=9,vfrac=0.1,tfrac=0.1,cfrac=1, showint=1000,vint=1000,ol_funct=tf.nn.relu , hl_funct=tf.nn.sigmoid, loss_funct=crossEntropy, weight_range=[0, 1], bestk=1)
-#main()
-
-"""
-TODO:
-x support activation_functs: hyperbolic tangent, sigmoid, relu or softmax
-x hl_activation_funct: must be set in output < build < gannmodule
-x op_activation_funct: must replace softmax parameter, and set in output < build < gann
-x loss function: must be set in error < configure_learning < gann, either mean-squared error or cross entropy (mean-squared atm)
-x initial weight range: must be set in weights < build < gannmodule
-x datasource: specify function and param for case generator
-x casefraction: length of sublist ca of cases < organize cases < caseman
-~ implement do_mapping, use ann.grabvar()
-x how to  show graphical visualization of output layer
-x support long bias vectors (maximize window...)
-- visualize dendrograms
-? Find dims automaticly (or not?)
-
-Qs:
-- Steps == global_training_step/epochs?
-"""
-
-# IMPORTANT TFLOW FUNCTIONS:
-# tf.nn.sigmoid
-# tf.nn.relu
-# tf.nn.tanh
