@@ -429,24 +429,49 @@ def dendrogram(features,labels,metric='euclidean',mode='average',ax=None,title='
 #   **** Helping functions ****
 
 def readFile(targetFile):
+    target_length = 0
     with open(targetFile) as file:
         data = []
         for line in file:
             row = []
             elements = []
-            for element in line.replace("\n", "").split(","):
-                elements.append(float(element))
+            features = line.replace("\n", "").split(",")
+            for i, feature in enumerate(features):
+                if(len(features) - 1) > i:
+                    elements.append(float(feature))
+                else:
+                    elements.append(int(feature))
             row.append(elements)
-            row.append([elements.pop()])
+            target = elements.pop()
+            if target > target_length:
+                target_lenght = target
+            row.append([target])
             data.append(row)
-
-    for row in data:
-        print(row)
+    data = format_target_datasets(data, target_lenght)
+    #data = scale_all_features(data)
     return data
 
-def meanSquaredError(target, output, name):
+
+# Format the dataset targets to become a list containing one hot target bit, instead of whole numbers.
+def format_target_datasets(filedata, target_length):
+    # Create target vector with one hot bit
+    for row in filedata:
+        target = [0] * target_length
+        int_target = row[-1][0]
+        if int_target is not 0:
+            target[int_target-1] = 1
+        row[-1] = target
+    return filedata
+
+# TODO
+#scale all features by their average and standard deviation.
+def scale_all_features(feature):
+
+    return #scaled_features
+
+def meanSquaredError(target, output, name="MSE"):
     return tf.reduce_mean(tf.square(target - output), name=name)
 
 # TODO: Q, IS THIS CORRECT?
-def cross_entropy(target, output, name):
+def cross_entropy(target, output, name="MSE"):
     return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=target, logits=output), name=name)
