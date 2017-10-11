@@ -12,7 +12,7 @@ from math import ceil
 
 class Gann():
 
-    def __init__(self, dims, weigth_range, cman,lrate=.1,showint=None,mbs=10,vint=None,ol_funct=tf.nn.softmax, hl_funct=tf.nn.relu, loss_funct=meanSquaredError):
+    def __init__(self, dims, weight_range, cman,lrate=.1,showint=None,mbs=10,vint=None,ol_funct=tf.nn.softmax, hl_funct=tf.nn.relu, loss_funct=meanSquaredError):
         self.learning_rate = lrate
         self.layer_sizes = dims # Sizes of each layer of neurons
         self.show_interval = showint # Frequency of showing grabbed variables
@@ -27,7 +27,7 @@ class Gann():
         self.hl_funct = hl_funct
         self.loss_funct = loss_funct
         self.modules = []
-        self.weigth_range = weigth_range
+        self.weight_range = weight_range
         self.build()
 
     # Probed variables are to be displayed in the Tensorboard.
@@ -53,9 +53,9 @@ class Gann():
         # Build all of the modules
         for i,outsize in enumerate(self.layer_sizes[1:]):
             if i < (len(self.layer_sizes) - 2):
-                gmod = Gannmodule(self,i,invar,insize,outsize, a_funct=self.hl_funct, weigth_range=self.weigth_range)
+                gmod = Gannmodule(self,i,invar,insize,outsize, a_funct=self.hl_funct, weight_range=self.weight_range)
             else:
-                gmod = Gannmodule(self,i,invar,insize,outsize, a_funct=self.ol_funct, weigth_range=self.weigth_range)
+                gmod = Gannmodule(self,i,invar,insize,outsize, a_funct=self.ol_funct, weight_range=self.weight_range)
             invar = gmod.output; insize = gmod.outsize
         self.output = gmod.output # Output of last module is output of whole network
         self.target = tf.placeholder(tf.float64,shape=(None,gmod.outsize),name='Target')
@@ -223,7 +223,7 @@ class Gann():
 # A general ann module = a layer of neurons (the output) plus its incoming weights and biases.
 class Gannmodule():
 
-    def __init__(self,ann,index,invariable,insize,outsize, a_funct, weigth_range):
+    def __init__(self,ann,index,invariable,insize,outsize, a_funct, weight_range):
         self.ann = ann
         self.insize=insize  # Number of neurons feeding into this module
         self.outsize=outsize # Number of neurons in this module
@@ -231,14 +231,14 @@ class Gannmodule():
         self.index = index
         self.name = "Module-"+str(self.index)
         self.a_funct = a_funct
-        self.weigth_range = weigth_range
+        self.weight_range = weight_range
         self.build()
 
     def build(self):
         mona = self.name; n = self.outsize
-        self.weights = tf.Variable(np.random.uniform(self.weigth_range[0], self.weigth_range[1], size=(self.insize,n)),
+        self.weights = tf.Variable(np.random.uniform(self.weight_range[0], self.weight_range[1], size=(self.insize,n)),
                                    name=mona+'-wgt',trainable=True) # True = default for trainable anyway
-        self.biases = tf.Variable(np.random.uniform(self.weigth_range[0], self.weigth_range[1], size=n),
+        self.biases = tf.Variable(np.random.uniform(self.weight_range[0], self.weight_range[1], size=n),
                                   name=mona+'-bias', trainable=True)  # First bias vector
         if self.a_funct:
             self.output = self.a_funct(tf.matmul(self.input,self.weights)+self.biases,name=mona+'-out')
@@ -301,39 +301,32 @@ class Caseman():
 
 # After running this, open a Tensorboard (Go to localhost:6006 in your Chrome Browser) and check the
 # 'scalar', 'distribution' and 'histogram' menu options to view the probed variables.
-def autoex(epochs=10000,nbits=4,lrate=0.1,showint=10000,mbs=None,vfrac=0.1,tfrac=0.1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weigth_range=[0, 1],bestk=1):
-    size = 2**nbits
-    mbs = mbs if mbs else size
-    case_generator = (lambda : TFT.gen_all_one_hot_cases(2**nbits))
-    cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac)
-    ann = Gann(dims=[size,nbits,size],cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,ol_funct=ol_funct, hl_funct=hl_funct, loss_funct=loss_funct, weigth_range=weigth_range)
-    #ann.gen_probe(0,'wgt',('hist','avg'))  # Plot a histogram and avg of the incoming weights to module 0.
-    #ann.gen_probe(1,'out',('avg','max'))  # Plot average and max value of module 1's output vector
-    #ann.add_grabvar(0,'wgt') # Add a grabvar (to be displayed in its own matplotlib window).
-    ann.add_grabvar(0,'in') # Add a grabvar (to be displayed in its own matplotlib window).
-    ann.add_grabvar(1,'in') # Add a grabvar (to be displayed in its own matplotlib window).
-    ann.add_grabvar(1,'out') # Add a grabvar (to be displayed in its own matplotlib window).
+def autoex(data_params=(2**4,), epochs=10000,nbits=4, dims=[2*4,4,2**4],lrate=0.1,showint=10000,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1):
+    case_generator = (lambda : TFT.gen_all_one_hot_cases(*data_params))
+    cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac,cfrac=cfrac)
+    ann = Gann(dims=dims,cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,ol_funct=ol_funct, hl_funct=hl_funct, loss_funct=loss_funct, weight_range=weight_range)
+    doMapping(ann)
     ann.run(epochs,bestk=bestk)
     ann.runmore(epochs*2,bestk=bestk)
     return ann
 
-def countex(epochs=500,nbits=10,ncases=500,lrate=0.5,showint=50,mbs=20,vfrac=0.1,tfrac=0.1,vint=50,ol_funct=tf.nn.softmax , hl_funct=tf.nn.relu,loss_funct=crossEntropy,weigth_range=[0, 1],bestk=1):
-    case_generator = (lambda: TFT.gen_vector_count_cases(ncases,nbits))
+def countex(epochs=500,nbits=10,data_params=(500,10),lrate=0.5,showint=50,mbs=20,vfrac=0.1,tfrac=0.1,vint=50,ol_funct=tf.nn.softmax , hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1):
+    case_generator = (lambda: TFT.gen_vector_count_cases(*data_params))
     cman = Caseman(cfunc=case_generator, vfrac=vfrac, tfrac=tfrac)
-    ann = Gann(dims=[nbits, nbits*3, nbits+1], cman=cman, lrate=lrate, showint=showint, mbs=mbs, vint=vint, ol_funct=ol_funct, hl_funct=hl_funct,loss_funct=loss_funct, weigth_range=weigth_range)
+    ann = Gann(dims=[nbits, nbits*3, nbits+1], cman=cman, lrate=lrate, showint=showint, mbs=mbs, vint=vint, ol_funct=ol_funct, hl_funct=hl_funct,loss_funct=loss_funct, weight_range=weight_range)
     ann.add_grabvar(0,'in') # Add a grabvar (to be displayed in its own matplotlib window).
     ann.add_grabvar(1,'in') # Add a grabvar (to be displayed in its own matplotlib window).
     ann.add_grabvar(1,'out') # Add a grabvar (to be displayed in its own matplotlib window).
     ann.run(epochs,bestk=bestk)
     return ann
 
-def parity(epochs=5000,nbits=2,lrate=0.1,showint=1000,mbs=None,vfrac=0.1,tfrac=0.1,vint=1000,ol_funct=tf.nn.softmax , hl_funct=tf.nn.sigmoid, loss_funct=crossEntropy, weigth_range=[0, 1], bestk=1):
+def parity(epochs=5000,nbits=2,lrate=0.1,showint=1000,mbs=None,vfrac=0.1,tfrac=0.1,vint=1000,ol_funct=tf.nn.softmax , hl_funct=tf.nn.sigmoid, loss_funct=crossEntropy, weight_range=[0, 1], bestk=1):
     size = 2**nbits
     mbs = mbs if mbs else size
     case_generator = (lambda : TFT.gen_vector_count_cases(2, 2**nbits))
     cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac)
     print(cman.cases)
-    ann = Gann(dims=[size, nbits, size+1],cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,ol_funct=ol_funct,hl_funct=hl_funct, loss_funct=loss_funct, weigth_range=weigth_range)
+    ann = Gann(dims=[size, nbits, size+1],cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,ol_funct=ol_funct,hl_funct=hl_funct, loss_funct=loss_funct, weight_range=weight_range)
     ann.gen_probe(0,'wgt',('hist','avg'))  # Plot a histogram and avg of the incoming weights to module 0.
     ann.gen_probe(1,'out',('avg','max'))  # Plot average and max value of module 1's output vector
     #ann.add_grabvar(0,'wgt') # Add a grabvar (to be displayed in its own matplotlib window).
@@ -346,51 +339,51 @@ def parity(epochs=5000,nbits=2,lrate=0.1,showint=1000,mbs=None,vfrac=0.1,tfrac=0
     ann.runmore(epochs*2, bestk=bestk)
     return ann
 
-def segment(epochs=2000,nbits=2,lrate=0.1,showint=1000,mbs=None,vfrac=0.1,tfrac=0.1,vint=1000, ol_funct=tf.nn.softmax , hl_funct=tf.nn.relu, loss_funct=crossEntropy, weigth_range=[0, 1],bestk=1):
+def segment(epochs=2000,nbits=2,lrate=0.1, dims=[25, 2, 9], showint=1000,mbs=None,vfrac=0.1,tfrac=0.1, cfrac=1,vint=1000, ol_funct=tf.nn.softmax , hl_funct=tf.nn.relu, loss_funct=crossEntropy, weight_range=[0, 1], data_params=(25, 1000, 0, 8),bestk=1):
     size = 9
     mbs = mbs if mbs else size
-    case_generator = (lambda : TFT.gen_segmented_vector_cases(25, 1000, 0, 8))
-    cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac)
-    print(cman.cases)
-    ann = Gann(dims=[25, nbits, size],cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,ol_funct=ol_funct, hl_funct=hl_funct, loss_funct=loss_funct, weigth_range=weigth_range)
-    ann.gen_probe(0,'wgt',('hist','avg'))  # Plot a histogram and avg of the incoming weights to module 0.
-    ann.gen_probe(1,'out',('avg','max'))  # Plot average and max value of module 1's output vector
-    #ann.add_grabvar(0,'wgt') # Add a grabvar (to be displayed in its own matplotlib window).
-    ann.add_grabvar(0,'in') # Add a grabvar (to be displayed in its own matplotlib window).
-    ann.add_grabvar(1,'in') # Add a grabvar (to be displayed in its own matplotlib window).
-    ann.add_grabvar(1,'out') # Add a grabvar (to be displayed in its own matplotlib window).
-
+    case_generator = (lambda : TFT.gen_segmented_vector_cases(*data_params))
+    cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac, cfrac=cfrac)
+    ann = Gann(dims=dims,cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,ol_funct=ol_funct, hl_funct=hl_funct, loss_funct=loss_funct, weight_range=weight_range)
+    doMapping(ann)
     ann.run(epochs, bestk=bestk)
     ann.runmore(epochs*2, bestk=bestk)
     return ann
 
 # TODO: Does not run good, need to scale input data better
 # Change target vector to counting vector with the same range as possible answer
-def datasets(epochs=2000,nbits=9,dims=[9, 9, 7], lrate=0.1,showint=1000,mbs=30,vfrac=0.1,tfrac=0.1, cfrac=1,vint=1000,ol_funct=tf.nn.softmax , hl_funct=tf.nn.sigmoid, loss_funct=crossEntropy, weigth_range=[0, 1], data_funct=readFile, data_params="../data/glass.txt", bestk=1):
+def datasets(epochs=2000,nbits=9,dims=[9, 9, 7], lrate=0.1,showint=1000,mbs=30,vfrac=0.1,tfrac=0.1, cfrac=1,vint=1000,ol_funct=tf.nn.softmax , hl_funct=tf.nn.sigmoid, loss_funct=crossEntropy, weight_range=[0, 1], data_params="../data/glass.txt", bestk=1):
     size = 2**nbits
     mbs = mbs if mbs else size
-    case_generator = (lambda : data_funct(data_params))
-    cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac)
-    print(cman.cases)
-    ann = Gann(dims=dims,cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,hl_funct=hl_funct, ol_funct=ol_funct, loss_funct=loss_funct, weigth_range=weigth_range)
+    case_generator = (lambda : readFile(data_params))
+    cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac, cfrac=cfrac)
+    ann = Gann(dims=dims,cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,hl_funct=hl_funct, ol_funct=ol_funct, loss_funct=loss_funct, weight_range=weight_range)
     doMapping(ann)
     ann.run(epochs, bestk=bestk)
     ann.runmore(epochs*2, bestk=bestk)
     return ann
 
 
-def main(main_funct=datasets, data_params="../data/glass.txt", data_funct=readFile, epochs=1000, nbits=9, dims=[9, 9, 7], lrate=0.1, mbs=10,
+def main(data_funct=readFile, data_params=("../data/glass.txt",), epochs=1000, nbits=9, dims=[9, 9, 7], lrate=0.1, mbs=10,
          vfrac=0.1, tfrac=0.1,showint=1000, vint=1000,hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, weight_range=[-.1, .1],
          cfrac=0.9, map_batch_size=0, steps=10,map_layers=0, map_dendrograms=[0], display_weights=[0], display_biases=[0], bestk=1):
-        return main_funct(epochs=epochs,nbits=nbits,dims=dims,  lrate=lrate, showint=showint,mbs=mbs, vfrac=vfrac, tfrac=tfrac,cfrac=cfrac,vint=vint,ol_funct=ol_funct,
-                          hl_funct=hl_funct,loss_funct=loss_funct, weigth_range=weight_range, data_funct=data_funct, data_params=data_params, bestk=1)
+    case_generator = (lambda : data_funct(*data_params))
+    cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac,cfrac=cfrac)
+    ann = Gann(dims=dims,cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,ol_funct=ol_funct, hl_funct=hl_funct, loss_funct=loss_funct, weight_range=weight_range)
+    doMapping(ann)
+    ann.run(epochs,bestk=bestk)
+    ann.runmore(epochs*2,bestk=bestk)
+    return ann
 
 #autoex()
 #countex()
 #parity()
 #datasets()
 #segment()
-main()
+
+#main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=5000,nbits=4, dims=[2**4, 4, 2**4],lrate=0.1,showint=10000,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1)
+main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=1000, nbits=2, dims=[25, 2, 9], lrate=0.1,mbs=9,vfrac=0.1,tfrac=0.1,cfrac=1, showint=1000,vint=1000,ol_funct=tf.nn.relu , hl_funct=tf.nn.sigmoid, loss_funct=crossEntropy, weight_range=[0, 1], bestk=1)
+#main()
 
 """
 TODO:
@@ -398,8 +391,8 @@ x support activation_functs: hyperbolic tangent, sigmoid, relu or softmax
 x hl_activation_funct: must be set in output < build < gannmodule
 x op_activation_funct: must replace softmax parameter, and set in output < build < gann
 x loss function: must be set in error < configure_learning < gann, either mean-squared error or cross entropy (mean-squared atm)
-- initial weight range: must be set in weights < build < gannmodule
-- datasource: specify function and param for case generator (missing data for all functions)
+x initial weight range: must be set in weights < build < gannmodule
+x datasource: specify function and param for case generator
 x casefraction: length of sublist ca of cases < organize cases < caseman
 ~ implement do_mapping, use ann.grabvar()
 x how to  show graphical visualization of output layer
