@@ -323,14 +323,14 @@ def main(data_funct=readFile, data_params=("../data/glass.txt",), epochs=1000, n
 #countex
 #main(TFT.gen_vector_count_cases, (500, 10), 30, 10, [10, 30, 11])
 
-#autoencoder
+#autoencoder, using gen_dense_autoencoder_cases is an option
 #main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=5000,nbits=4, dims=[2**4, 4, 2**4],lrate=0.1,showint=10000,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1)
 
 #segment counter
 #main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=1000, nbits=2, dims=[25, 2, 9], lrate=0.1,mbs=9,vfrac=0.1,tfrac=0.1,cfrac=1, showint=1000,vint=1000,ol_funct=tf.nn.relu , hl_funct=tf.nn.sigmoid, loss_funct=crossEntropy, weight_range=[0, 1], bestk=1)
 
 #defaults to dataset
-#main()
+main()
 
 """
 TODO:
@@ -346,6 +346,8 @@ x how to  show graphical visualization of output layer
 x support long bias vectors (maximize window...)
 - visualize dendrograms
 ? Find dims automaticly (or not?)
+- Implement reading from mnist
+- Implement scaling by deviation
 
 Qs:
 - Steps == global_training_step/epochs?

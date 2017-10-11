@@ -7,6 +7,7 @@ import os  # For starting up tensorboard from inside python
 import matplotlib.pyplot as PLT
 import scipy.cluster.hierarchy as SCH  # Needed for dendrograms
 import numpy.random as NPR
+from math import sqrt
 
 # ****** SESSION HANDLING *******
 
@@ -443,6 +444,8 @@ def readFile(targetFile):
     max_feature = 0
     min_feature = 999999999999999
     target_length = 0
+    total_value = 0
+    total_in_features = 0
     with open(targetFile) as file:
         data = []
         for line in file:
@@ -453,6 +456,7 @@ def readFile(targetFile):
                 # Input features are floats
                 if(len(features) - 1) > i:
                     elements.append(float(feature))
+                    total_in_features += float(feature)
                 # Target features are ints
                 else:
                     elements.append(int(feature))
@@ -464,14 +468,17 @@ def readFile(targetFile):
             row.append([target])
             data.append(row)
 
+            total_in_features = len(elements)
             if target > target_length:
                 target_lenght = target
             max_feature = max((elements + [max_feature]))
             min_feature = min((elements + [min_feature]))
 
+    #average = total_value/total_in_features
     # manipulate the data to become neural network friendly
     data = format_target_datasets(data, target_lenght)
     data = scale_min_max(data, min_feature, max_feature)
+    #data = scale_average_and_deviation(data, average)
     return data
 
 
@@ -485,6 +492,27 @@ def format_target_datasets(data, target_length):
             target[int_target-1] = 1
         row[-1] = target
     return data
+
+# TODO:
+def scale_average_and_deviation(data, average):
+    deviations = calculate_standard_deviation(data, average)
+    return
+
+    #deviation
+
+# TODO:
+# The average is total average atm, which is wrong, "differences" list is also created wrong
+def calculate_standard_deviation(data, average):
+    differences = [[0] * len(data[0][0])]
+    deviations = []
+    for y in range(len(data)):
+        for x in range(len(data[y][0])):
+            differences[x].append(data[y][0][x])
+    print("diff", differences)
+    for difference in differences:
+        deviations.append(sqrt(sum(difference)/average))
+    print("deviations", deviations)
+    return deviations
 
 # Scale all input features by the min and max value
 def scale_min_max(data, min_feature, max_feature):
