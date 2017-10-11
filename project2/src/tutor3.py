@@ -344,8 +344,6 @@ def parity(epochs=5000,nbits=2,lrate=0.1,showint=1000,mbs=None,vfrac=0.1,tfrac=0
     ann.runmore(epochs*2, bestk=bestk)
     return ann
 
-
-# TODO: HOWTO DO THIS?
 def segment(epochs=2000,nbits=2,lrate=0.1,showint=1000,mbs=None,vfrac=0.1,tfrac=0.1,vint=1000, ol_funct=tf.nn.softmax , hl_funct=tf.nn.relu, loss_funct=crossEntropy, weigth_range=[0, 1],bestk=1):
     size = 9
     mbs = mbs if mbs else size
@@ -366,24 +364,31 @@ def segment(epochs=2000,nbits=2,lrate=0.1,showint=1000,mbs=None,vfrac=0.1,tfrac=
 
 # TODO: Does not run good, need to scale input data better
 # Change target vector to counting vector with the same range as possible answer
-def datasets(epochs=2000,nbits=9,lrate=0.1,showint=1000,mbs=30,vfrac=0.1,tfrac=0.1,vint=1000,ol_funct=tf.nn.softmax , hl_funct=tf.nn.sigmoid, loss_funct=crossEntropy, weigth_range=[0, 1], targetFile="../data/glass.txt", bestk=1):
+def datasets(epochs=2000,nbits=9,dims=[9, 9, 7], lrate=0.1,showint=1000,mbs=30,vfrac=0.1,tfrac=0.1,vint=1000,ol_funct=tf.nn.softmax , hl_funct=tf.nn.sigmoid, loss_funct=crossEntropy, weigth_range=[0, 1], data_funct=readFile, data_params="../data/glass.txt", bestk=1):
     size = 2**nbits
     mbs = mbs if mbs else size
-    case_generator = (lambda : readFile(targetFile))
+    case_generator = (lambda : data_funct(data_params))
     cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac)
     print(cman.cases)
-    ann = Gann(dims=[nbits, nbits, 7],cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,hl_funct=hl_funct, ol_funct=ol_funct, loss_funct=loss_funct, weigth_range=weigth_range)
+    ann = Gann(dims=dims,cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,hl_funct=hl_funct, ol_funct=ol_funct, loss_funct=loss_funct, weigth_range=weigth_range)
     doMapping(ann)
     ann.run(epochs, bestk=bestk)
     ann.runmore(epochs*2, bestk=bestk)
     return ann
 
 
+def main(main_funct=datasets, data_params="../data/glass.txt", data_funct=readFile, epochs=1000, nbits=9, dims=[9, 9, 7], lrate=0.1, mbs=10,
+         vfrac=0.1, tfrac=0.1,showint=1000, vint=1000,hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, weight_range=[-.1, .1],
+         case_fraction=1, map_batch_size=0, steps=10,map_layers=0, map_dendrograms=[0], display_weights=[0], display_biases=[0], bestk=1):
+        return main_funct(epochs=epochs,nbits=nbits,dims=dims,  lrate=lrate, showint=showint,mbs=mbs, vfrac=vfrac, tfrac=tfrac,vint=vint,ol_funct=ol_funct,
+                          hl_funct=hl_funct,loss_funct=loss_funct, weigth_range=weight_range, data_funct=data_funct, data_params=data_params, bestk=1)
+
 #autoex()
 #countex()
 #parity()
 #datasets()
 #segment()
+main()
 
 """
 TODO:
