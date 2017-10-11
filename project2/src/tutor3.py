@@ -299,12 +299,12 @@ class Caseman():
 
 # After running this, open a Tensorboard (Go to localhost:6006 in your Chrome Browser) and check the
 # 'scalar', 'distribution' and 'histogram' menu options to view the probed variables.
-def autoex(epochs=10000,nbits=4,lrate=0.1,showint=10000,mbs=None,vfrac=0.1,tfrac=0.1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,bestk=1):
+def autoex(epochs=10000,nbits=4,lrate=0.1,showint=10000,mbs=None,vfrac=0.1,tfrac=0.1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weigth_range=[0, 1],bestk=1):
     size = 2**nbits
     mbs = mbs if mbs else size
     case_generator = (lambda : TFT.gen_all_one_hot_cases(2**nbits))
     cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac)
-    ann = Gann(dims=[size,nbits,size],cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,ol_funct=ol_funct, hl_funct=hl_funct, loss_funct=crossEntropy)
+    ann = Gann(dims=[size,nbits,size],cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,ol_funct=ol_funct, hl_funct=hl_funct, loss_funct=loss_funct, weigth_range=weigth_range)
     #ann.gen_probe(0,'wgt',('hist','avg'))  # Plot a histogram and avg of the incoming weights to module 0.
     #ann.gen_probe(1,'out',('avg','max'))  # Plot average and max value of module 1's output vector
     #ann.add_grabvar(0,'wgt') # Add a grabvar (to be displayed in its own matplotlib window).
@@ -315,23 +315,23 @@ def autoex(epochs=10000,nbits=4,lrate=0.1,showint=10000,mbs=None,vfrac=0.1,tfrac
     ann.runmore(epochs*2,bestk=bestk)
     return ann
 
-def countex(epochs=500,nbits=10,ncases=500,lrate=0.5,showint=50,mbs=20,vfrac=0.1,tfrac=0.1,vint=50,ol_funct=tf.nn.softmax , hl_funct=tf.nn.relu,loss_funct=crossEntropy,bestk=1):
+def countex(epochs=500,nbits=10,ncases=500,lrate=0.5,showint=50,mbs=20,vfrac=0.1,tfrac=0.1,vint=50,ol_funct=tf.nn.softmax , hl_funct=tf.nn.relu,loss_funct=crossEntropy,weigth_range=[0, 1],bestk=1):
     case_generator = (lambda: TFT.gen_vector_count_cases(ncases,nbits))
     cman = Caseman(cfunc=case_generator, vfrac=vfrac, tfrac=tfrac)
-    ann = Gann(dims=[nbits, nbits*3, nbits+1], cman=cman, lrate=lrate, showint=showint, mbs=mbs, vint=vint, ol_funct=ol_funct, hl_funct=hl_funct,loss_funct=crossEntropy)
+    ann = Gann(dims=[nbits, nbits*3, nbits+1], cman=cman, lrate=lrate, showint=showint, mbs=mbs, vint=vint, ol_funct=ol_funct, hl_funct=hl_funct,loss_funct=loss_funct, weigth_range=weigth_range)
     ann.add_grabvar(0,'in') # Add a grabvar (to be displayed in its own matplotlib window).
     ann.add_grabvar(1,'in') # Add a grabvar (to be displayed in its own matplotlib window).
     ann.add_grabvar(1,'out') # Add a grabvar (to be displayed in its own matplotlib window).
     ann.run(epochs,bestk=bestk)
     return ann
 
-def parity(epochs=5000,nbits=2,lrate=0.1,showint=1000,mbs=None,vfrac=0.1,tfrac=0.1,vint=1000,ol_funct=tf.nn.softmax , hl_funct=tf.nn.sigmoid, loss_funct=crossEntropy, bestk=1):
+def parity(epochs=5000,nbits=2,lrate=0.1,showint=1000,mbs=None,vfrac=0.1,tfrac=0.1,vint=1000,ol_funct=tf.nn.softmax , hl_funct=tf.nn.sigmoid, loss_funct=crossEntropy, weigth_range=[0, 1], bestk=1):
     size = 2**nbits
     mbs = mbs if mbs else size
     case_generator = (lambda : TFT.gen_vector_count_cases(2, 2**nbits))
     cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac)
     print(cman.cases)
-    ann = Gann(dims=[size, nbits, size+1],cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,ol_funct=ol_funct,hl_funct=hl_funct, loss_funct=loss_funct)
+    ann = Gann(dims=[size, nbits, size+1],cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,ol_funct=ol_funct,hl_funct=hl_funct, loss_funct=loss_funct, weigth_range=weigth_range)
     ann.gen_probe(0,'wgt',('hist','avg'))  # Plot a histogram and avg of the incoming weights to module 0.
     ann.gen_probe(1,'out',('avg','max'))  # Plot average and max value of module 1's output vector
     #ann.add_grabvar(0,'wgt') # Add a grabvar (to be displayed in its own matplotlib window).
@@ -346,13 +346,13 @@ def parity(epochs=5000,nbits=2,lrate=0.1,showint=1000,mbs=None,vfrac=0.1,tfrac=0
 
 
 # TODO: HOWTO DO THIS?
-def segment(epochs=2000,nbits=2,lrate=0.1,showint=1000,mbs=None,vfrac=0.1,tfrac=0.1,vint=1000, ol_funct=tf.nn.softmax , hl_funct=tf.nn.relu, loss_funct=crossEntropy, bestk=1):
+def segment(epochs=2000,nbits=2,lrate=0.1,showint=1000,mbs=None,vfrac=0.1,tfrac=0.1,vint=1000, ol_funct=tf.nn.softmax , hl_funct=tf.nn.relu, loss_funct=crossEntropy, weigth_range=[0, 1],bestk=1):
     size = 9
     mbs = mbs if mbs else size
     case_generator = (lambda : TFT.gen_segmented_vector_cases(25, 1000, 0, 8))
     cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac)
     print(cman.cases)
-    ann = Gann(dims=[25, nbits, size],cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,ol_funct=ol_funct, hl_funct=hl_funct, loss_funct=loss_funct)
+    ann = Gann(dims=[25, nbits, size],cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,ol_funct=ol_funct, hl_funct=hl_funct, loss_funct=loss_funct, weigth_range=weigth_range)
     ann.gen_probe(0,'wgt',('hist','avg'))  # Plot a histogram and avg of the incoming weights to module 0.
     ann.gen_probe(1,'out',('avg','max'))  # Plot average and max value of module 1's output vector
     #ann.add_grabvar(0,'wgt') # Add a grabvar (to be displayed in its own matplotlib window).
@@ -382,7 +382,7 @@ def datasets(epochs=2000,nbits=9,lrate=0.1,showint=1000,mbs=30,vfrac=0.1,tfrac=0
 #autoex()
 #countex()
 #parity()
-datasets()
+#datasets()
 #segment()
 
 """
