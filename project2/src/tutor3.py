@@ -11,7 +11,7 @@ from time import sleep
 
 class Gann():
 
-    def __init__(self, dims, cman,lrate=.1,showint=None,mbs=10,vint=None,ol_funct=tf.nn.softmax, hl_funct=tf.nn.relu, loss_funct=meanSquaredError):
+    def __init__(self, dims, weigth_range, cman,lrate=.1,showint=None,mbs=10,vint=None,ol_funct=tf.nn.softmax, hl_funct=tf.nn.relu, loss_funct=meanSquaredError):
         self.learning_rate = lrate
         self.layer_sizes = dims # Sizes of each layer of neurons
         self.show_interval = showint # Frequency of showing grabbed variables
@@ -26,6 +26,7 @@ class Gann():
         self.hl_funct = hl_funct
         self.loss_funct = loss_funct
         self.modules = []
+        self.weigth_range = weigth_range
         self.build()
 
     # Probed variables are to be displayed in the Tensorboard.
@@ -51,9 +52,9 @@ class Gann():
         # Build all of the modules
         for i,outsize in enumerate(self.layer_sizes[1:]):
             if i < (len(self.layer_sizes) - 2):
-                gmod = Gannmodule(self,i,invar,insize,outsize, a_funct=self.hl_funct)
+                gmod = Gannmodule(self,i,invar,insize,outsize, a_funct=self.hl_funct, weigth_range=self.weigth_range)
             else:
-                gmod = Gannmodule(self,i,invar,insize,outsize, a_funct=self.ol_funct)
+                gmod = Gannmodule(self,i,invar,insize,outsize, a_funct=self.ol_funct, weigth_range=self.weigth_range)
             invar = gmod.output; insize = gmod.outsize
         self.output = gmod.output # Output of last module is output of whole network
         self.target = tf.placeholder(tf.float64,shape=(None,gmod.outsize),name='Target')
@@ -221,7 +222,7 @@ class Gann():
 # A general ann module = a layer of neurons (the output) plus its incoming weights and biases.
 class Gannmodule():
 
-    def __init__(self,ann,index,invariable,insize,outsize, a_funct):
+    def __init__(self,ann,index,invariable,insize,outsize, a_funct, weigth_range):
         self.ann = ann
         self.insize=insize  # Number of neurons feeding into this module
         self.outsize=outsize # Number of neurons in this module
@@ -229,13 +230,14 @@ class Gannmodule():
         self.index = index
         self.name = "Module-"+str(self.index)
         self.a_funct = a_funct
+        self.weigth_range = weigth_range
         self.build()
 
     def build(self):
         mona = self.name; n = self.outsize
-        self.weights = tf.Variable(np.random.uniform(-.1, .1, size=(self.insize,n)),
+        self.weights = tf.Variable(np.random.uniform(self.weigth_range[0], self.weigth_range[1], size=(self.insize,n)),
                                    name=mona+'-wgt',trainable=True) # True = default for trainable anyway
-        self.biases = tf.Variable(np.random.uniform(-.1, .1, size=n),
+        self.biases = tf.Variable(np.random.uniform(self.weigth_range[0], self.weigth_range[1], size=n),
                                   name=mona+'-bias', trainable=True)  # First bias vector
         if self.a_funct:
             self.output = self.a_funct(tf.matmul(self.input,self.weights)+self.biases,name=mona+'-out')
@@ -362,15 +364,15 @@ def segment(epochs=2000,nbits=2,lrate=0.1,showint=1000,mbs=None,vfrac=0.1,tfrac=
     ann.runmore(epochs*2, bestk=bestk)
     return ann
 
-# TODO: Does not run good, or run with bestk=1
+# TODO: Does not run good, need to scale input data better
 # Change target vector to counting vector with the same range as possible answer
-def datasets(epochs=10000,nbits=9,lrate=0.1,showint=1000,mbs=30,vfrac=0.1,tfrac=0.1,vint=1000,ol_funct=tf.nn.softmax , hl_funct=tf.nn.sigmoid, loss_funct=crossEntropy, targetFile="../data/glass.txt", bestk=1):
+def datasets(epochs=2000,nbits=9,lrate=0.1,showint=1000,mbs=30,vfrac=0.1,tfrac=0.1,vint=1000,ol_funct=tf.nn.softmax , hl_funct=tf.nn.sigmoid, loss_funct=crossEntropy, weigth_range=[0, 1], targetFile="../data/glass.txt", bestk=1):
     size = 2**nbits
     mbs = mbs if mbs else size
     case_generator = (lambda : readFile(targetFile))
     cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac)
     print(cman.cases)
-    ann = Gann(dims=[nbits, nbits, 7],cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,hl_funct=hl_funct, ol_funct=ol_funct, loss_funct=loss_funct)
+    ann = Gann(dims=[nbits, nbits, 7],cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,hl_funct=hl_funct, ol_funct=ol_funct, loss_funct=loss_funct, weigth_range=weigth_range)
     doMapping(ann)
     ann.run(epochs, bestk=bestk)
     ann.runmore(epochs*2, bestk=bestk)
@@ -388,15 +390,15 @@ TODO:
 x support activation_functs: hyperbolic tangent, sigmoid, relu or softmax
 x hl_activation_funct: must be set in output < build < gannmodule
 x op_activation_funct: must replace softmax parameter, and set in output < build < gann
-- loss function: must be set in error < configure_learning < gann, either mean-squared error or cross entropy (mean-squared atm)
+x loss function: must be set in error < configure_learning < gann, either mean-squared error or cross entropy (mean-squared atm)
 - initial weight range: must be set in weights < build < gannmodule
-- datasource: specify function and param for case generator
+- datasource: specify function and param for case generator (missing data for all functions)
 - casefraction: length of sublist ca of cases < organize cases < caseman
-- implement do_mapping, use ann.grabvar()
-- how to  show graphical visualization of output layer
-- support long bias vectors
+~ implement do_mapping, use ann.grabvar()
+x how to  show graphical visualization of output layer
+x support long bias vectors (maximize window...)
 - visualize dendrograms
-- Find dims automaticly
+? Find dims automaticly (or not?)
 
 Qs:
 - Steps == global_training_step/epochs?
