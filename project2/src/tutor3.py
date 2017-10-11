@@ -5,6 +5,7 @@ import matplotlib.pyplot as PLT
 import tflowtools as TFT
 from tflowtools import meanSquaredError, crossEntropy, readFile, doMapping
 from time import sleep
+from math import ceil
 
 # ******* A General Artificial Neural Network ********
 # This is the original GANN, which has been improved in the file gann.py
@@ -270,10 +271,11 @@ class Gannmodule():
 
 class Caseman():
 
-    def __init__(self,cfunc,vfrac=0,tfrac=0):
+    def __init__(self,cfunc,vfrac=0,tfrac=0, cfrac=1):
         self.casefunc = cfunc
         self.validation_fraction = vfrac
         self.test_fraction = tfrac
+        self.case_fraction = cfrac
         self.training_fraction = 1 - (vfrac + tfrac)
         self.generate_cases()
         self.organize_cases()
@@ -282,7 +284,7 @@ class Caseman():
         self.cases = self.casefunc()  # Run the case generator.  Case = [input-vector, target-vector]
 
     def organize_cases(self):
-        ca = np.array(self.cases)
+        ca = np.array(self.cases[:ceil((len(self.cases)*self.case_fraction))])
         np.random.shuffle(ca) # Randomly shuffle all cases
         separator1 = round(len(self.cases) * self.training_fraction)
         separator2 = separator1 + round(len(self.cases)*self.validation_fraction)
@@ -364,7 +366,7 @@ def segment(epochs=2000,nbits=2,lrate=0.1,showint=1000,mbs=None,vfrac=0.1,tfrac=
 
 # TODO: Does not run good, need to scale input data better
 # Change target vector to counting vector with the same range as possible answer
-def datasets(epochs=2000,nbits=9,dims=[9, 9, 7], lrate=0.1,showint=1000,mbs=30,vfrac=0.1,tfrac=0.1,vint=1000,ol_funct=tf.nn.softmax , hl_funct=tf.nn.sigmoid, loss_funct=crossEntropy, weigth_range=[0, 1], data_funct=readFile, data_params="../data/glass.txt", bestk=1):
+def datasets(epochs=2000,nbits=9,dims=[9, 9, 7], lrate=0.1,showint=1000,mbs=30,vfrac=0.1,tfrac=0.1, cfrac=1,vint=1000,ol_funct=tf.nn.softmax , hl_funct=tf.nn.sigmoid, loss_funct=crossEntropy, weigth_range=[0, 1], data_funct=readFile, data_params="../data/glass.txt", bestk=1):
     size = 2**nbits
     mbs = mbs if mbs else size
     case_generator = (lambda : data_funct(data_params))
@@ -379,8 +381,8 @@ def datasets(epochs=2000,nbits=9,dims=[9, 9, 7], lrate=0.1,showint=1000,mbs=30,v
 
 def main(main_funct=datasets, data_params="../data/glass.txt", data_funct=readFile, epochs=1000, nbits=9, dims=[9, 9, 7], lrate=0.1, mbs=10,
          vfrac=0.1, tfrac=0.1,showint=1000, vint=1000,hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, weight_range=[-.1, .1],
-         case_fraction=1, map_batch_size=0, steps=10,map_layers=0, map_dendrograms=[0], display_weights=[0], display_biases=[0], bestk=1):
-        return main_funct(epochs=epochs,nbits=nbits,dims=dims,  lrate=lrate, showint=showint,mbs=mbs, vfrac=vfrac, tfrac=tfrac,vint=vint,ol_funct=ol_funct,
+         cfrac=0.9, map_batch_size=0, steps=10,map_layers=0, map_dendrograms=[0], display_weights=[0], display_biases=[0], bestk=1):
+        return main_funct(epochs=epochs,nbits=nbits,dims=dims,  lrate=lrate, showint=showint,mbs=mbs, vfrac=vfrac, tfrac=tfrac,cfrac=cfrac,vint=vint,ol_funct=ol_funct,
                           hl_funct=hl_funct,loss_funct=loss_funct, weigth_range=weight_range, data_funct=data_funct, data_params=data_params, bestk=1)
 
 #autoex()
@@ -398,7 +400,7 @@ x op_activation_funct: must replace softmax parameter, and set in output < build
 x loss function: must be set in error < configure_learning < gann, either mean-squared error or cross entropy (mean-squared atm)
 - initial weight range: must be set in weights < build < gannmodule
 - datasource: specify function and param for case generator (missing data for all functions)
-- casefraction: length of sublist ca of cases < organize cases < caseman
+x casefraction: length of sublist ca of cases < organize cases < caseman
 ~ implement do_mapping, use ann.grabvar()
 x how to  show graphical visualization of output layer
 x support long bias vectors (maximize window...)
