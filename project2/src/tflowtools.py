@@ -429,6 +429,8 @@ def dendrogram(features,labels,metric='euclidean',mode='average',ax=None,title='
 #   **** Helping functions ****
 
 def readFile(targetFile):
+    max_feature = 0
+    min_feature = 999999999999999
     target_length = 0
     with open(targetFile) as file:
         data = []
@@ -437,37 +439,48 @@ def readFile(targetFile):
             elements = []
             features = line.replace("\n", "").split(",")
             for i, feature in enumerate(features):
+                # Input features are floats
                 if(len(features) - 1) > i:
                     elements.append(float(feature))
+                # Target features are ints
                 else:
                     elements.append(int(feature))
+
+            # append all features
             row.append(elements)
+            # pop target and append in the end
             target = elements.pop()
-            if target > target_length:
-                target_lenght = target
             row.append([target])
             data.append(row)
+
+            if target > target_length:
+                target_lenght = target
+            max_feature = max((elements + [max_feature]))
+            min_feature = min((elements + [min_feature]))
+
+    # manipulate the data to become neural network friendly
     data = format_target_datasets(data, target_lenght)
-    #data = scale_all_features(data)
+    data = scale_min_max(data, min_feature, max_feature)
     return data
 
 
 # Format the dataset targets to become a list containing one hot target bit, instead of whole numbers.
-def format_target_datasets(filedata, target_length):
+def format_target_datasets(data, target_length):
     # Create target vector with one hot bit
-    for row in filedata:
+    for row in data:
         target = [0] * target_length
         int_target = row[-1][0]
         if int_target is not 0:
             target[int_target-1] = 1
         row[-1] = target
-    return filedata
+    return data
 
-# TODO
-#scale all features by their average and standard deviation.
-def scale_all_features(feature):
-
-    return #scaled_features
+# Scale all input features by the min and max value
+def scale_min_max(data, min_feature, max_feature):
+    for row in data:
+        for i, feature in enumerate(row[0]):
+            row[0][i] = ((feature - min_feature) / (max_feature - min_feature))
+    return data
 
 def meanSquaredError(target, output, name="MSE"):
     return tf.reduce_mean(tf.square(target - output), name=name)
