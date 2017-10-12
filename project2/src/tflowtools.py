@@ -440,12 +440,10 @@ def doMapping(ann):
         ann.add_grabvar(i,'out') # Add a grabvar (to be displayed in its own matplotlib window).
 
 
-def readFile(targetFile):
+def readFile(targetFile, scale):
     max_feature = 0
     min_feature = 999999999999999
     target_length = 0
-    total_value = 0
-    total_in_features = 0
     with open(targetFile) as file:
         data = []
         for line in file:
@@ -456,7 +454,6 @@ def readFile(targetFile):
                 # Input features are floats
                 if(len(features) - 1) > i:
                     elements.append(float(feature))
-                    total_in_features += float(feature)
                 # Target features are ints
                 else:
                     elements.append(int(feature))
@@ -468,17 +465,18 @@ def readFile(targetFile):
             row.append([target])
             data.append(row)
 
-            total_in_features = len(elements)
             if target > target_length:
                 target_lenght = target
             max_feature = max((elements + [max_feature]))
             min_feature = min((elements + [min_feature]))
-
-    #average = total_value/total_in_features
     # manipulate the data to become neural network friendly
     data = format_target_datasets(data, target_lenght)
-    data = scale_min_max(data, min_feature, max_feature)
-    #data = scale_average_and_deviation(data, average)
+    print(scale)
+    if scale == "minmax":
+        data = scale_min_max(data, min_feature, max_feature)
+    else:
+        print("Do scale by average and standard deviation")
+        data = scale_average_and_deviation(data)
     return data
 
 
@@ -494,25 +492,43 @@ def format_target_datasets(data, target_length):
     return data
 
 # TODO:
-def scale_average_and_deviation(data, average):
-    deviations = calculate_standard_deviation(data, average)
-    return
+def scale_average_and_deviation(data):
+    features = get_data_features(data)
+    averages, deviations = calculate_average_and_standard_deviation(features)
+    for r, row in enumerate(data):
+        for f, feature in enumerate(row[0]):
+            data[r][0][f] = ((data[r][0][f]-averages[f])/deviations[f])
+    return data
 
-    #deviation
+def calculate_average_and_standard_deviation(features):
+    deviations = []
+    averages = []
+    for feature in features:
+        averages.append(sum(feature)/len(feature))
+
+        squared_differences = []
+        for difference in feature:
+            squared_differences.append((difference-averages[-1])**2)
+        deviations.append(sqrt((sum(squared_differences)/len(squared_differences))))
+
+    print(averages)
+    print(deviations)
+    return averages, deviations
 
 # TODO:
 # The average is total average atm, which is wrong, "differences" list is also created wrong
-def calculate_standard_deviation(data, average):
-    differences = [[0] * len(data[0][0])]
-    deviations = []
+def get_data_features(data):
+    neuron_inputs= []
+    for x in range(len(data[0][0])):
+        neuron_inputs.append([])
+
+    print(neuron_inputs)
     for y in range(len(data)):
         for x in range(len(data[y][0])):
-            differences[x].append(data[y][0][x])
-    print("diff", differences)
-    for difference in differences:
-        deviations.append(sqrt(sum(difference)/average))
-    print("deviations", deviations)
-    return deviations
+            neuron_inputs[x].append(data[y][0][x])
+    print(neuron_inputs)
+
+    return neuron_inputs
 
 # Scale all input features by the min and max value
 def scale_min_max(data, min_feature, max_feature):

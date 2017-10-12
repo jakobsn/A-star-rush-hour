@@ -299,7 +299,7 @@ class Caseman():
 
 #   ****  MAIN functions ****
 
-def main(data_funct=readFile, data_params=("../data/glass.txt",), epochs=1000, nbits=9, dims=[9, 9, 7], lrate=0.1, mbs=10,
+def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=1000, nbits=9, dims=[9, 9, 7], lrate=0.1, mbs=10,
          vfrac=0.1, tfrac=0.1,showint=1000, vint=1000,hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, weight_range=[-.1, .1],
          cfrac=0.9, map_batch_size=0, steps=10,map_layers=0, map_dendrograms=[0], display_weights=[0], display_biases=[0], bestk=1):
     case_generator = (lambda : data_funct(*data_params))
