@@ -1,5 +1,5 @@
 __author__ = 'keithd'
-__mnist_path__ = "/home/jakob/Dropbox/skole/2017-2018/host/AI-programming/project2/src/"
+__mnist_path__ = "/home/jakob/Dropbox/skole/2017-2018/host/mnist_files/"
 
 # Copied (and modified) from http://g.sweyla.com/blog/2012/mnist-numpy/, which is
 # adapted from http://abel.ee.ucla.edu/cvxopt/_downloads/mnist.py
