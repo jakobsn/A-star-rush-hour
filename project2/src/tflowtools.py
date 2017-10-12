@@ -471,11 +471,9 @@ def readFile(targetFile, scale):
             min_feature = min((elements + [min_feature]))
     # manipulate the data to become neural network friendly
     data = format_target_datasets(data, target_lenght)
-    print(scale)
     if scale == "minmax":
         data = scale_min_max(data, min_feature, max_feature)
-    else:
-        print("Do scale by average and standard deviation")
+    elif scale == "avgdev":
         data = scale_average_and_deviation(data)
     return data
 
@@ -491,7 +489,7 @@ def format_target_datasets(data, target_length):
         row[-1] = target
     return data
 
-# TODO:
+# Scale data by average and standard deviation
 def scale_average_and_deviation(data):
     features = get_data_features(data)
     averages, deviations = calculate_average_and_standard_deviation(features)
@@ -500,35 +498,31 @@ def scale_average_and_deviation(data):
             data[r][0][f] = ((data[r][0][f]-averages[f])/deviations[f])
     return data
 
+# Calculates average and standard deviation, followed wikipedia: https://simple.wikipedia.org/wiki/Standard_deviation
 def calculate_average_and_standard_deviation(features):
     deviations = []
     averages = []
     for feature in features:
+        # Calculate average and standard deviation for each feature
         averages.append(sum(feature)/len(feature))
-
         squared_differences = []
         for difference in feature:
             squared_differences.append((difference-averages[-1])**2)
         deviations.append(sqrt((sum(squared_differences)/len(squared_differences))))
-
-    print(averages)
-    print(deviations)
     return averages, deviations
 
-# TODO:
-# The average is total average atm, which is wrong, "differences" list is also created wrong
+# Get all the input data stored in lists of features
 def get_data_features(data):
-    neuron_inputs= []
+    # Create list to store lists of input features
+    features = []
     for x in range(len(data[0][0])):
-        neuron_inputs.append([])
+        features.append([])
 
-    print(neuron_inputs)
+    # Append all features
     for y in range(len(data)):
         for x in range(len(data[y][0])):
-            neuron_inputs[x].append(data[y][0][x])
-    print(neuron_inputs)
-
-    return neuron_inputs
+            features[x].append(data[y][0][x])
+    return features
 
 # Scale all input features by the min and max value
 def scale_min_max(data, min_feature, max_feature):
