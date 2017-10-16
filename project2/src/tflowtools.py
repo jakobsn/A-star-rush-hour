@@ -8,6 +8,8 @@ import matplotlib.pyplot as PLT
 import scipy.cluster.hierarchy as SCH  # Needed for dendrograms
 import numpy.random as NPR
 from math import sqrt
+from tensorflow.examples.tutorials.mnist import input_data
+from sklearn import preprocessing
 
 # ****** SESSION HANDLING *******
 
@@ -431,7 +433,7 @@ def dendrogram(features,labels,metric='euclidean',mode='average',ax=None,title='
 
 def doMapping(ann):
     ann.gen_probe(0,'wgt',('hist','avg'))  # Plot a histogram and avg of the incoming weights to module 0.
-    ann.gen_probe(1,'out',('avg','max'))  # Plot average and max value of module 1's output vector
+    #ann.gen_probe(1,'out',('avg','max'))  # Plot average and max value of module 1's output vector
     ann.add_grabvar(0,'wgt') # Add a grabvar (to be displayed in its own matplotlib window).
 
     # Grab all nodes I/O data
@@ -477,6 +479,13 @@ def readFile(targetFile, scale):
         data = scale_average_and_deviation(data)
     return data
 
+# Shape mnist data for formating
+def shape_mnist(case):
+    data = np.zeros(shape=len(case[0]))
+    for i, features, target in zip(enumerate(case[0]), case[1]):
+        data[i]=([np.hstack(features, target)])
+    print(data)
+    return data
 
 # Format the dataset targets to become a list containing one hot target bit, instead of whole numbers.
 def format_target_datasets(data, target_length):
@@ -537,3 +546,13 @@ def meanSquaredError(target, output, name="MSE"):
 # TODO: Q, IS THIS CORRECT?
 def crossEntropy(target, output, name="MSE"):
     return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=target, logits=output), name=name)
+
+def get_mnist_data(size):
+    mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
+    features, labels = mnist.train.next_batch(size)
+    features = preprocessing.minmax_scale(features)
+    output = []
+
+    for i in range(len(features)):
+        output.append(np.array([np.array(features[i].tolist()), np.array(labels[i].tolist())]))
+    return output

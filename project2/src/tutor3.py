@@ -3,10 +3,12 @@ import numpy as np
 import math
 import matplotlib.pyplot as PLT
 import tflowtools as TFT
-from tflowtools import meanSquaredError, crossEntropy, readFile, doMapping, scale_average_and_deviation, scale_min_max
-from time import sleep
+from tflowtools import meanSquaredError, crossEntropy, readFile, doMapping, scale_average_and_deviation, scale_min_max, get_mnist_data
+from time import time, sleep
 from math import ceil
 import mnist_basics as mb
+import theano
+
 
 # ******* A General Artificial Neural Network ********
 # This is the original GANN, which has been improved in the file gann.py
@@ -303,12 +305,16 @@ class Caseman():
 def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=1000, nbits=9, dims=[9, 9, 7], lrate=0.1, mbs=10,
          vfrac=0.1, tfrac=0.1,showint=1000, vint=1000,hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, weight_range=[-.1, .1],
          cfrac=0.9, map_batch_size=0, steps=10,map_layers=0, map_dendrograms=[0], display_weights=[0], display_biases=[0], bestk=1):
+    start = time()
     case_generator = (lambda : data_funct(*data_params))
     cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac,cfrac=cfrac)
     ann = Gann(dims=dims,cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,ol_funct=ol_funct, hl_funct=hl_funct, loss_funct=loss_funct, weight_range=weight_range)
     doMapping(ann)
     ann.run(epochs,bestk=bestk)
     ann.runmore(epochs*2,bestk=bestk)
+    end = time()
+    print("params", data_params, "epochs", epochs, "dims", dims, "lrate", lrate, "mbs", mbs)
+    print("Time elapsed:", end - start)
     return ann
 
 #autoex()
@@ -330,23 +336,10 @@ def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs
 #segment counter
 #main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=1000, nbits=2, dims=[25, 2, 9], lrate=0.1,mbs=9,vfrac=0.1,tfrac=0.1,cfrac=1, showint=1000,vint=1000,ol_funct=tf.nn.relu , hl_funct=tf.nn.sigmoid, loss_funct=crossEntropy, weight_range=[0, 1], bestk=1)
 
-#defaults to dataset
+#defaults to dataset glass
 #main()
 
-
-#mb.quicktest()
-cases=mb.load_cases("all_flat_mnist_training_cases")
-print(cases)
-TFT.format_target_datasets(cases, 9)
-
-
-#cases= mb.load_all_flat_cases()
-for i, case in enumerate(cases):
-    print("hei")
-    print(case[0])
-sleep(5)
-
-#main(data_funct=scale_min_max, data_params=mb.load_mnist("training"))
+main(data_funct=get_mnist_data, data_params=(10000,), epochs=5000, dims=[784, 10], lrate=0.1, mbs=500)
 
 """
 TODO:
@@ -363,7 +356,8 @@ x support long bias vectors (maximize window...)
 - visualize dendrograms
 ? Find dims automaticly (or not?)
 - Implement reading from mnist
-- Implement scaling by deviation
+x Implement scaling by deviation
+- Numpy arrays
 
 Qs:
 - Steps == global_training_step/epochs?
