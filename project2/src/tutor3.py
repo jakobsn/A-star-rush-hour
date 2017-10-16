@@ -309,7 +309,7 @@ def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs
     case_generator = (lambda : data_funct(*data_params))
     cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac,cfrac=cfrac)
     ann = Gann(dims=dims,cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,ol_funct=ol_funct, hl_funct=hl_funct, loss_funct=loss_funct, weight_range=weight_range)
-    doMapping(ann)
+    #doMapping(ann)
     ann.run(epochs,bestk=bestk)
     ann.runmore(epochs*2,bestk=bestk)
     end = time()
@@ -339,7 +339,11 @@ def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs
 #defaults to dataset glass
 #main()
 
-main(data_funct=get_mnist_data, data_params=(10000,), epochs=5000, dims=[784, 10], lrate=0.1, mbs=500)
+# MNIST
+#main(data_funct=get_mnist_data, data_params=(2000,), epochs=5000, dims=[784, 10], lrate=0.1, mbs=500)
+
+# Yeast
+main(data_funct=readFile, data_params=("../data/yeast.txt", "avgdev"), epochs=1000, dims=[8, 9, 10], lrate=0.1, mbs=10)
 
 """
 TODO:
@@ -355,7 +359,7 @@ x how to  show graphical visualization of output layer
 x support long bias vectors (maximize window...)
 - visualize dendrograms
 ? Find dims automaticly (or not?)
-- Implement reading from mnist
+x Implement reading from mnist
 x Implement scaling by deviation
 - Numpy arrays
 

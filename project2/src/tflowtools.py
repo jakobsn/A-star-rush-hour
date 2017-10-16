@@ -466,13 +466,16 @@ def readFile(targetFile, scale):
             target = elements.pop()
             row.append([target])
             data.append(row)
-
+            print(target)
             if target > target_length:
-                target_lenght = target
+                print("larger", target)
+                target_length = target
             max_feature = max((elements + [max_feature]))
             min_feature = min((elements + [min_feature]))
     # manipulate the data to become neural network friendly
-    data = format_target_datasets(data, target_lenght)
+    print(data)
+    print(target_length)
+    data = format_target_datasets(data, target_length)
     if scale == "minmax":
         data = scale_min_max(data, min_feature, max_feature)
     elif scale == "avgdev":
@@ -494,6 +497,8 @@ def format_target_datasets(data, target_length):
         target = [0] * target_length
         int_target = row[-1][0]
         if int_target is not 0:
+            print("target", target)
+            print("int_target", int_target)
             target[int_target-1] = 1
         row[-1] = target
     return data
