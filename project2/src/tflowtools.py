@@ -442,7 +442,7 @@ def doMapping(ann):
         ann.add_grabvar(i,'out') # Add a grabvar (to be displayed in its own matplotlib window).
 
 
-def readFile(targetFile, scale):
+def readFile(targetFile, scale, colons=False):
     max_feature = 0
     min_feature = 999999999999999
     target_length = 0
@@ -451,13 +451,17 @@ def readFile(targetFile, scale):
         for line in file:
             row = []
             elements = []
-            features = line.replace("\n", "").split(",")
+            if not colons:
+                features = line.replace("\n", "").split(",")
+            else:
+                features = line.replace("\n", "").split(";")
             for i, feature in enumerate(features):
                 # Input features are floats
                 if(len(features) - 1) > i:
                     elements.append(float(feature))
                 # Target features are ints
                 else:
+                    print("feature", feature)
                     elements.append(int(feature))
 
             # append all features
@@ -555,9 +559,7 @@ def crossEntropy(target, output, name="MSE"):
 def get_mnist_data(size):
     mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
     features, labels = mnist.train.next_batch(size)
-    features = preprocessing.minmax_scale(features)
     output = []
-
     for i in range(len(features)):
         output.append(np.array([np.array(features[i].tolist()), np.array(labels[i].tolist())]))
     return output

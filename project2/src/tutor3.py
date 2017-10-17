@@ -304,12 +304,13 @@ class Caseman():
 
 def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=1000, nbits=9, dims=[9, 9, 7], lrate=0.1, mbs=10,
          vfrac=0.1, tfrac=0.1,showint=1000, vint=1000,hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, weight_range=[-.1, .1],
-         cfrac=1, map_batch_size=0, steps=10,map_layers=0, map_dendrograms=[0], display_weights=[0], display_biases=[0], bestk=1):
+         cfrac=1, map_batch_size=0, steps=10,map_layers=0, map_dendrograms=[0], display_weights=[0], display_biases=[0], bestk=1, show=False):
     start = time()
     case_generator = (lambda : data_funct(*data_params))
     cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac,cfrac=cfrac)
     ann = Gann(dims=dims,cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,ol_funct=ol_funct, hl_funct=hl_funct, loss_funct=loss_funct, weight_range=weight_range)
-    #doMapping(ann)
+    if show:
+        doMapping(ann)
     ann.run(epochs,bestk=bestk)
     #ann.runmore(epochs*2,bestk=bestk)
     end = time()
@@ -330,8 +331,8 @@ def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs
 #segment counter 100%
 #main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=100, nbits=2, dims=[25, 10, 9], lrate=0.1,mbs=9,vfrac=0.1,tfrac=0.8,cfrac=1, showint=1000,vint=1000,ol_funct=tf.nn.relu , hl_funct=tf.nn.sigmoid, loss_funct=crossEntropy, bestk=1)
 
-# dataset wine
-main(data_funct=readFile, data_params=("../data/wine.txt","avgdev"), epochs=100, dims=[11, 3, 2, 6], mbs=50, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
+# dataset wine,  100%
+#main(data_funct=readFile, data_params=("../data/wine.txt","avgdev", True), epochs=200, dims=[11, 4, 3, 8], mbs=10, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
 
 # dataset glass, 97-100%
 #main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=100, dims=[9, 3, 2, 7], mbs=50, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
@@ -340,10 +341,7 @@ main(data_funct=readFile, data_params=("../data/wine.txt","avgdev"), epochs=100,
 #main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=200, dims=[8, 3, 2, 10], mbs=20, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
 
 # MNIST
-#main(data_funct=get_mnist_data, data_params=(2000,), epochs=5000, dims=[784, 10], lrate=0.1, mbs=500)
-
-# Yeast
-#main(data_funct=readFile, data_params=("../data/yeast.txt", "avgdev"), epochs=1000, dims=[8, 9, 10], lrate=0.1, mbs=10)
+#main(data_funct=get_mnist_data, data_params=(17230,), epochs=100, dims=[784, 600, 10], lrate=0.2, mbs=200, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=meanSquaredError ,cfrac=0.1)
 
 """
 TODO:
