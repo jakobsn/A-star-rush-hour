@@ -304,46 +304,46 @@ class Caseman():
 
 def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=1000, nbits=9, dims=[9, 9, 7], lrate=0.1, mbs=10,
          vfrac=0.1, tfrac=0.1,showint=1000, vint=1000,hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, weight_range=[-.1, .1],
-         cfrac=0.9, map_batch_size=0, steps=10,map_layers=0, map_dendrograms=[0], display_weights=[0], display_biases=[0], bestk=1):
+         cfrac=1, map_batch_size=0, steps=10,map_layers=0, map_dendrograms=[0], display_weights=[0], display_biases=[0], bestk=1):
     start = time()
     case_generator = (lambda : data_funct(*data_params))
     cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac,cfrac=cfrac)
     ann = Gann(dims=dims,cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,ol_funct=ol_funct, hl_funct=hl_funct, loss_funct=loss_funct, weight_range=weight_range)
     #doMapping(ann)
     ann.run(epochs,bestk=bestk)
-    ann.runmore(epochs*2,bestk=bestk)
+    #ann.runmore(epochs*2,bestk=bestk)
     end = time()
     print("params", data_params, "epochs", epochs, "dims", dims, "lrate", lrate, "mbs", mbs)
     print("Time elapsed:", end - start)
     return ann
 
-#autoex()
-#countex()
-#parity()
-#datasets()
-#segment()
-#countex(epochs=500,nbits=10,data_params=(500,10),lrate=0.5,showint=50,mbs=20,vfrac=0.1,tfrac=0.1,vint=50,ol_funct=tf.nn.softmax , hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1):
 
-#parity
-#main(data_funct=TFT.gen_vector_count_cases, data_params=(2, 4), epochs=200, nbits=9, dims=[4, 2, 5])
+#parity, 95-100%
+#main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=100, nbits=9, dims=[10, 6, 2], lrate=0.1, mbs=5, hl_funct=tf.nn.relu, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
 
-#countex
-#main(TFT.gen_vector_count_cases, (500, 10), 30, 10, [10, 30, 11])
+#autoencoder, 100%. using gen_dense_autoencoder_cases is an option
+#main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=2000,nbits=4, dims=[2**4, 4, 2**4],lrate=0.1,showint=10000,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1)
 
-#autoencoder, using gen_dense_autoencoder_cases is an option
-#main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=5000,nbits=4, dims=[2**4, 4, 2**4],lrate=0.1,showint=10000,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1)
+#countex, 97-100%
+#main(data_funct=TFT.gen_vector_count_cases, data_params=(500, 15), epochs=100, dims=[15, 6, 16], hl_funct=tf.nn.relu, ol_funct=tf.nn.relu)
 
-#segment counter
-#main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=1000, nbits=2, dims=[25, 2, 9], lrate=0.1,mbs=9,vfrac=0.1,tfrac=0.1,cfrac=1, showint=1000,vint=1000,ol_funct=tf.nn.relu , hl_funct=tf.nn.sigmoid, loss_funct=crossEntropy, weight_range=[0, 1], bestk=1)
+#segment counter 100%
+#main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=100, nbits=2, dims=[25, 10, 9], lrate=0.1,mbs=9,vfrac=0.1,tfrac=0.8,cfrac=1, showint=1000,vint=1000,ol_funct=tf.nn.relu , hl_funct=tf.nn.sigmoid, loss_funct=crossEntropy, bestk=1)
 
-#defaults to dataset glass
-#main()
+# dataset wine
+main(data_funct=readFile, data_params=("../data/wine.txt","avgdev"), epochs=100, dims=[11, 3, 2, 6], mbs=50, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
+
+# dataset glass, 97-100%
+#main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=100, dims=[9, 3, 2, 7], mbs=50, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
+
+# dataset yeast, 94-100%
+#main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=200, dims=[8, 3, 2, 10], mbs=20, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
 
 # MNIST
 #main(data_funct=get_mnist_data, data_params=(2000,), epochs=5000, dims=[784, 10], lrate=0.1, mbs=500)
 
 # Yeast
-main(data_funct=readFile, data_params=("../data/yeast.txt", "avgdev"), epochs=1000, dims=[8, 9, 10], lrate=0.1, mbs=10)
+#main(data_funct=readFile, data_params=("../data/yeast.txt", "avgdev"), epochs=1000, dims=[8, 9, 10], lrate=0.1, mbs=10)
 
 """
 TODO:
