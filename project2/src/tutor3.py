@@ -127,6 +127,13 @@ class Gann():
         for bias in display_biases:
             self.add_grabvar(bias, "bias")
 
+        inputs = [c[0] for c in self.caseman.get_training_cases()[:map_batch_size]]; targets = [c[1] for c in self.caseman.get_training_cases()[:map_batch_size]]
+        feeder = {self.input: inputs, self.target: targets}
+        self.test_func = self.error
+        testres, grabvals, _ = self.run_one_step(self.test_func, self.grabvars, self.probes, session=self.current_session,
+                                                 feed_dict=feeder, show_interval=None, mapping=True)
+        print('%s Set Error = %f ' % ("Map testing", testres))
+        self.close_current_session()
         #sleep(10)
         return
 
@@ -179,7 +186,7 @@ class Gann():
     # Similar to the "quickrun" functions used earlier.
 
     def run_one_step(self, operators, grabbed_vars=None, probed_vars=None, dir='probeview',
-                  session=None, feed_dict=None, step=1, show_interval=1):
+                  session=None, feed_dict=None, step=1, show_interval=1, mapping=False):
         sess = session if session else TFT.gen_initialized_session(dir=dir)
         if probed_vars is not None:
             results = sess.run([operators, grabbed_vars, probed_vars], feed_dict=feed_dict)
@@ -188,7 +195,7 @@ class Gann():
             results = sess.run([operators, grabbed_vars], feed_dict=feed_dict)
         if show_interval and (step % show_interval == 0):
             self.display_grabvars(results[1], grabbed_vars, step=step)
-        if step == 100:
+        if mapping:
             print("grabvars:", grabbed_vars)
             self.display_grabvars(results[1], grabbed_vars, step=step)
         return results[0], results[1], sess
@@ -350,12 +357,12 @@ def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs
     if map_batch_size:
         ann.do_mapping(map_batch_size, map_layers, map_dendrograms, display_weights, display_biases)
     sleep(3)
-    ann.runmore(1,bestk=bestk)
+    #ann.runmore(1,bestk=bestk)
     sleep(3)
     return ann
 
 
-main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=100, nbits=9, dims=[10, 6, 2], lrate=0.1, mbs=5, hl_funct=tf.nn.relu, ol_funct=tf.nn.relu, loss_funct=crossEntropy, map_batch_size=1, map_layers=[0, 1], map_dendrograms=[0, 1], display_weights=[0], display_biases=[0])
+main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=100, nbits=9, dims=[10, 6, 2], lrate=0.1, mbs=5, hl_funct=tf.nn.relu, ol_funct=tf.nn.relu, loss_funct=crossEntropy, map_batch_size=3, map_layers=[0, 1], map_dendrograms=[0, 1], display_weights=[0], display_biases=[0])
 
 
 #parity, 95-100%
