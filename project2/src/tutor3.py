@@ -3,7 +3,7 @@ import numpy as np
 import math
 import matplotlib.pyplot as PLT
 import tflowtools as TFT
-from tflowtools import meanSquaredError, crossEntropy, readFile, doMapping, scale_average_and_deviation, scale_min_max, get_mnist_data, readShrooms
+from tflowtools import meanSquaredError, crossEntropy, readFile, scale_average_and_deviation, scale_min_max, get_mnist_data, readShrooms
 from time import time, sleep
 from math import ceil
 import mnist_basics as mb
@@ -112,6 +112,23 @@ class Gann():
         else:
             print('%s Set Correct Classifications = %f %%' % (msg, 100*(testres/len(cases))))
         return testres  # self.error uses MSE, so this is a per-case value when bestk=None
+
+    def do_mapping(self, map_batch_size, map_layers, map_dendrograms, display_weights, display_biases):
+        for i in range(len(self.layer_sizes) - 1):
+            self.add_grabvar(i, 'in')  # Add a grabvar (to be displayed in its own matplotlib window).
+            self.add_grabvar(i, 'out')  # Add a grabvar (to be displayed in its own matplotlib window).
+        #sleep(10)
+        return
+
+    # Show weights and IO data
+    def show(self):
+        self.gen_probe(0, 'wgt', ('hist', 'avg'))  # Plot a histogram and avg of the incoming weights to module 0.
+        # ann.gen_probe(1,'out',('avg','max'))  # Plot average and max value of module 1's output vector
+        self.add_grabvar(0, 'wgt')  # Add a grabvar (to be displayed in its own matplotlib window).
+        # Grab all nodes I/O data
+        for i in range(len(self.layer_sizes) - 1):
+            self.add_grabvar(i, 'in')  # Add a grabvar (to be displayed in its own matplotlib window).
+            self.add_grabvar(i, 'out')  # Add a grabvar (to be displayed in its own matplotlib window).
 
     # Logits = tensor, float - [batch_size, NUM_CLASSES].
     # labels: Labels tensor, int32 - [batch_size], with values in range [0, NUM_CLASSES).
@@ -303,19 +320,23 @@ class Caseman():
 #   ****  MAIN functions ****
 
 def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=1000, nbits=9, dims=[9, 9, 7], lrate=0.1, mbs=10,
-         vfrac=0.1, tfrac=0.1,showint=1000, vint=1000,hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, weight_range=[-.1, .1],
-         cfrac=1, map_batch_size=0, steps=10,map_layers=0, map_dendrograms=[0], display_weights=[0], display_biases=[0], bestk=1, show=False):
+         vfrac=0.1, tfrac=0.1,showint=0, vint=1000,hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, weight_range=[-.1, .1],
+         cfrac=1, map_batch_size=0, steps=10,map_layers=0, map_dendrograms=[0], display_weights=[0], display_biases=[0], bestk=1):
     start = time()
     case_generator = (lambda : data_funct(*data_params))
     cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac,cfrac=cfrac)
     ann = Gann(dims=dims,cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,ol_funct=ol_funct, hl_funct=hl_funct, loss_funct=loss_funct, weight_range=weight_range)
-    if show:
-        doMapping(ann)
+    if showint:
+        ann.show()
     ann.run(epochs,bestk=bestk)
-    #ann.runmore(epochs*2,bestk=bestk)
     end = time()
     print("params", data_params, "epochs", epochs, "dims", dims, "lrate", lrate, "mbs", mbs)
     print("Time elapsed:", end - start)
+    if map_batch_size:
+        ann.reopen_current_session()
+        ann.do_mapping(map_batch_size, map_layers, map_dendrograms, display_weights, display_biases)
+    ann.runmore(epochs,bestk=bestk)
+
     return ann
 
 #parity, 95-100%
@@ -339,8 +360,8 @@ def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs
 # dataset yeast, 94-100%
 #main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=200, dims=[8, 3, 2, 10], mbs=20, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
 
-# dataset, mushrooms, 95-96%
-main(data_funct=readShrooms, data_params=("../data/agaricus-lepiota.data",), epochs=100, dims=[22, 2], mbs=10, hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy)
+# dataset, mushrooms, 95-96%. Classifies mushrooms from agaricus and lepiota family as poisonous or edible. https://archive.ics.uci.edu/ml/datasets/Mushroom
+main(data_funct=readShrooms, data_params=("../data/agaricus-lepiota.data",), epochs=100, dims=[22, 2], mbs=10, hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, map_batch_size=1, map_layers=[0,1], map_dendrograms=[0,1], display_weights=[0], display_biases=[0])
 
 # MNIST
 #main(data_funct=get_mnist_data, data_params=(17230,), epochs=100, dims=[784, 600, 10], lrate=0.2, mbs=200, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=meanSquaredError ,cfrac=0.1)
@@ -381,7 +402,6 @@ def autoex(data_params=(2**4,), epochs=10000,nbits=4, dims=[2*4,4,2**4],lrate=0.
     case_generator = (lambda : TFT.gen_all_one_hot_cases(*data_params))
     cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac,cfrac=cfrac)
     ann = Gann(dims=dims,cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,ol_funct=ol_funct, hl_funct=hl_funct, loss_funct=loss_funct, weight_range=weight_range)
-    doMapping(ann)
     ann.run(epochs,bestk=bestk)
     ann.runmore(epochs*2,bestk=bestk)
     return ann
@@ -418,7 +438,6 @@ def segment(epochs=2000,nbits=2,lrate=0.1, dims=[25, 2, 9], showint=1000,mbs=Non
     case_generator = (lambda : TFT.gen_segmented_vector_cases(*data_params))
     cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac, cfrac=cfrac)
     ann = Gann(dims=dims,cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,ol_funct=ol_funct, hl_funct=hl_funct, loss_funct=loss_funct, weight_range=weight_range)
-    doMapping(ann)
     ann.run(epochs, bestk=bestk)
     ann.runmore(epochs*2, bestk=bestk)
     return ann
@@ -431,7 +450,6 @@ def datasets(epochs=2000,nbits=9,dims=[9, 9, 7], lrate=0.1,showint=1000,mbs=30,v
     case_generator = (lambda : readFile(data_params))
     cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac, cfrac=cfrac)
     ann = Gann(dims=dims,cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,hl_funct=hl_funct, ol_funct=ol_funct, loss_funct=loss_funct, weight_range=weight_range)
-    doMapping(ann)
     ann.run(epochs, bestk=bestk)
     ann.runmore(epochs*2, bestk=bestk)
     return ann

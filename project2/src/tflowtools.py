@@ -431,16 +431,6 @@ def dendrogram(features,labels,metric='euclidean',mode='average',ax=None,title='
 
 #   **** Helping functions ****
 
-def doMapping(ann):
-    ann.gen_probe(0,'wgt',('hist','avg'))  # Plot a histogram and avg of the incoming weights to module 0.
-    #ann.gen_probe(1,'out',('avg','max'))  # Plot average and max value of module 1's output vector
-    ann.add_grabvar(0,'wgt') # Add a grabvar (to be displayed in its own matplotlib window).
-
-    # Grab all nodes I/O data
-    for i in range(len(ann.layer_sizes)-1):
-        ann.add_grabvar(i,'in') # Add a grabvar (to be displayed in its own matplotlib window).
-        ann.add_grabvar(i,'out') # Add a grabvar (to be displayed in its own matplotlib window).
-
 def readFile(targetFile, scale, colons=False):
     max_feature = 0
     min_feature = 999999999999999
