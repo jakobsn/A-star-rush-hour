@@ -3,7 +3,7 @@ import numpy as np
 import math
 import matplotlib.pyplot as PLT
 import tflowtools as TFT
-from tflowtools import meanSquaredError, crossEntropy, readFile, doMapping, scale_average_and_deviation, scale_min_max, get_mnist_data
+from tflowtools import meanSquaredError, crossEntropy, readFile, doMapping, scale_average_and_deviation, scale_min_max, get_mnist_data, readShrooms
 from time import time, sleep
 from math import ceil
 import mnist_basics as mb
@@ -318,7 +318,6 @@ def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs
     print("Time elapsed:", end - start)
     return ann
 
-
 #parity, 95-100%
 #main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=100, nbits=9, dims=[10, 6, 2], lrate=0.1, mbs=5, hl_funct=tf.nn.relu, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
 
@@ -339,6 +338,9 @@ def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs
 
 # dataset yeast, 94-100%
 #main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=200, dims=[8, 3, 2, 10], mbs=20, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
+
+# dataset, mushrooms, 95-96%
+main(data_funct=readShrooms, data_params=("../data/agaricus-lepiota.data",), epochs=100, dims=[22, 2], mbs=10, hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy)
 
 # MNIST
 #main(data_funct=get_mnist_data, data_params=(17230,), epochs=100, dims=[784, 600, 10], lrate=0.2, mbs=200, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=meanSquaredError ,cfrac=0.1)

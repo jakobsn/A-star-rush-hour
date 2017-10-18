@@ -441,7 +441,6 @@ def doMapping(ann):
         ann.add_grabvar(i,'in') # Add a grabvar (to be displayed in its own matplotlib window).
         ann.add_grabvar(i,'out') # Add a grabvar (to be displayed in its own matplotlib window).
 
-
 def readFile(targetFile, scale, colons=False):
     max_feature = 0
     min_feature = 999999999999999
@@ -563,3 +562,23 @@ def get_mnist_data(size):
     for i in range(len(features)):
         output.append(np.array([np.array(features[i].tolist()), np.array(labels[i].tolist())]))
     return output
+
+def readShrooms(targetFile):
+    with open(targetFile) as file:
+        data = []
+        for line in file:
+            row = []
+            features = []
+            for feature in line.replace("\n", "").split(","):
+                features.append(ord(feature))
+            row.append(preprocessing.minmax_scale(np.array(features[1:])))
+            target = features[0]
+            #poison
+            if target == 112:
+                target = [1, 0]
+            #edible
+            elif target == 101:
+                target = [0, 1]
+            row.append(np.array(target))
+            data.append(np.array(row))
+    return data
