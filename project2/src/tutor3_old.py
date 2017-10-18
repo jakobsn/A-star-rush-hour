@@ -376,7 +376,7 @@ def main(epochs=1000, nbits=3, dims=[9, 3, 9], lrate=0.3, weight_range=None, sho
 #     dims=[9, 4, 4, 9], data_funct=readFile)
 
 #Translate default autoencoder to use generic main method
-main(epochs=10000,nbits=4,lrate=0.1,showint=2000,mbs=None,vfrac=0.1,tfrac=0.1,vint=2000,op_activation_funct=False, data_params=(2**4,), dims=[16, 4, 16])
+#main(epochs=10000,nbits=4,lrate=0.1,showint=2000,mbs=None,vfrac=0.1,tfrac=0.1,vint=2000,op_activation_funct=False, data_params=(2**4,), dims=[16, 4, 16])
 
 #parity
 
@@ -384,7 +384,7 @@ main(epochs=10000,nbits=4,lrate=0.1,showint=2000,mbs=None,vfrac=0.1,tfrac=0.1,vi
 #         steps=10, loss_funct=False, hl_activation_funct=False, op_activation_funct=True, case_fraction=1, vfrac=0.1, tfrac=0.1, mbs=10,
 #         map_batch_size=0, map_layers=0, map_dendrograms=[0], display_weights=[0], display_biases=[0])
 #Default autoencoder
-#autoex(epochs=300,nbits=4,lrate=0.03,showint=100,mbs=None,vfrac=0.1,tfrac=0.1,vint=100,sm=False)
+autoex(epochs=5000,nbits=4,lrate=0.03,showint=1000,mbs=None,vfrac=0.1,tfrac=0.1,vint=100,sm=False)
 
 
 

@@ -15,7 +15,7 @@ import theano
 
 class Gann():
 
-    def __init__(self, dims, weight_range, cman,lrate=.1,showint=None,mbs=10,vint=None,ol_funct=tf.nn.softmax, hl_funct=tf.nn.relu, loss_funct=meanSquaredError):
+    def __init__(self, dims, cman, weight_range=[-.1,.1], lrate=.1,showint=None,mbs=10,vint=None,ol_funct=tf.nn.softmax, hl_funct=tf.nn.relu, loss_funct=meanSquaredError):
         self.learning_rate = lrate
         self.layer_sizes = dims # Sizes of each layer of neurons
         self.show_interval = showint # Frequency of showing grabbed variables
@@ -133,6 +133,7 @@ class Gann():
         testres, grabvals, _ = self.run_one_step(self.test_func, self.grabvars, self.probes, session=self.current_session,
                                                  feed_dict=feeder, show_interval=None, mapping=True)
         print('%s Set Error = %f ' % ("Map testing", testres))
+        sleep(10)
         self.close_current_session()
         #sleep(10)
         return
@@ -353,6 +354,8 @@ def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs
     case_generator = (lambda : data_funct(*data_params))
     cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac,cfrac=cfrac)
     ann = Gann(dims=dims,cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,ol_funct=ol_funct, hl_funct=hl_funct, loss_funct=loss_funct, weight_range=weight_range)
+    #ann.add_grabvar(0, 'in')  # Add a grabvar (to be displayed in its own matplotlib window).
+    #ann.add_grabvar(1, 'out')  # Add a grabvar (to be displayed in its own matplotlib window).
     #if showint:
         #ann.show()
 
@@ -361,6 +364,7 @@ def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs
     print("params", data_params, "epochs", epochs, "dims", dims, "lrate", lrate, "mbs", mbs)
     print("Time elapsed:", end - start)
     if map_batch_size:
+        #a=1
         ann.do_mapping(map_batch_size, map_layers, map_dendrograms, display_weights, display_biases)
     sleep(3)
     #ann.runmore(1,bestk=bestk)
@@ -368,7 +372,9 @@ def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs
     return ann
 
 
-main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=10, nbits=9, dims=[10, 6, 2], lrate=0.1, mbs=5, hl_funct=tf.nn.relu, ol_funct=tf.nn.relu, loss_funct=crossEntropy, map_batch_size=3, map_layers=[0, 1], map_dendrograms=[0, 1], display_weights=[0], display_biases=[0])
+
+#main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=10, nbits=9, dims=[10, 6, 2], lrate=0.1, mbs=5, hl_funct=tf.nn.relu, ol_funct=tf.nn.relu, loss_funct=crossEntropy, map_batch_size=3, map_layers=[0, 1], map_dendrograms=[0, 1], display_weights=[0], display_biases=[0])
+#main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=10000,nbits=4, dims=[2**4, 4, 2**4],lrate=0.1,showint=1000,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1, map_batch_size=9, map_layers=[0, 1], map_dendrograms=[0, 1], display_weights=[0], display_biases=[])
 
 
 #parity, 95-100%
@@ -393,10 +399,10 @@ main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=10, nbits=9,
 #main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=200, dims=[8, 3, 2, 10], mbs=20, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
 
 # dataset, mushrooms, 95-96%. Classifies mushrooms from agaricus and lepiota family as poisonous or edible. https://archive.ics.uci.edu/ml/datasets/Mushroom
-#main(data_funct=readShrooms, data_params=("../data/agaricus-lepiota.data",), epochs=100, dims=[22, 2], mbs=10, hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, map_batch_size=1, map_layers=[0,1], map_dendrograms=[0,1], display_weights=[0], display_biases=[0])
+#main(data_funct=readShrooms, data_params=("../data/agaricus-lepiota.data",), epochs=100, dims=[22, 2], mbs=10, hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, map_batch_size=1, map_layers=[0], map_dendrograms=[0,1], display_weights=[0], display_biases=[0])
 
 # MNIST
-#main(data_funct=get_mnist_data, data_params=(17230,), epochs=100, dims=[784, 600, 10], lrate=0.2, mbs=200, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=meanSquaredError ,cfrac=0.1)
+#main(data_funct=get_mnist_data, data_params=(17230,), epochs=100, dims=[784, 600, 10], lrate=0.2, mbs=200, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=meanSquaredError ,cfrac=0.1,map_batch_size=5, map_layers=[0, 1], map_dendrograms=[0, 1], display_weights=[], display_biases=[])
 
 """
 TODO:
@@ -426,3 +432,36 @@ Qs:
 # tf.nn.tanh
 
 
+#main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=2000,nbits=4, dims=[2**4, 4, 2**4],lrate=0.1,showint=10000,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1)
+
+# After running this, open a Tensorboard (Go to localhost:6006 in your Chrome Browser) and check the
+# 'scalar', 'distribution' and 'histogram' menu options to view the probed variables.
+def autoex(epochs=10000,nbits=4,lrate=0.1,showint=1000,mbs=None,vfrac=0.1,tfrac=0.1,vint=100,sm=False,bestk=1):
+    size = 2**nbits
+    mbs = 10
+    case_generator = (lambda : TFT.gen_all_one_hot_cases(2**nbits))
+    cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac)
+    ann = Gann(dims=[size,nbits,size], cman=cman, lrate=lrate, showint=showint, mbs=mbs, vint=vint, ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy)
+
+    #ann.add_grabvar(0, 'in')  # Add a grabvar (to be displayed in its own matplotlib window).
+    #ann.add_grabvar(1, 'out')  # Add a grabvar (to be displayed in its own matplotlib window).    ann.run(epochs,bestk=bestk)
+    ann.run(epochs, bestk=bestk)
+    sleep(10)
+    ann.runmore(epochs,bestk=bestk)
+    return ann
+
+def countex(epochs=3000,nbits=10,ncases=500,lrate=0.5,showint=1000,mbs=20,vfrac=0.1,tfrac=0.1,vint=200,sm=True,bestk=1):
+    case_generator = (lambda: TFT.gen_vector_count_cases(ncases,nbits))
+    cman = Caseman(cfunc=case_generator, vfrac=vfrac, tfrac=tfrac)
+    ann = Gann(dims=[nbits, nbits*3, nbits+1], cman=cman, lrate=lrate, showint=showint, mbs=mbs, vint=vint)
+    #ann.add_grabvar(0, 'in')  # Add a grabvar (to be displayed in its own matplotlib window).
+    #ann.add_grabvar(1, 'out')  # Add a grabvar (to be displayed in its own matplotlib window).
+    ann.run(epochs,bestk=bestk)
+    return ann
+#countex()
+#autoex()
+
+#main(data_funct=TFT.gen_vector_count_cases, data_params=(500, 15), epochs=3000, dims=[15, 6, 16], mbs=20,
+#     hl_funct=tf.nn.relu, ol_funct=tf.nn.softmax, loss_funct=meanSquaredError, showint=0, map_batch_size=5, map_layers=[0, 1], map_dendrograms=[0, 1], display_weights=[], display_biases=[])
+
+#main(data_funct=TFT.gen_vector_count_cases, data_params=(500, 15), epochs=100, dims=[15, 6, 16], hl_funct=tf.nn.relu, ol_funct=tf.nn.relu,map_batch_size=5, map_layers=[0, 1], map_dendrograms=[0, 1], display_weights=[], display_biases=[])
