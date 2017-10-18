@@ -210,6 +210,12 @@ class Gann():
             if type(v) == np.ndarray and len(v.shape) > 1: # If v is a matrix, use hinton plotting
                 TFT.hinton_plot(v,fig=self.grabvar_figures[fig_index],title= names[i]+ ' at step '+ str(step))
                 fig_index += 1
+            # Print graphical visialization of the bias vector in the module
+            elif "bias" in names[i]:
+                v = np.array([v])
+                print("v inn",v)
+                TFT.display_matrix(v, title=names[i] + ' at step ' + str(step))
+                fig_index += 1
             else:
                 print(v, end="\n\n")
 
@@ -362,7 +368,7 @@ def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs
     return ann
 
 
-main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=100, nbits=9, dims=[10, 6, 2], lrate=0.1, mbs=5, hl_funct=tf.nn.relu, ol_funct=tf.nn.relu, loss_funct=crossEntropy, map_batch_size=3, map_layers=[0, 1], map_dendrograms=[0, 1], display_weights=[0], display_biases=[0])
+main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=10, nbits=9, dims=[10, 6, 2], lrate=0.1, mbs=5, hl_funct=tf.nn.relu, ol_funct=tf.nn.relu, loss_funct=crossEntropy, map_batch_size=3, map_layers=[0, 1], map_dendrograms=[0, 1], display_weights=[0], display_biases=[0])
 
 
 #parity, 95-100%
