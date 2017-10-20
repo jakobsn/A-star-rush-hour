@@ -40,7 +40,6 @@ class Gann():
     # Grabvars are displayed by my own code, so I have more control over the display format.  Each
     # grabvar gets its own matplotlib figure in which to display its value.
     def add_grabvar(self,module_index,type='wgt'):
-        print("added", module_index, type)
         self.grabvars.append(self.modules[module_index].getvar(type))
         self.grabvar_figures.append(PLT.figure())
 
@@ -130,10 +129,10 @@ class Gann():
         inputs = [c[0] for c in self.caseman.get_training_cases()[:map_batch_size]]; targets = [c[1] for c in self.caseman.get_training_cases()[:map_batch_size]]
         feeder = {self.input: inputs, self.target: targets}
         self.test_func = self.error
-        testres, grabvals, _ = self.run_one_step(self.test_func, self.grabvars, self.probes, session=self.current_session,
+        testres, grabvals, _ = self.run_one_step(self.test_func, self.grabvars, self.probes, session=self.current_session, step="Postprocessing",
                                                  feed_dict=feeder, show_interval=None, mapping=True)
         print('%s Set Error = %f ' % ("Map testing", testres))
-        sleep(10)
+        sleep(30)
         self.close_current_session()
         #sleep(10)
         return
@@ -197,7 +196,6 @@ class Gann():
         if show_interval and (step % show_interval == 0):
             self.display_grabvars(results[1], grabbed_vars, step=step)
         if mapping:
-            print("grabvars:", grabbed_vars)
             self.display_grabvars(results[1], grabbed_vars, step=step)
         return results[0], results[1], sess
 
@@ -371,14 +369,20 @@ def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs
     sleep(3)
     return ann
 
-
+def leaky_relu(feature, leak=0.2, name="lrelu"):
+    with tf.variable_scope(name):
+        f1 = 0.5 * (1 + leak)
+        f2 = 0.5 * (1 - leak)
+        return f1 * feature + f2 * abs(feature)
 
 #main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=10, nbits=9, dims=[10, 6, 2], lrate=0.1, mbs=5, hl_funct=tf.nn.relu, ol_funct=tf.nn.relu, loss_funct=crossEntropy, map_batch_size=3, map_layers=[0, 1], map_dendrograms=[0, 1], display_weights=[0], display_biases=[0])
 #main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=10000,nbits=4, dims=[2**4, 4, 2**4],lrate=0.1,showint=1000,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1, map_batch_size=9, map_layers=[0, 1], map_dendrograms=[0, 1], display_weights=[0], display_biases=[])
 
 
 #parity, 95-100%
-#main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=100, nbits=9, dims=[10, 6, 2], lrate=0.1, mbs=5, hl_funct=tf.nn.relu, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
+#main(data_funct=TFT.gen_all_parity_cases, data_params=(10,),epochs=100, nbits=9, dims=[10, 6, 2], lrate=0.1, mbs=5,hl_funct=tf.nn.relu,ol_funct=tf.nn.relu, loss_funct=crossEntropy,map_batch_size=9,map_layers=[0, 1], map_dendrograms=[0, 1], display_weights=[], display_biases=[])
+
+#main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=100, nbits=9, dims=[10, 5, 2], lrate=0.1, mbs=10, hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=meanSquaredError)
 
 #autoencoder, 100%. using gen_dense_autoencoder_cases is an option
 #main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=2000,nbits=4, dims=[2**4, 4, 2**4],lrate=0.1,showint=10000,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1)
@@ -397,12 +401,14 @@ def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs
 
 # dataset yeast, 94-100%
 #main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=200, dims=[8, 3, 2, 10], mbs=20, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
+#main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=2000, dims=[8, 3, 2, 10], mbs=10, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
+#main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=200, dims=[8, 3, 2, 10], mbs=20, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy, map_batch_size=5, map_layers=[0, 2])
 
 # dataset, mushrooms, 95-96%. Classifies mushrooms from agaricus and lepiota family as poisonous or edible. https://archive.ics.uci.edu/ml/datasets/Mushroom
 #main(data_funct=readShrooms, data_params=("../data/agaricus-lepiota.data",), epochs=100, dims=[22, 2], mbs=10, hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, map_batch_size=1, map_layers=[0], map_dendrograms=[0,1], display_weights=[0], display_biases=[0])
 
 # MNIST
-#main(data_funct=get_mnist_data, data_params=(17230,), epochs=100, dims=[784, 600, 10], lrate=0.2, mbs=200, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=meanSquaredError ,cfrac=0.1,map_batch_size=5, map_layers=[0, 1], map_dendrograms=[0, 1], display_weights=[], display_biases=[])
+main(data_funct=get_mnist_data, data_params=(17230,), epochs=100, dims=[784, 600, 10], lrate=0.2, mbs=200, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=meanSquaredError ,cfrac=0.1,map_batch_size=5, map_layers=[0, 1], map_dendrograms=[0, 1], display_weights=[], display_biases=[])
 
 """
 TODO:
@@ -434,6 +440,10 @@ Qs:
 
 #main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=2000,nbits=4, dims=[2**4, 4, 2**4],lrate=0.1,showint=10000,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1)
 
+
+#main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=10000,nbits=4, dims=[2**4, 4, 2**4],lrate=0.1,showint=10000,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1)
+
+
 # After running this, open a Tensorboard (Go to localhost:6006 in your Chrome Browser) and check the
 # 'scalar', 'distribution' and 'histogram' menu options to view the probed variables.
 def autoex(epochs=10000,nbits=4,lrate=0.1,showint=1000,mbs=None,vfrac=0.1,tfrac=0.1,vint=100,sm=False,bestk=1):
@@ -441,16 +451,16 @@ def autoex(epochs=10000,nbits=4,lrate=0.1,showint=1000,mbs=None,vfrac=0.1,tfrac=
     mbs = 10
     case_generator = (lambda : TFT.gen_all_one_hot_cases(2**nbits))
     cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac)
-    ann = Gann(dims=[size,nbits,size], cman=cman, lrate=lrate, showint=showint, mbs=mbs, vint=vint, ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy)
+    ann = Gann(dims=[size,nbits,size], cman=cman, lrate=lrate, showint=showint, mbs=mbs, vint=vint, ol_funct=tf.nn.softmax, hl_funct=tf.nn.relu,loss_funct=crossEntropy)
 
     #ann.add_grabvar(0, 'in')  # Add a grabvar (to be displayed in its own matplotlib window).
     #ann.add_grabvar(1, 'out')  # Add a grabvar (to be displayed in its own matplotlib window).    ann.run(epochs,bestk=bestk)
     ann.run(epochs, bestk=bestk)
     sleep(10)
-    ann.runmore(epochs,bestk=bestk)
+    #ann.runmore(epochs,bestk=bestk)
     return ann
 
-def countex(epochs=3000,nbits=10,ncases=500,lrate=0.5,showint=1000,mbs=20,vfrac=0.1,tfrac=0.1,vint=200,sm=True,bestk=1):
+def countex(epochs=10000,nbits=10,ncases=500,lrate=0.1,showint=1000,mbs=20,vfrac=0.1,tfrac=0.1,vint=200,sm=True,bestk=1):
     case_generator = (lambda: TFT.gen_vector_count_cases(ncases,nbits))
     cman = Caseman(cfunc=case_generator, vfrac=vfrac, tfrac=tfrac)
     ann = Gann(dims=[nbits, nbits*3, nbits+1], cman=cman, lrate=lrate, showint=showint, mbs=mbs, vint=vint)
