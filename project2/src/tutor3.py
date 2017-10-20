@@ -115,12 +115,9 @@ class Gann():
 
     def do_mapping(self, map_batch_size, map_layers, map_dendrograms, display_weights, display_biases):
         self.reopen_current_session()
-
         for layer in map_layers:
-            print("grab vars")
             self.add_grabvar(layer, 'in')  # Add a grabvar (to be displayed in its own matplotlib window).
             self.add_grabvar(layer, 'out')  # Add a grabvar (to be displayed in its own matplotlib window).
-            print("add IO for:", layer)
         for weight in display_weights:
             self.add_grabvar(weight, 'wgt')
         for bias in display_biases:
@@ -134,19 +131,7 @@ class Gann():
         print('%s Set Error = %f ' % ("Map testing", testres))
         sleep(30)
         self.close_current_session()
-        #sleep(10)
         return
-
-    # REMOVE LATER*********************
-    # Show weights and IO data
-    def show(self):
-        self.gen_probe(0, 'wgt', ('hist', 'avg'))  # Plot a histogram and avg of the incoming weights to module 0.
-        # ann.gen_probe(1,'out',('avg','max'))  # Plot average and max value of module 1's output vector
-        self.add_grabvar(0, 'wgt')  # Add a grabvar (to be displayed in its own matplotlib window).
-        # Grab all nodes I/O data
-        for i in range(len(self.layer_sizes) - 1):
-            self.add_grabvar(i, 'in')  # Add a grabvar (to be displayed in its own matplotlib window).
-            self.add_grabvar(i, 'out')  # Add a grabvar (to be displayed in its own matplotlib window).
 
     # Logits = tensor, float - [batch_size, NUM_CLASSES].
     # labels: Labels tensor, int32 - [batch_size], with values in range [0, NUM_CLASSES).
@@ -386,6 +371,7 @@ def leaky_relu(feature, leak=0.2, name="lrelu"):
 
 #autoencoder, 100%. using gen_dense_autoencoder_cases is an option
 #main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=2000,nbits=4, dims=[2**4, 4, 2**4],lrate=0.1,showint=10000,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1)
+#main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=2000,nbits=4, dims=[2**4, 4, 2**4],lrate=0.1,showint=10000,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1, map_batch_size=5, map_layers=[0, 1])
 
 #countex, 97-100%
 #main(data_funct=TFT.gen_vector_count_cases, data_params=(500, 15), epochs=100, dims=[15, 6, 16], hl_funct=tf.nn.relu, ol_funct=tf.nn.relu)
@@ -397,10 +383,11 @@ def leaky_relu(feature, leak=0.2, name="lrelu"):
 #main(data_funct=readFile, data_params=("../data/wine.txt","avgdev", True), epochs=200, dims=[11, 4, 3, 8], mbs=10, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
 
 # dataset glass, 97-100%
-#main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=100, dims=[9, 3, 2, 7], mbs=50, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
+main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=500, dims=[9, 3, 2, 7], mbs=50, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy, map_batch_size=10, map_layers=[0, 2])
 
 # dataset yeast, 94-100%
 #main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=200, dims=[8, 3, 2, 10], mbs=20, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
+
 #main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=2000, dims=[8, 3, 2, 10], mbs=10, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
 #main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=200, dims=[8, 3, 2, 10], mbs=20, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy, map_batch_size=5, map_layers=[0, 2])
 
@@ -408,7 +395,7 @@ def leaky_relu(feature, leak=0.2, name="lrelu"):
 #main(data_funct=readShrooms, data_params=("../data/agaricus-lepiota.data",), epochs=100, dims=[22, 2], mbs=10, hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, map_batch_size=1, map_layers=[0], map_dendrograms=[0,1], display_weights=[0], display_biases=[0])
 
 # MNIST
-main(data_funct=get_mnist_data, data_params=(17230,), epochs=100, dims=[784, 600, 10], lrate=0.2, mbs=200, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=meanSquaredError ,cfrac=0.1,map_batch_size=5, map_layers=[0, 1], map_dendrograms=[0, 1], display_weights=[], display_biases=[])
+#main(data_funct=get_mnist_data, data_params=(17230,), epochs=100, dims=[784, 600, 10], lrate=0.2, mbs=200, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=meanSquaredError ,cfrac=0.1,map_batch_size=5, map_layers=[0, 1], map_dendrograms=[0, 1], display_weights=[], display_biases=[])
 
 """
 TODO:
