@@ -330,24 +330,21 @@ class Caseman():
 
 #   ****  MAIN functions ****
 
-def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=1000, nbits=9, dims=[9, 9, 7], lrate=0.1, mbs=10,
+#main(data_funct=TFT.gen_vector_count_cases, data_params=(500, 15), epochs=100, dims=[15, 6, 16], hl_funct=tf.nn.relu, ol_funct=tf.nn.relu)
+
+def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=1000, dims=[9, 9, 7], lrate=0.1, mbs=10,
          vfrac=0.1, tfrac=0.1,showint=1000, vint=1000,hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, weight_range=[-.1, .1],
-         cfrac=1, map_batch_size=0, steps=10,map_layers=0, map_dendrograms=[0], display_weights=[0], display_biases=[0], bestk=1):
+         cfrac=1, map_batch_size=0,map_layers=0, map_dendrograms=[0], display_weights=[0], display_biases=[0], bestk=1):
     start = time()
     case_generator = (lambda : data_funct(*data_params))
     cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac,cfrac=cfrac)
     ann = Gann(dims=dims,cman=cman,lrate=lrate,showint=showint,mbs=mbs,vint=vint,ol_funct=ol_funct, hl_funct=hl_funct, loss_funct=loss_funct, weight_range=weight_range)
-    #ann.add_grabvar(0, 'in')  # Add a grabvar (to be displayed in its own matplotlib window).
-    #ann.add_grabvar(1, 'out')  # Add a grabvar (to be displayed in its own matplotlib window).
-    #if showint:
-        #ann.show()
 
     ann.run(epochs,bestk=bestk)
     end = time()
     print("params", data_params, "epochs", epochs, "dims", dims, "lrate", lrate, "mbs", mbs)
     print("Time elapsed:", end - start)
     if map_batch_size:
-        #a=1
         ann.do_mapping(map_batch_size, map_layers, map_dendrograms, display_weights, display_biases)
     sleep(3)
     #ann.runmore(1,bestk=bestk)
@@ -375,6 +372,7 @@ def leaky_relu(feature, leak=0.2, name="lrelu"):
 
 #countex, 97-100%
 #main(data_funct=TFT.gen_vector_count_cases, data_params=(500, 15), epochs=100, dims=[15, 6, 16], hl_funct=tf.nn.relu, ol_funct=tf.nn.relu)
+main(data_funct=TFT.gen_vector_count_cases, data_params=(500, 15), epochs=2000, dims=[15, 100, 16], hl_funct=tf.nn.sigmoid, ol_funct=tf.identity, loss_funct=meanSquaredError, lrate=0.5, map_batch_size=10, map_layers=[0,1])
 
 #segment counter 100%
 #main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=100, nbits=2, dims=[25, 10, 9], lrate=0.1,mbs=9,vfrac=0.1,tfrac=0.8,cfrac=1, showint=1000,vint=1000,ol_funct=tf.nn.relu , hl_funct=tf.nn.sigmoid, loss_funct=crossEntropy, bestk=1)
@@ -383,7 +381,9 @@ def leaky_relu(feature, leak=0.2, name="lrelu"):
 #main(data_funct=readFile, data_params=("../data/wine.txt","avgdev", True), epochs=200, dims=[11, 4, 3, 8], mbs=10, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
 
 # dataset glass, 97-100%
-main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=500, dims=[9, 3, 2, 7], mbs=50, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy, map_batch_size=10, map_layers=[0, 2])
+#main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=5, dims=[9, 3, 2, 7], mbs=50, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy, map_batch_size=10, map_layers=[0, 2])
+#main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=500, dims=[9, 3, 2, 7], mbs=50, hl_funct=tf.nn.tanh, ol_funct=tf.nn.sigmoid, loss_funct=crossEntropy, map_batch_size=10, map_layers=[0, 2])
+
 
 # dataset yeast, 94-100%
 #main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=200, dims=[8, 3, 2, 10], mbs=20, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
@@ -392,7 +392,7 @@ main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=500
 #main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=200, dims=[8, 3, 2, 10], mbs=20, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy, map_batch_size=5, map_layers=[0, 2])
 
 # dataset, mushrooms, 95-96%. Classifies mushrooms from agaricus and lepiota family as poisonous or edible. https://archive.ics.uci.edu/ml/datasets/Mushroom
-#main(data_funct=readShrooms, data_params=("../data/agaricus-lepiota.data",), epochs=100, dims=[22, 2], mbs=10, hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, map_batch_size=1, map_layers=[0], map_dendrograms=[0,1], display_weights=[0], display_biases=[0])
+#main(data_funct=readShrooms, data_params=("../data/agaricus-lepiota.data",), epochs=100, dims=[22, 2], mbs=10, hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, map_batch_size=10, map_layers=[0], map_dendrograms=[0,1], display_weights=[0], display_biases=[0])
 
 # MNIST
 #main(data_funct=get_mnist_data, data_params=(17230,), epochs=100, dims=[784, 600, 10], lrate=0.2, mbs=200, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=meanSquaredError ,cfrac=0.1,map_batch_size=5, map_layers=[0, 1], map_dendrograms=[0, 1], display_weights=[], display_biases=[])
@@ -423,6 +423,7 @@ Qs:
 # tf.nn.sigmoid
 # tf.nn.relu
 # tf.nn.tanh
+# identity
 
 
 #main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=2000,nbits=4, dims=[2**4, 4, 2**4],lrate=0.1,showint=10000,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1)
@@ -462,3 +463,5 @@ def countex(epochs=10000,nbits=10,ncases=500,lrate=0.1,showint=1000,mbs=20,vfrac
 #     hl_funct=tf.nn.relu, ol_funct=tf.nn.softmax, loss_funct=meanSquaredError, showint=0, map_batch_size=5, map_layers=[0, 1], map_dendrograms=[0, 1], display_weights=[], display_biases=[])
 
 #main(data_funct=TFT.gen_vector_count_cases, data_params=(500, 15), epochs=100, dims=[15, 6, 16], hl_funct=tf.nn.relu, ol_funct=tf.nn.relu,map_batch_size=5, map_layers=[0, 1], map_dendrograms=[0, 1], display_weights=[], display_biases=[])
+
+# Cross entropy + softmax + one hot
