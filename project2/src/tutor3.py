@@ -370,21 +370,6 @@ def leaky_relu(feature, leak=0.2, name="lrelu"):
 #main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=2000,nbits=4, dims=[2**4, 4, 2**4],lrate=0.1,showint=10000,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1)
 #main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=2000,nbits=4, dims=[2**4, 4, 2**4],lrate=0.1,showint=10000,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1, map_batch_size=5, map_layers=[0, 1])
 
-#countex, 97-100%
-# main(data_funct=TFT.gen_vector_count_cases, data_params=(500, 15), epochs=3000, dims=[15, 60, 20, 16], hl_funct=tf.nn.sigmoid, ol_funct=tf.identity, loss_funct=meanSquaredError, lrate=0.6, mbs=5)#, map_batch_size=10, map_layers=[0,1,2])
-
-#main(data_funct=TFT.gen_vector_count_cases, data_params=(500, 15), epochs=5000, dims=[15, 55, 20, 16], hl_funct=tf.nn.sigmoid, ol_funct=tf.identity, loss_funct=meanSquaredError, lrate=0.6, mbs=5)#, map_batch_size=10, map_layers=[0,1])
-
-
-#segment counter 100%
-#main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=100, nbits=2, dims=[25, 10, 9], lrate=0.1,mbs=9,vfrac=0.1,tfrac=0.8,cfrac=1, showint=1000,vint=1000,ol_funct=tf.nn.relu , hl_funct=tf.nn.sigmoid, loss_funct=crossEntropy, bestk=1)
-#main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=100, dims=[25, 10, 9], lrate=0.1,mbs=10,vfrac=0.1,tfrac=0.8,cfrac=1, ol_funct=tf.nn.tf.identity , hl_funct=tf.nn.sigmoid, loss_funct=meanSquaredError, bestk=1)
-
-#main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=500, dims=[25, 10, 9], lrate=0.5,mbs=10,vfrac=0.1,tfrac=0.8,cfrac=1, ol_funct=tf.nn.tf.softmax , hl_funct=tf.nn.sigmoid, loss_funct=meanSquaredError, bestk=1); print("sm, sig, mse")
-#main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=500, dims=[25, 10, 9], lrate=0.5,mbs=10,vfrac=0.1,tfrac=0.8,cfrac=1, ol_funct=tf.nn.tf.identity , hl_funct=tf.nn.tanh, loss_funct=meanSquaredError, bestk=1); print("id, tanh, mse")
-#main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=500, dims=[25, 10, 9], lrate=0.5,mbs=10,vfrac=0.1,tfrac=0.8,cfrac=1, ol_funct=tf.nn.tf.identity , hl_funct=tf.nn.sigmoid, loss_funct=meanSquaredError, bestk=1); print("id, sig, mse")
-#main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=500, dims=[25, 10, 9], lrate=0.5,mbs=10,vfrac=0.1,tfrac=0.8,cfrac=1, ol_funct=tf.nn.tf.identity , hl_funct=tf.nn.sigmoid, loss_funct=crossEntropy, bestk=1); print("id, sig, cross")
-
 
 # dataset wine,  100%
 #main(data_funct=readFile, data_params=("../data/wine.txt","avgdev", True), epochs=200, dims=[11, 4, 3, 8], mbs=10, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
@@ -393,17 +378,25 @@ def leaky_relu(feature, leak=0.2, name="lrelu"):
 #main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=5, dims=[9, 3, 2, 7], mbs=50, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy, map_batch_size=10, map_layers=[0, 2])
 #main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=500, dims=[9, 3, 2, 7], mbs=50, hl_funct=tf.nn.tanh, ol_funct=tf.nn.sigmoid, loss_funct=crossEntropy, map_batch_size=10, map_layers=[0, 2])
 
-
 # dataset yeast, 94-100%
 #main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=200, dims=[8, 3, 2, 10], mbs=20, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
 
 #main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=2000, dims=[8, 3, 2, 10], mbs=10, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
 #main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=200, dims=[8, 3, 2, 10], mbs=20, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy, map_batch_size=5, map_layers=[0, 2])
 
-# dataset, mushrooms, 95-96%. Classifies mushrooms from agaricus and lepiota family as poisonous or edible. https://archive.ics.uci.edu/ml/datasets/Mushroom
+
+
+#countex, 97-100% DONE
+# main(data_funct=TFT.gen_vector_count_cases, data_params=(500, 15), epochs=3000, dims=[15, 60, 20, 16], hl_funct=tf.nn.sigmoid, ol_funct=tf.identity, loss_funct=meanSquaredError, lrate=0.6, mbs=5)#, map_batch_size=10, map_layers=[0,1,2])
+# main(data_funct=TFT.gen_vector_count_cases, data_params=(500, 15), epochs=5000, dims=[15, 55, 20, 16], hl_funct=tf.nn.sigmoid, ol_funct=tf.identity, loss_funct=meanSquaredError, lrate=0.6, mbs=5)#, map_batch_size=10, map_layers=[0,1])
+
+#segment counter 99% DONE
+#main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=1000, dims=[25, 30, 10, 9], lrate=0.6,mbs=20,vfrac=0.1,tfrac=0.1,cfrac=1, ol_funct=tf.identity , hl_funct=tf.nn.tanh, loss_funct=meanSquaredError, bestk=1)#, map_batch_size=10, map_layers=[0,2])
+
+# dataset, mushrooms, 95-96%. DONE. Classifies mushrooms from agaricus and lepiota family as poisonous or edible. https://archive.ics.uci.edu/ml/datasets/Mushroom
 #main(data_funct=readShrooms, data_params=("../data/agaricus-lepiota.data",), epochs=100, dims=[22, 2], mbs=10, hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, map_batch_size=10, map_layers=[0], map_dendrograms=[0,1], display_weights=[0], display_biases=[0])
 
-# MNIST
+# MNIST DONE
 #main(data_funct=get_mnist_data, data_params=(17230,), epochs=100, dims=[784, 600, 10], lrate=0.2, mbs=200, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=meanSquaredError ,cfrac=0.1,map_batch_size=5, map_layers=[0, 1], map_dendrograms=[0, 1], display_weights=[], display_biases=[])
 
 """
