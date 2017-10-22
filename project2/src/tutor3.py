@@ -378,18 +378,13 @@ def leaky_relu(feature, leak=0.2, name="lrelu"):
 
 
 
-# dataset yeast, 94-100%
-#main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=200, dims=[8, 3, 2, 10], mbs=20, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
-
-#main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=2000, dims=[8, 3, 2, 10], mbs=10, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
-#main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=200, dims=[8, 3, 2, 10], mbs=20, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy, map_batch_size=5, map_layers=[0, 2])
-
-
-
+# dataset yeast, 94-100% DONE
+#main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=500, dims=[8, 70, 50, 10], mbs=5, lrate=0.3, hl_funct=tf.nn.relu, ol_funct=tf.identity, loss_funct=crossEntropy); print("relu, id, ce")
+main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=500, dims=[8, 70, 50, 10], mbs=5, lrate=0.5, hl_funct=tf.nn.relu, ol_funct=tf.identity, loss_funct=crossEntropy); print("relu, id, ce")
 
 #parity, 95-100% DONE
 #main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=1000, dims=[10, 50, 2], lrate=0.2, mbs=20, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=crossEntropy); print("relu, tan, ce")
-#main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=1000, dims=[10, 50, 2], lrate=0.2, mbs=30, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=crossEntropy); print("relu, tan, ce")
+#*main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=1000, dims=[10, 50, 2], lrate=0.2, mbs=30, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=crossEntropy); print("relu, tan, ce")
 
 
 #countex, 97-100% DONE
