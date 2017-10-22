@@ -343,7 +343,7 @@ def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs
     ann.run(epochs,bestk=bestk)
     end = time()
     print("params", data_params, "epochs", epochs, "dims", dims, "lrate", lrate, "mbs", mbs)
-    print("Time elapsed:", end - start)
+    print("Time elapsed:", end - start, "s", (end-start)/60, "m")
     if map_batch_size:
         ann.do_mapping(map_batch_size, map_layers, map_dendrograms, display_weights, display_biases)
     sleep(3)
@@ -371,11 +371,20 @@ def leaky_relu(feature, leak=0.2, name="lrelu"):
 #main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=2000,nbits=4, dims=[2**4, 4, 2**4],lrate=0.1,showint=10000,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1, map_batch_size=5, map_layers=[0, 1])
 
 #countex, 97-100%
-#main(data_funct=TFT.gen_vector_count_cases, data_params=(500, 15), epochs=100, dims=[15, 6, 16], hl_funct=tf.nn.relu, ol_funct=tf.nn.relu)
-main(data_funct=TFT.gen_vector_count_cases, data_params=(500, 15), epochs=2000, dims=[15, 100, 16], hl_funct=tf.nn.sigmoid, ol_funct=tf.identity, loss_funct=meanSquaredError, lrate=0.5, map_batch_size=10, map_layers=[0,1])
+# main(data_funct=TFT.gen_vector_count_cases, data_params=(500, 15), epochs=3000, dims=[15, 60, 20, 16], hl_funct=tf.nn.sigmoid, ol_funct=tf.identity, loss_funct=meanSquaredError, lrate=0.6, mbs=5)#, map_batch_size=10, map_layers=[0,1,2])
+
+#main(data_funct=TFT.gen_vector_count_cases, data_params=(500, 15), epochs=5000, dims=[15, 55, 20, 16], hl_funct=tf.nn.sigmoid, ol_funct=tf.identity, loss_funct=meanSquaredError, lrate=0.6, mbs=5)#, map_batch_size=10, map_layers=[0,1])
+
 
 #segment counter 100%
 #main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=100, nbits=2, dims=[25, 10, 9], lrate=0.1,mbs=9,vfrac=0.1,tfrac=0.8,cfrac=1, showint=1000,vint=1000,ol_funct=tf.nn.relu , hl_funct=tf.nn.sigmoid, loss_funct=crossEntropy, bestk=1)
+#main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=100, dims=[25, 10, 9], lrate=0.1,mbs=10,vfrac=0.1,tfrac=0.8,cfrac=1, ol_funct=tf.nn.tf.identity , hl_funct=tf.nn.sigmoid, loss_funct=meanSquaredError, bestk=1)
+
+#main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=500, dims=[25, 10, 9], lrate=0.5,mbs=10,vfrac=0.1,tfrac=0.8,cfrac=1, ol_funct=tf.nn.tf.softmax , hl_funct=tf.nn.sigmoid, loss_funct=meanSquaredError, bestk=1); print("sm, sig, mse")
+#main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=500, dims=[25, 10, 9], lrate=0.5,mbs=10,vfrac=0.1,tfrac=0.8,cfrac=1, ol_funct=tf.nn.tf.identity , hl_funct=tf.nn.tanh, loss_funct=meanSquaredError, bestk=1); print("id, tanh, mse")
+#main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=500, dims=[25, 10, 9], lrate=0.5,mbs=10,vfrac=0.1,tfrac=0.8,cfrac=1, ol_funct=tf.nn.tf.identity , hl_funct=tf.nn.sigmoid, loss_funct=meanSquaredError, bestk=1); print("id, sig, mse")
+#main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=500, dims=[25, 10, 9], lrate=0.5,mbs=10,vfrac=0.1,tfrac=0.8,cfrac=1, ol_funct=tf.nn.tf.identity , hl_funct=tf.nn.sigmoid, loss_funct=crossEntropy, bestk=1); print("id, sig, cross")
+
 
 # dataset wine,  100%
 #main(data_funct=readFile, data_params=("../data/wine.txt","avgdev", True), epochs=200, dims=[11, 4, 3, 8], mbs=10, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
