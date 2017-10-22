@@ -361,10 +361,6 @@ def leaky_relu(feature, leak=0.2, name="lrelu"):
 #main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=10000,nbits=4, dims=[2**4, 4, 2**4],lrate=0.1,showint=1000,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1, map_batch_size=9, map_layers=[0, 1], map_dendrograms=[0, 1], display_weights=[0], display_biases=[])
 
 
-#parity, 95-100%
-#main(data_funct=TFT.gen_all_parity_cases, data_params=(10,),epochs=100, nbits=9, dims=[10, 6, 2], lrate=0.1, mbs=5,hl_funct=tf.nn.relu,ol_funct=tf.nn.relu, loss_funct=crossEntropy,map_batch_size=9,map_layers=[0, 1], map_dendrograms=[0, 1], display_weights=[], display_biases=[])
-
-#main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=100, nbits=9, dims=[10, 5, 2], lrate=0.1, mbs=10, hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=meanSquaredError)
 
 #autoencoder, 100%. using gen_dense_autoencoder_cases is an option
 #main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=2000,nbits=4, dims=[2**4, 4, 2**4],lrate=0.1,showint=10000,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1)
@@ -386,9 +382,12 @@ def leaky_relu(feature, leak=0.2, name="lrelu"):
 
 
 
+
+#parity, 95-100% DONE
+#main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=1000, dims=[10, 50, 2], lrate=0.2, mbs=10, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=crossEntropy); print("relu, tan, ce")
+
 #countex, 97-100% DONE
-# main(data_funct=TFT.gen_vector_count_cases, data_params=(500, 15), epochs=3000, dims=[15, 60, 20, 16], hl_funct=tf.nn.sigmoid, ol_funct=tf.identity, loss_funct=meanSquaredError, lrate=0.6, mbs=5)#, map_batch_size=10, map_layers=[0,1,2])
-# main(data_funct=TFT.gen_vector_count_cases, data_params=(500, 15), epochs=5000, dims=[15, 55, 20, 16], hl_funct=tf.nn.sigmoid, ol_funct=tf.identity, loss_funct=meanSquaredError, lrate=0.6, mbs=5)#, map_batch_size=10, map_layers=[0,1])
+# main(data_funct=TFT.gen_vector_count_cases, data_params=(500, 15), epochs=4000, dims=[15, 55, 20, 16], hl_funct=tf.nn.sigmoid, ol_funct=tf.identity, loss_funct=meanSquaredError, lrate=0.6, mbs=5)#, map_batch_size=10, map_layers=[0,1])
 
 #segment counter 99% DONE
 #main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=1000, dims=[25, 30, 10, 9], lrate=0.6,mbs=20,vfrac=0.1,tfrac=0.1,cfrac=1, ol_funct=tf.identity , hl_funct=tf.nn.tanh, loss_funct=meanSquaredError, bestk=1)#, map_batch_size=10, map_layers=[0,2])
