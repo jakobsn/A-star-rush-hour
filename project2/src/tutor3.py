@@ -357,22 +357,26 @@ def leaky_relu(feature, leak=0.2, name="lrelu"):
         f2 = 0.5 * (1 - leak)
         return f1 * feature + f2 * abs(feature)
 
-#main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=10, nbits=9, dims=[10, 6, 2], lrate=0.1, mbs=5, hl_funct=tf.nn.relu, ol_funct=tf.nn.relu, loss_funct=crossEntropy, map_batch_size=3, map_layers=[0, 1], map_dendrograms=[0, 1], display_weights=[0], display_biases=[0])
-#main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=10000,nbits=4, dims=[2**4, 4, 2**4],lrate=0.1,showint=1000,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1, map_batch_size=9, map_layers=[0, 1], map_dendrograms=[0, 1], display_weights=[0], display_biases=[])
-
-
-
-#autoencoder, 100%. using gen_dense_autoencoder_cases is an option
-#main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=2000,nbits=4, dims=[2**4, 4, 2**4],lrate=0.1,showint=10000,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1)
-#main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=2000,nbits=4, dims=[2**4, 4, 2**4],lrate=0.1,showint=10000,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1, map_batch_size=5, map_layers=[0, 1])
-
-
 # dataset wine,  100%
 #main(data_funct=readFile, data_params=("../data/wine.txt","avgdev", True), epochs=200, dims=[11, 4, 3, 8], mbs=10, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
 
 # dataset glass, 97-100%
 #main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=5, dims=[9, 3, 2, 7], mbs=50, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy, map_batch_size=10, map_layers=[0, 2])
 #main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=500, dims=[9, 3, 2, 7], mbs=50, hl_funct=tf.nn.tanh, ol_funct=tf.nn.sigmoid, loss_funct=crossEntropy, map_batch_size=10, map_layers=[0, 2])
+
+
+#autoencoder, 100%. WILL NOT BE TESTEDusing gen_dense_autoencoder_cases is an option
+#main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=2000,nbits=4, dims=[2**4, 4, 2**4],lrate=0.1,showint=10000,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1)
+#main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=1000, dims=[2**4, 4, 2**4],lrate=0.1,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,ol_funct=tf.nn.tanh, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1); print("tan, relu, ce")
+#main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=1000, dims=[2**4, 4, 2**4],lrate=0.1,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,ol_funct=tf.identity, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1); print("id, relu, ce")
+#main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=1000, dims=[2**4, 4, 2**4],lrate=0.1,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,ol_funct=tf.nn.softmax, hl_funct=tf.nn.sigmoid,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1); print("sm, sig, ce")
+#main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=1000, dims=[2**4, 4, 2**4],lrate=0.1,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,ol_funct=tf.nn.tanh, hl_funct=tf.nn.relu,loss_funct=meanSquaredError,weight_range=[0, 1],bestk=1); print("tan, relu, mse")
+
+#~30%
+#main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=1000, dims=[2**4, 4, 2**4],lrate=0.1,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,ol_funct=tf.identity, hl_funct=tf.nn.tanh,loss_funct=meanSquaredError,weight_range=[0, 1],bestk=1); print("id, tan, mse")
+#main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=1000, dims=[2**4, 4, 2**4],lrate=0.1,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,ol_funct=tf.identity, hl_funct=tf.nn.sigmoid,loss_funct=meanSquaredError,weight_range=[0, 1],bestk=1); print("sm, sig, ce")
+
+
 
 # dataset yeast, 94-100%
 #main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=200, dims=[8, 3, 2, 10], mbs=20, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
@@ -384,7 +388,9 @@ def leaky_relu(feature, leak=0.2, name="lrelu"):
 
 
 #parity, 95-100% DONE
-#main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=1000, dims=[10, 50, 2], lrate=0.2, mbs=10, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=crossEntropy); print("relu, tan, ce")
+#main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=1000, dims=[10, 50, 2], lrate=0.2, mbs=20, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=crossEntropy); print("relu, tan, ce")
+#main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=1000, dims=[10, 50, 2], lrate=0.2, mbs=30, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=crossEntropy); print("relu, tan, ce")
+
 
 #countex, 97-100% DONE
 # main(data_funct=TFT.gen_vector_count_cases, data_params=(500, 15), epochs=4000, dims=[15, 55, 20, 16], hl_funct=tf.nn.sigmoid, ol_funct=tf.identity, loss_funct=meanSquaredError, lrate=0.6, mbs=5)#, map_batch_size=10, map_layers=[0,1])
