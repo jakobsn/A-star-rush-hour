@@ -128,6 +128,17 @@ class Gann():
         self.test_func = self.error
         testres, grabvals, _ = self.run_one_step(self.test_func, self.grabvars, self.probes, session=self.current_session, step="Postprocessing",
                                                  feed_dict=feeder, show_interval=None, mapping=True)
+
+        self.grabvars = []
+        for dendro in map_dendrograms:
+            self.add_grabvar(dendro, 'in')  # Add a grabvar (to be displayed in its own matplotlib window).
+            self.add_grabvar(dendro, 'out')  # Add a grabvar (to be displayed in its own matplotlib window).
+
+        testres, grabvals, _ = self.run_one_step(self.test_func, self.grabvars, self.probes, session=self.current_session, step="Postprocessing",
+                                                 feed_dict=feeder, show_interval=None, mapping=False, dendrogram=True)
+        #print("grabvals")
+        #print(grabvals)
+
         print('%s Set Error = %f ' % ("Map testing", testres))
         sleep(30)
         self.close_current_session()
@@ -171,7 +182,7 @@ class Gann():
     # Similar to the "quickrun" functions used earlier.
 
     def run_one_step(self, operators, grabbed_vars=None, probed_vars=None, dir='probeview',
-                  session=None, feed_dict=None, step=1, show_interval=1, mapping=False):
+                  session=None, feed_dict=None, step=1, show_interval=1, mapping=False, dendrogram=False):
         sess = session if session else TFT.gen_initialized_session(dir=dir)
         if probed_vars is not None:
             results = sess.run([operators, grabbed_vars, probed_vars], feed_dict=feed_dict)
@@ -182,7 +193,19 @@ class Gann():
             self.display_grabvars(results[1], grabbed_vars, step=step)
         if mapping:
             self.display_grabvars(results[1], grabbed_vars, step=step)
+        if dendrogram:
+            self.display_dendrograms(results[1], grabbed_vars, step=step)
         return results[0], results[1], sess
+
+    def display_dendrograms(self, grabbed_vals, grabbed_vars, step):
+        names = [x.name for x in grabbed_vars];
+        msg = "Grabbed Variables at Step " + str(step)
+        print("\n" + msg, end="\n")
+        for i, o in zip(grabbed_vals[0:len(grabbed_vals):2], grabbed_vals[1:len(grabbed_vals):2]):
+            print("i")
+            print(i)
+            print("o")
+            print(o)
 
     def display_grabvars(self, grabbed_vals, grabbed_vars,step=1):
         names = [x.name for x in grabbed_vars];
@@ -358,6 +381,10 @@ def leaky_relu(feature, leak=0.2, name="lrelu"):
         f2 = 0.5 * (1 - leak)
         return f1 * feature + f2 * abs(feature)
 
+main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=100, dims=[10, 50, 2], lrate=0.2, mbs=30,
+         hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=crossEntropy, map_batch_size=5, map_layers=[0],
+         display_biases=[0], map_dendrograms=[0,1]); print("relu, tan, ce")
+
 
 #autoencoder, 100%. WILL NOT BE TESTED using gen_dense_autoencoder_cases is an option
 #main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=2000,nbits=4, dims=[2**4, 4, 2**4],lrate=0.1,showint=10000,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1)
@@ -384,7 +411,7 @@ def leaky_relu(feature, leak=0.2, name="lrelu"):
 
 #parity, 95-100% DONE
 #2main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=1000, dims=[10, 50, 2], lrate=0.2, mbs=20, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=crossEntropy); print("relu, tan, ce")
-main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=1000, dims=[10, 50, 2], lrate=0.2, mbs=30, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=crossEntropy, map_batch_size=5, map_layers=[0], display_biases=[0]); print("relu, tan, ce")
+#main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=1000, dims=[10, 50, 2], lrate=0.2, mbs=30, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=crossEntropy, map_batch_size=5, map_layers=[0], display_biases=[0]); print("relu, tan, ce")
 
 #countex, 97-100% DONE
 #main(data_funct=TFT.gen_vector_count_cases, data_params=(500, 15), epochs=4000, dims=[15, 55, 20, 16], hl_funct=tf.nn.sigmoid, ol_funct=tf.identity, loss_funct=meanSquaredError, lrate=0.6, mbs=5)#, map_batch_size=10, map_layers=[0,1])
