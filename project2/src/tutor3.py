@@ -207,6 +207,14 @@ class Gann():
             print("o")
             print(o)
 
+            in_pattern=[]
+            for line in i:
+                din = TFT.bits_to_str(line)
+            in_pattern.append(din)
+            print("din")
+            print(din)
+            TFT.dendrogram(o, in_pattern)
+
     def display_grabvars(self, grabbed_vals, grabbed_vars,step=1):
         names = [x.name for x in grabbed_vars];
         msg = "Grabbed Variables at Step " + str(step)
