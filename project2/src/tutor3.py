@@ -357,9 +357,6 @@ def leaky_relu(feature, leak=0.2, name="lrelu"):
         f2 = 0.5 * (1 - leak)
         return f1 * feature + f2 * abs(feature)
 
-# dataset wine,  100%
-#main(data_funct=readFile, data_params=("../data/wine.txt","avgdev", True), epochs=200, dims=[11, 4, 3, 8], mbs=10, hl_funct=tf.nn.tanh, ol_funct=tf.nn.relu, loss_funct=crossEntropy)
-
 
 #autoencoder, 100%. WILL NOT BE TESTED using gen_dense_autoencoder_cases is an option
 #main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=2000,nbits=4, dims=[2**4, 4, 2**4],lrate=0.1,showint=10000,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,vint=10000,ol_funct=tf.nn.relu, hl_funct=tf.nn.relu,loss_funct=crossEntropy,weight_range=[0, 1],bestk=1)
@@ -373,6 +370,8 @@ def leaky_relu(feature, leak=0.2, name="lrelu"):
 #main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=1000, dims=[2**4, 4, 2**4],lrate=0.1,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,ol_funct=tf.identity, hl_funct=tf.nn.sigmoid,loss_funct=meanSquaredError,weight_range=[0, 1],bestk=1); print("sm, sig, ce")
 
 
+# dataset wine,  100%
+main(data_funct=readFile, data_params=("../data/wine.txt","avgdev", True), epochs=2000, dims=[11, 50, 10, 8], mbs=10, lrate=0.4, hl_funct=tf.nn.tanh, ol_funct=tf.identity, loss_funct=meanSquaredError); print("tan, id, mse")
 
 # dataset glass, 97-100% DONE
 #2main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=1000, dims=[9, 10, 10, 7], mbs=10, lrate=0.5, hl_funct=tf.nn.tanh, ol_funct=tf.identity, loss_funct=meanSquaredError); print("tan, id, mse")
