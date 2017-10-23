@@ -370,8 +370,8 @@ def leaky_relu(feature, leak=0.2, name="lrelu"):
 #main(data_funct=TFT.gen_all_one_hot_cases, data_params=(2**4,), epochs=1000, dims=[2**4, 4, 2**4],lrate=0.1,mbs=10,vfrac=0.1,tfrac=0.1, cfrac=1,ol_funct=tf.identity, hl_funct=tf.nn.sigmoid,loss_funct=meanSquaredError,weight_range=[0, 1],bestk=1); print("sm, sig, ce")
 
 
-# dataset wine,  100%
-main(data_funct=readFile, data_params=("../data/wine.txt","avgdev", True), epochs=2000, dims=[11, 50, 10, 8], mbs=10, lrate=0.4, hl_funct=tf.nn.tanh, ol_funct=tf.identity, loss_funct=meanSquaredError); print("tan, id, mse")
+# dataset wine,  100% DONE
+#main(data_funct=readFile, data_params=("../data/wine.txt","avgdev", True), epochs=2000, dims=[11, 50, 20, 8], mbs=10, lrate=0.4, hl_funct=tf.nn.tanh, ol_funct=tf.identity, loss_funct=meanSquaredError); print("tan, id, mse")
 
 # dataset glass, 97-100% DONE
 #2main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=1000, dims=[9, 10, 10, 7], mbs=10, lrate=0.5, hl_funct=tf.nn.tanh, ol_funct=tf.identity, loss_funct=meanSquaredError); print("tan, id, mse")
