@@ -5,7 +5,7 @@ import matplotlib.pyplot as PLT
 import tflowtools as TFT
 from tflowtools import meanSquaredError, crossEntropy, readFile, scale_average_and_deviation, scale_min_max, get_mnist_data, readShrooms
 from time import time, sleep
-from math import ceil
+from math import ceil, floor
 import mnist_basics as mb
 import theano
 
@@ -199,6 +199,7 @@ class Gann():
         return results[0], results[1], sess
 
     def display_dendrograms(self, grabbed_vals, grabbed_vars, step):
+        # TODO: HANDLE UNIQUE CASES ONLY
         names = [x.name for x in grabbed_vars]
 
         msg = "Grabbed Variables at Step " + str(step)
@@ -224,15 +225,21 @@ class Gann():
                             print("round element")
                             print(element)
                             print("to")
-                            print(round(element, 1))
-                            in_vals.append(round(element, 1))
-                        in_vals = in_vals[:30]
+                            if element == 0:
+                                print(0)
+                                in_vals.append(0)
+                            #elif 1 > element > -1:
+                            else:
+                                print("%.1f" % element)
+                                in_vals.append("%.1f" % element)
+
+                            #print("insert to invals")
+                            #print(in_vals)
+                        in_vals = in_vals
                         break
-                print("size")
-                print(np.array(in_vals).itemsize)
                 print("change")
                 print(in_vals)
-                din = TFT.bits_to_str(in_vals)
+                din = TFT.bits_to_str(in_vals).replace(".", "")
                 print("to")
                 print(din)
                 in_pattern.append(din)
@@ -416,11 +423,11 @@ def leaky_relu(feature, leak=0.2, name="lrelu"):
         return f1 * feature + f2 * abs(feature)
 
 
-
+"""
 main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=100, dims=[10, 50, 2], lrate=0.2, mbs=30,
          hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=crossEntropy, map_batch_size=5, map_layers=[],
          display_biases=[], map_dendrograms=[1]); print("relu, tan, ce")
-
+"""
 #main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=1000, dims=[25, 30, 10, 9], lrate=0.6,mbs=20,vfrac=0.1,tfrac=0.1,cfrac=1, ol_funct=tf.identity , hl_funct=tf.nn.tanh, loss_funct=meanSquaredError, bestk=1, map_dendrograms=[0,1], map_batch_size=10)#, map_layers=[0,2])
 
 
@@ -445,7 +452,7 @@ main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=100, dims=[1
 
 # dataset yeast, 94-100% DONE
 #2main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=500, dims=[8, 70, 50, 10], mbs=5, lrate=0.3, hl_funct=tf.nn.relu, ol_funct=tf.identity, loss_funct=crossEntropy); print("relu, id, ce")
-#main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=500, dims=[8, 60, 50, 10], mbs=5, lrate=0.5, hl_funct=tf.nn.relu, ol_funct=tf.identity, loss_funct=crossEntropy); print("relu, id, ce")
+#main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=500, dims=[8, 60, 50, 10], mbs=5, lrate=0.5, hl_funct=tf.nn.relu, ol_funct=tf.identity, loss_funct=crossEntropy, map_batch_size=5, map_dendrograms=[0]); print("relu, id, ce")
 
 #parity, 95-100% DONE
 #2main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=1000, dims=[10, 50, 2], lrate=0.2, mbs=20, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=crossEntropy); print("relu, tan, ce")
