@@ -94,7 +94,12 @@ def all_one_hots(len, floats=False):
     return [int_to_one_hot(i,len,floats=floats) for i in range(len)]
 
 # bits = list of 1's and 0's
-def bits_to_str(bits): return ''.join(map(str,bits))
+def bits_to_str(bits, komma=False):
+    if not komma:
+        return ''.join(map(str,bits))
+    else:
+        return ','.join(map(str,bits))
+
 def str_to_bits(s): return [int(c) for c in s]
 
 # ****** VECTOR SHIFTING ******
