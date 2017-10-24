@@ -130,6 +130,7 @@ class Gann():
                                                  feed_dict=feeder, show_interval=None, mapping=True)
 
         self.grabvars = []
+        self.grabvar_figures = []
         for dendro in map_dendrograms:
             self.add_grabvar(dendro, 'in')  # Add a grabvar (to be displayed in its own matplotlib window).
             self.add_grabvar(dendro, 'out')  # Add a grabvar (to be displayed in its own matplotlib window).
@@ -198,7 +199,7 @@ class Gann():
         return results[0], results[1], sess
 
     def display_dendrograms(self, grabbed_vals, grabbed_vars, step):
-        names = [x.name for x in grabbed_vars];
+        names = [x.name for x in grabbed_vars]
         msg = "Grabbed Variables at Step " + str(step)
         print("\n" + msg, end="\n")
         for i, o in zip(grabbed_vals[0:len(grabbed_vals):2], grabbed_vals[1:len(grabbed_vals):2]):
@@ -209,11 +210,16 @@ class Gann():
 
             in_pattern=[]
             for line in i:
+                print("change")
+                print(line)
                 din = TFT.bits_to_str(line)
-            in_pattern.append(din)
+                print("to")
+                print(din)
+                in_pattern.append(din)
             print("din")
-            print(din)
+            print(in_pattern)
             TFT.dendrogram(o, in_pattern)
+            print("Displayed dendrogram")
 
     def display_grabvars(self, grabbed_vals, grabbed_vars,step=1):
         names = [x.name for x in grabbed_vars];
