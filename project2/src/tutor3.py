@@ -141,9 +141,22 @@ class Gann():
                                                      onezero=onezero, komma=komma, punktum=punktum, decimals=decimals)
         except:
             print("Input labels to large, shrinking...")
-            testres, grabvals, _ = self.run_one_step(self.test_func, self.grabvars, self.probes, session=self.current_session, step="Postprocessing",
-                                                     feed_dict=feeder, show_interval=None, mapping=False, dendrogram=True,
-                                                     onezero=True, komma=False, punktum=False, decimals=1)
+            try:
+                if decimals > 1:
+                    decimals -= 1
+                elif not onezero:
+                    onezero = True
+                elif komma:
+                    komma = False
+                else:
+                    punktum = False
+                testres, grabvals, _ = self.run_one_step(self.test_func, self.grabvars, self.probes, session=self.current_session, step="Postprocessing",
+                                                         feed_dict=feeder, show_interval=None, mapping=False, dendrogram=True,
+                                                         onezero=onezero, komma=komma, punktum=punktum, decimals=decimals)
+            except:
+                testres, grabvals, _ = self.run_one_step(self.test_func, self.grabvars, self.probes, session=self.current_session, step="Postprocessing",
+                                                         feed_dict=feeder, show_interval=None, mapping=False, dendrogram=True,
+                                                         onezero=True, komma=False, punktum=False, decimals=1)
 
         #print("grabvals")
         #print(grabvals)
@@ -414,7 +427,7 @@ class Caseman():
 def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=1000, dims=[9, 9, 7], lrate=0.1, mbs=10,
          vfrac=0.1, tfrac=0.1,showint=1000, vint=1000,hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, weight_range=[-.1, .1],
          cfrac=1, map_batch_size=0,map_layers=[], map_dendrograms=[0], display_weights=[0], display_biases=[0], bestk=1,
-         onezero=False, komma=False, punktum=False, decimals=1):
+         onezero=False, komma=False, punktum=False, decimals=2):
     start = time()
     case_generator = (lambda : data_funct(*data_params))
     cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac,cfrac=cfrac)
