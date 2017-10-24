@@ -10,6 +10,7 @@ import numpy.random as NPR
 from math import sqrt
 from tensorflow.examples.tutorials.mnist import input_data
 from sklearn import preprocessing
+from time import sleep
 
 # ****** SESSION HANDLING *******
 
@@ -430,6 +431,8 @@ def dendrogram(features,labels,metric='euclidean',mode='average',ax=None,title='
     ax.set_ylabel(metric + ' distance')
     print("before show")
     PLT.show(block=False)
+    sleep(10)
+    PLT.close()
     print("plt shown")
 
 

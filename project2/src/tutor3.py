@@ -128,7 +128,7 @@ class Gann():
         self.test_func = self.error
         testres, grabvals, _ = self.run_one_step(self.test_func, self.grabvars, self.probes, session=self.current_session, step="Postprocessing",
                                                  feed_dict=feeder, show_interval=None, mapping=True)
-
+        PLT.close("all")
         self.grabvars = []
         self.grabvar_figures = []
         for dendro in map_dendrograms:
@@ -200,9 +200,10 @@ class Gann():
 
     def display_dendrograms(self, grabbed_vals, grabbed_vars, step):
         names = [x.name for x in grabbed_vars]
+
         msg = "Grabbed Variables at Step " + str(step)
         print("\n" + msg, end="\n")
-        for i, o in zip(grabbed_vals[0:len(grabbed_vals):2], grabbed_vals[1:len(grabbed_vals):2]):
+        for j, i, o in zip(range(len(grabbed_vals[0:len(grabbed_vals):2])), grabbed_vals[0:len(grabbed_vals):2], grabbed_vals[1:len(grabbed_vals):2]):
             print("i")
             print(i)
             print("o")
@@ -210,15 +211,34 @@ class Gann():
 
             in_pattern=[]
             for line in i:
+                in_vals = line
+                print("type")
+                print(type(line[0]))
+                for element in line:
+                    print("integer?")
+                    print(line[0].is_integer())
+                    if not element.is_integer():
+                        # Format long floats
+                        in_vals = []
+                        for element in line:
+                            print("round element")
+                            print(element)
+                            print("to")
+                            print(round(element, 5))
+                            in_vals.append(round(element, 0))
+                        in_vals = in_vals[:10]
+                        break
+                print("size")
+                print(np.array(in_vals).itemsize)
                 print("change")
-                print(line)
-                din = TFT.bits_to_str(line)
+                print(in_vals)
+                din = TFT.bits_to_str(in_vals)
                 print("to")
                 print(din)
                 in_pattern.append(din)
             print("din")
             print(in_pattern)
-            TFT.dendrogram(o, in_pattern)
+            TFT.dendrogram(o, in_pattern, title="dendrogram: " + names[j])
             print("Displayed dendrogram")
 
     def display_grabvars(self, grabbed_vals, grabbed_vars,step=1):
@@ -372,7 +392,7 @@ class Caseman():
 
 def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=1000, dims=[9, 9, 7], lrate=0.1, mbs=10,
          vfrac=0.1, tfrac=0.1,showint=1000, vint=1000,hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, weight_range=[-.1, .1],
-         cfrac=1, map_batch_size=0,map_layers=0, map_dendrograms=[0], display_weights=[0], display_biases=[0], bestk=1):
+         cfrac=1, map_batch_size=0,map_layers=[], map_dendrograms=[0], display_weights=[0], display_biases=[0], bestk=1):
     start = time()
     case_generator = (lambda : data_funct(*data_params))
     cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac,cfrac=cfrac)
@@ -395,9 +415,13 @@ def leaky_relu(feature, leak=0.2, name="lrelu"):
         f2 = 0.5 * (1 - leak)
         return f1 * feature + f2 * abs(feature)
 
+
+
 main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=100, dims=[10, 50, 2], lrate=0.2, mbs=30,
          hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=crossEntropy, map_batch_size=5, map_layers=[0],
-         display_biases=[0], map_dendrograms=[0,1]); print("relu, tan, ce")
+         display_biases=[0], map_dendrograms=[1]); print("relu, tan, ce")
+
+#main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=1000, dims=[25, 30, 10, 9], lrate=0.6,mbs=20,vfrac=0.1,tfrac=0.1,cfrac=1, ol_funct=tf.identity , hl_funct=tf.nn.tanh, loss_funct=meanSquaredError, bestk=1, map_dendrograms=[0,1], map_batch_size=10)#, map_layers=[0,2])
 
 
 #autoencoder, 100%. WILL NOT BE TESTED using gen_dense_autoencoder_cases is an option
@@ -434,7 +458,7 @@ main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=100, dims=[1
 #main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=1000, dims=[25, 30, 10, 9], lrate=0.6,mbs=20,vfrac=0.1,tfrac=0.1,cfrac=1, ol_funct=tf.identity , hl_funct=tf.nn.tanh, loss_funct=meanSquaredError, bestk=1)#, map_batch_size=10, map_layers=[0,2])
 
 # dataset, mushrooms, 95-96%. DONE. Classifies mushrooms from agaricus and lepiota family as poisonous or edible. https://archive.ics.uci.edu/ml/datasets/Mushroom
-#main(data_funct=readShrooms, data_params=("../data/agaricus-lepiota.data",), epochs=100, dims=[22, 2], mbs=10, hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, map_batch_size=10, map_layers=[0], map_dendrograms=[0,1], display_weights=[0], display_biases=[0])
+#main(data_funct=readShrooms, data_params=("../data/agaricus-lepiota.data",), epochs=100, dims=[22, 2], mbs=10, hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, map_batch_size=10, map_layers=[0], map_dendrograms=[0], display_weights=[0], display_biases=[0])
 
 # MNIST DONE
 #main(data_funct=get_mnist_data, data_params=(17230,), epochs=100, dims=[784, 600, 10], lrate=0.2, mbs=200, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=meanSquaredError ,cfrac=0.1,map_batch_size=5, map_layers=[0, 1], map_dendrograms=[0, 1], display_weights=[], display_biases=[])
@@ -448,14 +472,14 @@ x loss function: must be set in error < configure_learning < gann, either mean-s
 x initial weight range: must be set in weights < build < gannmodule
 x datasource: specify function and param for case generator
 x casefraction: length of sublist ca of cases < organize cases < caseman
-~ implement do_mapping, use ann.grabvar()
+x implement do_mapping, use ann.grabvar()
 x how to  show graphical visualization of output layer
 x support long bias vectors (maximize window...)
 - visualize dendrograms
-? Find dims automaticly (or not?)
+x Find dims automaticly (or not?) not
 x Implement reading from mnist
 x Implement scaling by deviation
-- Numpy arrays
+x Numpy arrays
 
 Qs:
 - Steps == global_training_step/epochs?
