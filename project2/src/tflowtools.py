@@ -436,7 +436,7 @@ def dendrogram(features,labels,metric='euclidean',mode='average',ax=None,title='
     print("before show")
     PLT.show(block=False)
     sleep(10)
-    PLT.close()
+    PLT.close("all")
     print("plt shown")
 
 

@@ -242,7 +242,8 @@ class Gann():
                 din = TFT.bits_to_str(in_vals).replace(".", "")
                 print("to")
                 print(din)
-                in_pattern.append(din)
+                if not din in in_pattern:
+                    in_pattern.append(din)
             print("din")
             print(in_pattern)
             TFT.dendrogram(o, in_pattern, title="dendrogram: " + names[j])
@@ -449,10 +450,12 @@ main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=100, dims=[1
 # dataset glass, 97-100% DONE
 #2main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=1000, dims=[9, 10, 10, 7], mbs=10, lrate=0.5, hl_funct=tf.nn.tanh, ol_funct=tf.identity, loss_funct=meanSquaredError); print("tan, id, mse")
 #main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=1000, dims=[9, 10, 10, 7], mbs=10, lrate=0.7, hl_funct=tf.nn.tanh, ol_funct=tf.identity, loss_funct=meanSquaredError); print("tan, id, mse")
+#main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=1000, dims=[9, 10, 10, 7], mbs=10, lrate=0.7, hl_funct=tf.nn.tanh, ol_funct=tf.identity, loss_funct=meanSquaredError, map_batch_size=5, map_dendrograms=[0,1,2]); print("tan, id, mse")
+
 
 # dataset yeast, 94-100% DONE
 #2main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=500, dims=[8, 70, 50, 10], mbs=5, lrate=0.3, hl_funct=tf.nn.relu, ol_funct=tf.identity, loss_funct=crossEntropy); print("relu, id, ce")
-#main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=500, dims=[8, 60, 50, 10], mbs=5, lrate=0.5, hl_funct=tf.nn.relu, ol_funct=tf.identity, loss_funct=crossEntropy, map_batch_size=5, map_dendrograms=[0]); print("relu, id, ce")
+main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=500, dims=[8, 60, 50, 10], mbs=5, lrate=0.5, hl_funct=tf.nn.relu, ol_funct=tf.identity, loss_funct=crossEntropy, map_batch_size=5, map_dendrograms=[0,1]); print("relu, id, ce")
 
 #parity, 95-100% DONE
 #2main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=1000, dims=[10, 50, 2], lrate=0.2, mbs=20, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=crossEntropy); print("relu, tan, ce")
