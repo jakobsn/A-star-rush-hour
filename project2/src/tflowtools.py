@@ -427,7 +427,7 @@ def gen_dim_reduced_data(feature_array,target_size,eigen_values,eigen_vectors):
 # orientation = top, bottom, left, right (refers to location of the root of the tree)
 # mode = single, average, complete, centroid, ward, median
 # metric = euclidean, cityblock (manhattan), hamming, cosine, correlation ... (see matplotlib distance.pdist for all 23)
-def dendrogram(features,labels,metric='euclidean',mode='average',ax=None,title='Dendrogram',orient='top',lrot=90.0):
+def dendrogram(features,labels,metric='euclidean',mode='average',ax=None,title='Dendrogram',orient='top',lrot=90.0,sleep_time=30):
     mng = PLT.get_current_fig_manager()
     mng.full_screen_toggle()
     fig = PLT.gcf()
@@ -440,7 +440,7 @@ def dendrogram(features,labels,metric='euclidean',mode='average',ax=None,title='
     ax.set_ylabel(metric + ' distance')
     print("before show")
     PLT.show(block=False)
-    sleep(10)
+    sleep(sleep_time)
     PLT.close("all")
     print("plt shown")
 

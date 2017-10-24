@@ -114,7 +114,7 @@ class Gann():
         return testres  # self.error uses MSE, so this is a per-case value when bestk=None
 
     def do_mapping(self, map_batch_size, map_layers, map_dendrograms, display_weights, display_biases,
-                   onezero=False, komma=False, punktum=False, decimals=1):
+                   onezero=False, komma=False, punktum=False, decimals=1, mapping_time=30, dendro_time=30):
         self.reopen_current_session()
         for layer in map_layers:
             self.add_grabvar(layer, 'in')  # Add a grabvar (to be displayed in its own matplotlib window).
@@ -129,6 +129,8 @@ class Gann():
         self.test_func = self.error
         testres, grabvals, _ = self.run_one_step(self.test_func, self.grabvars, self.probes, session=self.current_session, step="Postprocessing",
                                                  feed_dict=feeder, show_interval=None, mapping=True)
+
+        sleep(mapping_time)
         PLT.close("all")
         self.grabvars = []
         self.grabvar_figures = []
@@ -138,31 +140,40 @@ class Gann():
         try:
             testres, grabvals, _ = self.run_one_step(self.test_func, self.grabvars, self.probes, session=self.current_session, step="Postprocessing",
                                                      feed_dict=feeder, show_interval=None, mapping=False, dendrogram=True,
-                                                     onezero=onezero, komma=komma, punktum=punktum, decimals=decimals)
+                                                     onezero=onezero, komma=komma, punktum=punktum, decimals=decimals, dendro_time=dendro_time)
         except:
             print("Input labels to large, shrinking...")
             try:
                 if decimals > 1:
                     decimals -= 1
-                elif not onezero:
-                    onezero = True
+                elif punktum:
+                    punktum = False
                 elif komma:
                     komma = False
-                else:
-                    punktum = False
                 testres, grabvals, _ = self.run_one_step(self.test_func, self.grabvars, self.probes, session=self.current_session, step="Postprocessing",
                                                          feed_dict=feeder, show_interval=None, mapping=False, dendrogram=True,
-                                                         onezero=onezero, komma=komma, punktum=punktum, decimals=decimals)
+                                                         onezero=onezero, komma=komma, punktum=punktum, decimals=decimals, dendro_time=dendro_time)
             except:
-                testres, grabvals, _ = self.run_one_step(self.test_func, self.grabvars, self.probes, session=self.current_session, step="Postprocessing",
-                                                         feed_dict=feeder, show_interval=None, mapping=False, dendrogram=True,
-                                                         onezero=True, komma=False, punktum=False, decimals=1)
+                try:
+                    if not onezero:
+                        onezero = True
+                    elif punktum:
+                        punktum = False
+                    elif komma:
+                        komma = False
+                    testres, grabvals, _ = self.run_one_step(self.test_func, self.grabvars, self.probes,
+                                                             session=self.current_session, step="Postprocessing",
+                                                             feed_dict=feeder, show_interval=None, mapping=False, dendrogram=True,
+                                                             onezero=onezero, komma=komma, punktum=punktum, decimals=decimals,dendro_time=dendro_time)
+                except:
+                    testres, grabvals, _ = self.run_one_step(self.test_func, self.grabvars, self.probes, session=self.current_session, step="Postprocessing",
+                                                             feed_dict=feeder, show_interval=None, mapping=False, dendrogram=True,
+                                                             onezero=True, komma=False, punktum=False, decimals=1,dendro_time=dendro_time)
 
         #print("grabvals")
         #print(grabvals)
 
         print('%s Set Error = %f ' % ("Map testing", testres))
-        sleep(30)
         self.close_current_session()
         return
 
@@ -205,7 +216,7 @@ class Gann():
 
     def run_one_step(self, operators, grabbed_vars=None, probed_vars=None, dir='probeview',
                   session=None, feed_dict=None, step=1, show_interval=1, mapping=False, dendrogram=False,
-                     onezero=False, komma=False, punktum=False, decimals=1):
+                     onezero=False, komma=False, punktum=False, decimals=1, dendro_time=30):
         sess = session if session else TFT.gen_initialized_session(dir=dir)
         if probed_vars is not None:
             results = sess.run([operators, grabbed_vars, probed_vars], feed_dict=feed_dict)
@@ -217,10 +228,10 @@ class Gann():
         if mapping:
             self.display_grabvars(results[1], grabbed_vars, step=step)
         if dendrogram:
-            self.display_dendrograms(results[1], grabbed_vars, step=step, onezero=onezero, komma=komma, punktum=punktum, decimals=decimals)
+            self.display_dendrograms(results[1], grabbed_vars, step=step, onezero=onezero, komma=komma, punktum=punktum, decimals=decimals, sleep_time=dendro_time)
         return results[0], results[1], sess
 
-    def display_dendrograms(self, grabbed_vals, grabbed_vars, step, onezero=False, komma=False, punktum=False, decimals=1):
+    def display_dendrograms(self, grabbed_vals, grabbed_vars, step, onezero=False, komma=False, punktum=False, decimals=1, sleep_time=30):
         # TODO: HANDLE UNIQUE CASES ONLY
         names = [x.name for x in grabbed_vars]
 
@@ -249,7 +260,7 @@ class Gann():
                             print("to")
                             if element == 0 and onezero:
                                 print(0)
-                                in_vals.append(0)
+                                in_vals.append("o")
                             #elif 1 > element > -1:
                             else:
                                 deci = "%."+str(decimals)+"f"
@@ -272,7 +283,7 @@ class Gann():
                     in_pattern.append(din)
             print("din")
             print(in_pattern)
-            TFT.dendrogram(o, in_pattern, title="dendrogram: " + names[j])
+            TFT.dendrogram(o, in_pattern, title="dendrogram: " + names[j], sleep_time=sleep_time)
             print("Displayed dendrogram")
 
     def display_grabvars(self, grabbed_vals, grabbed_vars,step=1):
@@ -426,8 +437,8 @@ class Caseman():
 
 def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=1000, dims=[9, 9, 7], lrate=0.1, mbs=10,
          vfrac=0.1, tfrac=0.1,showint=1000, vint=1000,hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, weight_range=[-.1, .1],
-         cfrac=1, map_batch_size=0,map_layers=[], map_dendrograms=[0], display_weights=[0], display_biases=[0], bestk=1,
-         onezero=False, komma=False, punktum=False, decimals=2):
+         cfrac=1, map_batch_size=0,map_layers=[], map_dendrograms=[], display_weights=[], display_biases=[], bestk=1,
+         onezero=False, komma=True, punktum=False, decimals=2):
     start = time()
     case_generator = (lambda : data_funct(*data_params))
     cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac,cfrac=cfrac)
@@ -439,9 +450,7 @@ def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs
     print("Time elapsed:", end - start, "s", (end-start)/60, "m")
     if map_batch_size:
         ann.do_mapping(map_batch_size, map_layers, map_dendrograms, display_weights, display_biases, onezero, komma, punktum, decimals)
-    sleep(3)
-    #ann.runmore(1,bestk=bestk)
-    sleep(3)
+    #ann.runmore(1000,bestk=bestk)
     return ann
 
 def leaky_relu(feature, leak=0.2, name="lrelu"):
@@ -451,11 +460,11 @@ def leaky_relu(feature, leak=0.2, name="lrelu"):
         return f1 * feature + f2 * abs(feature)
 
 
-
+"""
 main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=100, dims=[10, 50, 2], lrate=0.2, mbs=30,
          hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=crossEntropy, map_batch_size=5, map_layers=[],
          display_biases=[], map_dendrograms=[0,1], onezero=False, komma=True, punktum=True, decimals=2); print("relu, tan, ce")
-
+"""
 #main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=1000, dims=[25, 30, 10, 9], lrate=0.6,mbs=20,vfrac=0.1,tfrac=0.1,cfrac=1, ol_funct=tf.identity , hl_funct=tf.nn.tanh, loss_funct=meanSquaredError, bestk=1, map_dendrograms=[0,1], map_batch_size=10)#, map_layers=[0,2])
 
 
@@ -499,6 +508,16 @@ main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=100, dims=[1
 
 # MNIST DONE
 #main(data_funct=get_mnist_data, data_params=(17230,), epochs=100, dims=[784, 600, 10], lrate=0.2, mbs=200, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=meanSquaredError ,cfrac=0.1,map_batch_size=5, map_layers=[0, 1], map_dendrograms=[0, 1], display_weights=[], display_biases=[])
+
+
+#main(data_funct=get_mnist_data, data_params=(17230,), epochs=100, dims=[784, 600, 10], lrate=0.2, mbs=200, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=meanSquaredError ,cfrac=0.1,map_batch_size=5, map_dendrograms=[0, 1], display_weights=[], display_biases=[])
+#main(data_funct=readShrooms, data_params=("../data/agaricus-lepiota.data",), epochs=100, dims=[22, 2], mbs=10, hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, map_batch_size=10, map_layers=[], map_dendrograms=[0], display_weights=[], display_biases=[0])
+#main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=1000, dims=[25, 30, 10, 9], lrate=0.6,mbs=20,vfrac=0.1,tfrac=0.1,cfrac=1, ol_funct=tf.identity , hl_funct=tf.nn.tanh, loss_funct=meanSquaredError, map_batch_size=5, map_dendrograms=[0, 1, 2], bestk=1)#, map_batch_size=10, map_layers=[0,2])
+#main(data_funct=TFT.gen_vector_count_cases, data_params=(500, 15), epochs=4000, dims=[15, 55, 20, 16], hl_funct=tf.nn.sigmoid, ol_funct=tf.identity, loss_funct=meanSquaredError, lrate=0.6, mbs=5 ,map_batch_size=5, map_dendrograms=[0, 1, 2])#, map_batch_size=10, map_layers=[])
+main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=1000, dims=[10, 50, 2], lrate=0.2, mbs=30, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=crossEntropy, map_batch_size=5, map_layers=[], map_dendrograms=[0, 1], display_biases=[]); print("relu, tan, ce")
+#main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=500, dims=[8, 60, 50, 10], mbs=5, lrate=0.5, hl_funct=tf.nn.relu, ol_funct=tf.identity, loss_funct=crossEntropy, map_batch_size=5, map_dendrograms=[0, 1, 2]); print("relu, id, ce")
+#main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=1000, dims=[9, 10, 10, 7], mbs=10, lrate=0.7, hl_funct=tf.nn.tanh, ol_funct=tf.identity, loss_funct=meanSquaredError, map_batch_size=5, map_dendrograms=[0, 1, 2]); print("tan, id, mse")
+#main(data_funct=readFile, data_params=("../data/wine.txt","avgdev", True), epochs=2000, dims=[11, 50, 20, 8], mbs=10, lrate=0.4, hl_funct=tf.nn.tanh, ol_funct=tf.identity, loss_funct=meanSquaredError, map_batch_size=5, map_dendrograms=[0, 1, 2]); print("tan, id, mse")
 
 """
 TODO:
