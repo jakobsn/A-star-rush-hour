@@ -224,9 +224,9 @@ class Gann():
                             print("round element")
                             print(element)
                             print("to")
-                            print(round(element, 5))
-                            in_vals.append(round(element, 0))
-                        in_vals = in_vals[:10]
+                            print(round(element, 1))
+                            in_vals.append(round(element, 1))
+                        in_vals = in_vals[:30]
                         break
                 print("size")
                 print(np.array(in_vals).itemsize)
@@ -418,8 +418,8 @@ def leaky_relu(feature, leak=0.2, name="lrelu"):
 
 
 main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=100, dims=[10, 50, 2], lrate=0.2, mbs=30,
-         hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=crossEntropy, map_batch_size=5, map_layers=[0],
-         display_biases=[0], map_dendrograms=[1]); print("relu, tan, ce")
+         hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=crossEntropy, map_batch_size=5, map_layers=[],
+         display_biases=[], map_dendrograms=[1]); print("relu, tan, ce")
 
 #main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=1000, dims=[25, 30, 10, 9], lrate=0.6,mbs=20,vfrac=0.1,tfrac=0.1,cfrac=1, ol_funct=tf.identity , hl_funct=tf.nn.tanh, loss_funct=meanSquaredError, bestk=1, map_dendrograms=[0,1], map_batch_size=10)#, map_layers=[0,2])
 
