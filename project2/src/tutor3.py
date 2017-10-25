@@ -464,19 +464,31 @@ def str2bool(v):
             raise argparse.ArgumentTypeError('Boolean value expected.')
 
 if __name__ == '__main__':
-
     # Takes input from command line
     parser = argparse.ArgumentParser(description='General Artificial Neural Network')
     parser.add_argument('-fu', type=str, help='Data function')
-    parser.add_argument('-dp', type=str, help='Data parameters, separated with \"\'\"')
-    parser.add_argument('-di', type=str,help='Dimensions, separated with \"\'\"')
+    parser.add_argument('-dp', type=str, help='Data parameters, separated with \",\"')
+    parser.add_argument('-di', type=str,help='Dimensions, separated with \",\"')
     parser.add_argument('-ep', type=int,help='Epochs',nargs='?')
     parser.add_argument('-hl', type=str, help='Hidden layer activation function', nargs = '?')
     parser.add_argument('-ol', type=str,help='Output layer activation function',nargs='?')
     parser.add_argument('-lf', type=str,help='Loss function, \'crossEntropy\' or \'meanSquaredError\'',nargs='?')
-    parser.add_argument('-lr', type=float,help='Learning rate',nargs='?')
-    parser.add_argument('-mbs', type=int,help='Mini batch size',nargs='?')
+    parser.add_argument('-lr', type=float,help='Learning rate, default is 0.3',nargs='?')
+    parser.add_argument('-mbs', type=int,help='Mini batch size, default is 10',nargs='?')
     parser.add_argument('-ms', type=int,help='Map batch size',nargs='?')
+    parser.add_argument('-ml', type=str, help='Map layers separated with \",\"', nargs='?')
+    parser.add_argument('-md', type=str, help='Map dendrogerams layers separated with \",\"', nargs='?')
+    parser.add_argument('-db', type=str, help='Display biases separated with \",\"', nargs='?')
+    parser.add_argument('-dw', type=str, help='Display weights separated with \",\"', nargs='?')
+    parser.add_argument('-bk', type=int, help='Best k', nargs='?')
+    parser.add_argument('-oz', type=str2bool, help='Display \"0.0\" as \"o\" in dendrograms?', nargs='?')
+    parser.add_argument('-ko', type=str2bool, help='Include \',\' in dendrograms?', nargs='?')
+    parser.add_argument('-pu', type=str2bool, help='Include \'.\' in dendrograms?', nargs='?')
+    parser.add_argument('-de', type=int, help='Decimals included in each feature in dendrograms', nargs='?')
+    parser.add_argument('-mt', type=int, help='Mapping time', nargs='?')
+    parser.add_argument('-dt', type=int, help='Dendrogram time', nargs='?')
+    parser.add_argument('-si', type=int, help='Show interval', nargs='?')
+    parser.add_argument('-vi', type=int, help='Validation interval', nargs='?')
 
     args = parser.parse_args()
 
@@ -485,7 +497,7 @@ if __name__ == '__main__':
     # If the function is not a file reader, the arguments must be converted to int
     if funct is not get_mnist_data and funct is not readFile and funct is not readShrooms:
         for i, j in enumerate(parameters):
-            parameters[i]  = int(j)
+            parameters[i] = int(j)
 
     dimensions = args.di.split(',')
     for i, j in enumerate(dimensions):
@@ -495,14 +507,54 @@ if __name__ == '__main__':
     ol_funct = globals()[args.ol]
     loss_funct = globals()[args.lf]
 
+    if args.ml:
+        map_layers = args.ml.split(',')
+        for i, j in enumerate(map_layers):
+            map_layers[i] = int(j)
+    else:
+        map_layers = []
+
+    if args.md:
+        map_dendrograms = args.md.split(',')
+        for i, j in enumerate(map_dendrograms):
+            map_dendrograms[i] = int(j)
+    else:
+        map_dendrograms = []
+
+    if args.db:
+        display_biases = args.ml.split(',')
+        for i, j in enumerate(display_biases):
+            display_biases[i] = int(j)
+    else:
+        display_biases = []
+
+    if args.dw:
+        display_weights = args.ml.split(',')
+        for i, j in enumerate(display_weights):
+            display_weights[i] = int(j)
+    else:
+        display_weights = []
+
+
     if not hl_funct: hl_funct = relu
     if not ol_funct: ol_funct = softmax
     if not loss_funct: loss_funct = crossEntropy
     if not args.lr: args.lr = 0.3
     if not args.mbs: args.mbs = 10
+    if not args.bk: args.bk = 1
+    if not args.oz: args.oz = False
+    if not args.ko: args.ko = True
+    if not args.pu: args.pu = True
+    if not args.de: args.de = 2
+    if not args.mt: args.mt = 20
+    if not args.dt: args.dt = 20
+    if not args.si: args.si = 0
+    if not args.vi: args.vi = 500
 
     main(data_funct=funct, data_params=parameters,dims=dimensions, hl_funct=hl_funct, ol_funct=ol_funct,
-         loss_funct=loss_funct, lrate=args.lr, mbs=args.mbs)
+         loss_funct=loss_funct, lrate=args.lr, mbs=args.mbs, map_layers=map_layers, map_dendrograms=map_dendrograms,
+         display_biases=display_biases, display_weights=display_weights, bestk=args.bk, onezero=args.oz, komma=args.ko,
+         punktum=args.pu, decimals=args.de, mapping_time=args.mt, dendro_time=args.mt, showint=args.si, vint=args.vi)
 
 
 
