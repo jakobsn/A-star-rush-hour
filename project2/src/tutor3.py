@@ -277,7 +277,7 @@ class Gann():
                 if not self.allUnique(in_pattern):
                     in_pattern.pop()
 
-            if TFT.dendrogram(o, in_pattern, title="dendrogram: " + names[j], sleep_time=sleep_time):
+            if TFT.dendrogram(o, in_pattern, title="dendrogram: " + names[self.displayed_dendrograms].replace('in','').replace('out',''), sleep_time=sleep_time):
                 self.displayed_dendrograms += 2
 
     def allUnique(self, x):
