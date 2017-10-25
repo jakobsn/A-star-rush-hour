@@ -179,10 +179,23 @@ class Gann():
                                                              feed_dict=feeder, show_interval=None, mapping=False, dendrogram=True,
                                                              onezero=onezero, komma=komma, punktum=punktum, decimals=decimals,dendro_time=dendro_time)
                 except:
-                    testres, grabvals, _ = self.run_one_step(self.test_func, self.grabvars[self.displayed_dendrograms-1:], self.probes, session=self.current_session, step="Postprocessing",
-                                                             feed_dict=feeder, show_interval=None, mapping=False, dendrogram=True,
-                                                             onezero=True, komma=False, punktum=False, decimals=1,dendro_time=dendro_time)
-
+                    try:
+                        testres, grabvals, _ = self.run_one_step(self.test_func, self.grabvars[self.displayed_dendrograms-1:], self.probes, session=self.current_session, step="Postprocessing",
+                                                                 feed_dict=feeder, show_interval=None, mapping=False, dendrogram=True,
+                                                                 onezero=True, komma=False, punktum=False, decimals=1,dendro_time=dendro_time)
+                    except:
+                        try:
+                            testres, grabvals, _ = self.run_one_step(self.test_func,
+                                                                 self.grabvars[self.displayed_dendrograms - 1:],
+                                                                 self.probes, session=self.current_session, step="Postprocessing",
+                                                                 feed_dict=feeder, show_interval=None, mapping=False, dendrogram=True,
+                                                                 onezero=True, komma=False, punktum=False, decimals=1, dendro_time=dendro_time, leaf_font_size=8)
+                        except:
+                            testres, grabvals, _ = self.run_one_step(self.test_func,
+                                                                 self.grabvars[self.displayed_dendrograms - 1:],
+                                                                 self.probes, session=self.current_session, step="Postprocessing",
+                                                                 feed_dict=feeder, show_interval=None, mapping=False, dendrogram=True,
+                                                                 onezero=True, komma=False, punktum=False, decimals=1, dendro_time=dendro_time, leaf_font_size=7)
         print('%s Set Error = %f ' % ("Map testing", testres))
         self.close_current_session()
         return
@@ -226,7 +239,7 @@ class Gann():
 
     def run_one_step(self, operators, grabbed_vars=None, probed_vars=None, dir='probeview',
                   session=None, feed_dict=None, step=1, show_interval=1, mapping=False, dendrogram=False,
-                     onezero=False, komma=False, punktum=False, decimals=1, dendro_time=30):
+                     onezero=False, komma=False, punktum=False, decimals=1, dendro_time=30, leaf_font_size=None):
         sess = session if session else TFT.gen_initialized_session(dir=dir)
         if probed_vars is not None:
             results = sess.run([operators, grabbed_vars, probed_vars], feed_dict=feed_dict)
@@ -238,10 +251,10 @@ class Gann():
         if mapping:
             self.display_grabvars(results[1], grabbed_vars, step=step)
         if dendrogram:
-            self.display_dendrograms(results[1], grabbed_vars, step=step, onezero=onezero, komma=komma, punktum=punktum, decimals=decimals, sleep_time=dendro_time)
+            self.display_dendrograms(results[1], grabbed_vars, step=step, onezero=onezero, komma=komma, punktum=punktum, decimals=decimals, sleep_time=dendro_time, leaf_font_size=leaf_font_size)
         return results[0], results[1], sess
 
-    def display_dendrograms(self, grabbed_vals, grabbed_vars, step, onezero=False, komma=False, punktum=False, decimals=1, sleep_time=30):
+    def display_dendrograms(self, grabbed_vals, grabbed_vars, step, onezero=False, komma=False, punktum=False, decimals=1, sleep_time=30, leaf_font_size=None):
         names = [x.name for x in grabbed_vars]
         msg = "Grabbed Variables at Step " + str(step)
         print("\n" + msg, end="\n")
@@ -256,7 +269,7 @@ class Gann():
                         in_vals = []
                         for element in line:
                             # Represent '0,0' as 'o'
-                            if element == 0 and onezero:
+                            if element == 0 and onezero == 1:
                                 in_vals.append("o")
                             # Ceil the float by with specified number of decimals
                             else:
@@ -277,7 +290,7 @@ class Gann():
                 if not self.allUnique(in_pattern):
                     in_pattern.pop()
 
-            if TFT.dendrogram(o, in_pattern, title="dendrogram: " + names[self.displayed_dendrograms].replace('out','')[:-1], sleep_time=sleep_time):
+            if TFT.dendrogram(o, in_pattern, title="dendrogram: " + names[self.displayed_dendrograms].replace('out','')[:-1], sleep_time=sleep_time, leaf_font_size=leaf_font_size):
                 self.displayed_dendrograms += 2
 
     def allUnique(self, x):
