@@ -157,9 +157,7 @@ class Gann():
         except:
             print("Input labels to large, shrinking...")
             try:
-                if decimals > 1:
-                    decimals -= 1
-                elif punktum:
+                if punktum:
                     punktum = False
                 elif komma:
                     komma = False
