@@ -1,0 +1,24 @@
+python3 tutor3.py \
+-fu readFile \
+-dp ../data/yeast.txt,avgdev \
+-di 8,60,50,10 \
+-ep 500 \
+-hl relu \
+-ol identity \
+-lf crossEntropy \
+-lr 0.5 \
+-mbs 5
+-ms 
+-ml
+-md
+-db
+-dw
+-bk
+-oz
+-ko
+-pu
+-de
+-mt
+-dt
+-si
+-vi

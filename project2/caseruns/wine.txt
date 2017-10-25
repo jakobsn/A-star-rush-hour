@@ -1,0 +1,25 @@
+python3 tutor3.py \
+-fu readFile \
+-dp ../data/wine.txt,avgdev,True \
+-di 11,50,20,8 \
+-ep 2000 \
+-hl tanh \
+-ol identity \
+-lf meanSquaredError \
+-lr 0.4 \
+-mbs 10 
+-ms
+-ml
+-md
+-db
+-dw
+-bk
+-oz
+-ko
+-pu
+-de
+-mt
+-dt
+-si
+-vi
+

@@ -1,0 +1,26 @@
+python3 tutor3.py \
+-fu readShrooms \
+-dp ../data/agaricus-lepiota.data \
+-di 22,2 \
+-ep 200 \
+-hl sigmoid \
+-ol tanh \
+-lf meanSquaredError \
+-lr 0.1 \
+-mbs 10
+-ms
+-ml
+-md
+-db
+-dw
+-bk
+-oz
+-ko
+-pu
+-de
+-mt
+-dt
+-si
+-vi
+
+#obtained from https://archive.ics.uci.edu/ml/datasets/Mushroom

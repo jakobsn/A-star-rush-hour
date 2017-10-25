@@ -1,0 +1,24 @@
+python3 tutor3.py \
+-fu
+-dp
+-di
+-ep
+-hl
+-ol
+-lf
+-lr
+-mbs
+-ms
+-ml
+-md
+-db
+-dw
+-bk
+-oz
+-ko
+-pu
+-de
+-mt
+-dt
+-si
+-vi

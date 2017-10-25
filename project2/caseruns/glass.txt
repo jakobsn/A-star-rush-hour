@@ -1,0 +1,24 @@
+python3 tutor3.py \
+-fu readFile \
+-dp ../data/glass.txt,avgdev \
+-di 9,10,10,7 \
+-ep 1000 \
+-hl tanh \
+-ol identity \
+-lf meanSquaredError \
+-lr 0.7 \
+-mbs 10
+-ms 
+-ml
+-md
+-db
+-dw
+-bk
+-oz
+-ko
+-pu
+-de
+-mt
+-dt
+-si
+-vi

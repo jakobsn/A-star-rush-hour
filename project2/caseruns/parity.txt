@@ -1,0 +1,24 @@
+python3 tutor3.py \
+-fu gen_all_parity_cases \
+-dp 10, \
+-di 10,50,2 \
+-ep 1000 \
+-hl relu \
+-ol tanh \
+-lf crossEntropy \
+-lr 0.2 \
+-mbs 30
+-ms
+-ml
+-md
+-db
+-dw
+-bk
+-oz
+-ko
+-pu
+-de
+-mt
+-dt
+-si
+-vi
