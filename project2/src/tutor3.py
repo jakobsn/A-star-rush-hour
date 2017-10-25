@@ -503,9 +503,9 @@ if __name__ == '__main__':
     for i, j in enumerate(dimensions):
         dimensions[i] = int(j)
 
-    hl_funct = globals()[args.hl]
-    ol_funct = globals()[args.ol]
-    loss_funct = globals()[args.lf]
+    if args.hl: hl_funct = globals()[args.hl]
+    if args.ol: ol_funct = globals()[args.ol]
+    if args.lf: loss_funct = globals()[args.lf]
 
     if args.ml:
         map_layers = args.ml.split(',')
@@ -536,9 +536,9 @@ if __name__ == '__main__':
         display_weights = []
 
 
-    if not hl_funct: hl_funct = relu
-    if not ol_funct: ol_funct = softmax
-    if not loss_funct: loss_funct = crossEntropy
+    if not args.hl: hl_funct = relu
+    if not args.ol: ol_funct = softmax
+    if not args.lf: loss_funct = crossEntropy
     if not args.lr: args.lr = 0.3
     if not args.mbs: args.mbs = 10
     if not args.bk: args.bk = 1

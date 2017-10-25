@@ -456,7 +456,7 @@ def readFile(targetFile, scale, colons=False):
         for line in file:
             row = []
             elements = []
-            if not colons:
+            if not bool(colons):
                 features = line.replace("\n", "").split(",")
             else:
                 features = line.replace("\n", "").split(";")
