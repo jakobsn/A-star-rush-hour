@@ -475,15 +475,11 @@ def readFile(targetFile, scale, colons=False):
             target = elements.pop()
             row.append([target])
             data.append(row)
-            print(target)
             if target > target_length:
-                print("larger", target)
                 target_length = target
             max_feature = max((elements + [max_feature]))
             min_feature = min((elements + [min_feature]))
     # manipulate the data to become neural network friendly
-    print(data)
-    print(target_length)
     data = format_target_datasets(data, target_length)
     if scale == "minmax":
         data = scale_min_max(data, min_feature, max_feature)
@@ -588,3 +584,9 @@ def readShrooms(targetFile):
             row.append(np.array(target))
             data.append(np.array(row))
     return data
+
+def leaky_relu(feature, leak=0.2, name="lrelu"):
+    with tf.variable_scope(name):
+        f1 = 0.5 * (1 + leak)
+        f2 = 0.5 * (1 - leak)
+        return f1 * feature + f2 * abs(feature)

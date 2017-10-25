@@ -6,8 +6,6 @@ import tflowtools as TFT
 from tflowtools import meanSquaredError, crossEntropy, readFile, scale_average_and_deviation, scale_min_max, get_mnist_data, readShrooms
 from time import time, sleep
 from math import ceil, floor
-import mnist_basics as mb
-import theano
 
 
 # ******* A General Artificial Neural Network ********
@@ -125,6 +123,8 @@ class Gann():
             self.add_grabvar(bias, "bias")
 
         inputs = [c[0] for c in self.caseman.get_training_cases()[:map_batch_size]]; targets = [c[1] for c in self.caseman.get_training_cases()[:map_batch_size]]
+        print("input")
+        print(inputs)
         feeder = {self.input: inputs, self.target: targets}
         self.test_func = self.error
         testres, grabvals, _ = self.run_one_step(self.test_func, self.grabvars, self.probes, session=self.current_session, step="Postprocessing",
@@ -232,59 +232,46 @@ class Gann():
         return results[0], results[1], sess
 
     def display_dendrograms(self, grabbed_vals, grabbed_vars, step, onezero=False, komma=False, punktum=False, decimals=1, sleep_time=30):
-        # TODO: HANDLE UNIQUE CASES ONLY
         names = [x.name for x in grabbed_vars]
-
         msg = "Grabbed Variables at Step " + str(step)
         print("\n" + msg, end="\n")
         for j, i, o in zip(range(len(grabbed_vals[0:len(grabbed_vals):2])), grabbed_vals[0:len(grabbed_vals):2], grabbed_vals[1:len(grabbed_vals):2]):
-            print("i")
-            print(i)
-            print("o")
-            print(o)
-
             in_pattern=[]
             for line in i:
                 in_vals = line
-                print("type")
-                print(type(line[0]))
                 for element in line:
-                    print("integer?")
-                    print(line[0].is_integer())
+
+                    # Format long floats, if one of the numbers is not an int.
                     if not element.is_integer():
-                        # Format long floats
                         in_vals = []
                         for element in line:
-                            print("round element")
-                            print(element)
-                            print("to")
+                            # Represent '0,0' as 'o'
                             if element == 0 and onezero:
-                                print(0)
                                 in_vals.append("o")
-                            #elif 1 > element > -1:
+                            # Ceil the float by with specified number of decimals
                             else:
                                 deci = "%."+str(decimals)+"f"
-                                print(deci % element)
                                 in_vals.append(deci % element)
-
-                            #print("insert to invals")
-                            #print(in_vals)
-                        in_vals = in_vals
                         break
-                print("change")
-                print(in_vals)
+
+                # Keep '.'
                 if punktum:
                     din = TFT.bits_to_str(in_vals, komma)
+                # Remove '.'
                 else:
                     din = TFT.bits_to_str(in_vals, komma).replace(".", "")
-                print("to")
-                print(din)
+                # Gather only unique cases
+                print("incoming din,", din)
                 if not din in in_pattern:
                     in_pattern.append(din)
-            print("din")
-            print(in_pattern)
+                if not self.allUnique(in_pattern):
+                    in_pattern.pop()
+
             TFT.dendrogram(o, in_pattern, title="dendrogram: " + names[j], sleep_time=sleep_time)
-            print("Displayed dendrogram")
+
+    def allUnique(self, x):
+        seen = set()
+        return not any(i in seen or seen.add(i) for i in x)
 
     def display_grabvars(self, grabbed_vals, grabbed_vars,step=1):
         names = [x.name for x in grabbed_vars];
@@ -450,23 +437,23 @@ def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs
     print("params", data_params, "epochs", epochs, "dims", dims, "lrate", lrate, "mbs", mbs)
     print("Time elapsed:", end - start, "s", (end-start)/60, "m")
     if map_batch_size:
-        ann.do_mapping(map_batch_size, map_layers, map_dendrograms, display_weights, display_biases, onezero, komma, punktum, decimals)
+        if not len(map_layers):
+            ann.do_mapping(map_batch_size, map_layers, map_dendrograms, display_weights, display_biases, onezero, komma, punktum, decimals, mapping_time=0)
+        else:
+            ann.do_mapping(map_batch_size, map_layers, map_dendrograms, display_weights, display_biases, onezero, komma, punktum, decimals)
     #ann.runmore(1000,bestk=bestk)
+
     return ann
 
-def leaky_relu(feature, leak=0.2, name="lrelu"):
-    with tf.variable_scope(name):
-        f1 = 0.5 * (1 + leak)
-        f2 = 0.5 * (1 - leak)
-        return f1 * feature + f2 * abs(feature)
-
 
 """
-main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=100, dims=[10, 50, 2], lrate=0.2, mbs=30,
-         hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=crossEntropy, map_batch_size=5, map_layers=[],
+main(data_funct=TFT.gen_all_parity_cases, data_params=(4,), epochs=100, dims=[4, 20, 2], lrate=0.2, mbs=30,
+         hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=crossEntropy, map_batch_size=30, map_layers=[],
          display_biases=[], map_dendrograms=[0,1], onezero=False, komma=True, punktum=True, decimals=2); print("relu, tan, ce")
 """
-#main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=1000, dims=[25, 30, 10, 9], lrate=0.6,mbs=20,vfrac=0.1,tfrac=0.1,cfrac=1, ol_funct=tf.identity , hl_funct=tf.nn.tanh, loss_funct=meanSquaredError, bestk=1, map_dendrograms=[0,1], map_batch_size=10)#, map_layers=[0,2])
+
+
+main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=1000, dims=[25, 30, 10, 9], lrate=0.6,mbs=20,vfrac=0.1,tfrac=0.1,cfrac=1, ol_funct=tf.identity , hl_funct=tf.nn.tanh, loss_funct=meanSquaredError, bestk=1, map_dendrograms=[0,1], map_layers=[0], map_batch_size=30)#, map_layers=[0,2])
 
 
 #autoencoder, 100%. WILL NOT BE TESTED using gen_dense_autoencoder_cases is an option
@@ -515,7 +502,7 @@ main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=100, dims=[1
 #main(data_funct=readShrooms, data_params=("../data/agaricus-lepiota.data",), epochs=100, dims=[22, 2], mbs=10, hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, map_batch_size=10, map_layers=[], map_dendrograms=[0], display_weights=[], display_biases=[0])
 #main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=1000, dims=[25, 30, 10, 9], lrate=0.6,mbs=20,vfrac=0.1,tfrac=0.1,cfrac=1, ol_funct=tf.identity , hl_funct=tf.nn.tanh, loss_funct=meanSquaredError, map_batch_size=5, map_dendrograms=[0, 1, 2], bestk=1)#, map_batch_size=10, map_layers=[0,2])
 #main(data_funct=TFT.gen_vector_count_cases, data_params=(500, 15), epochs=4000, dims=[15, 55, 20, 16], hl_funct=tf.nn.sigmoid, ol_funct=tf.identity, loss_funct=meanSquaredError, lrate=0.6, mbs=5 ,map_batch_size=5, map_dendrograms=[0, 1, 2])#, map_batch_size=10, map_layers=[])
-main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=1000, dims=[10, 50, 2], lrate=0.2, mbs=30, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=crossEntropy, map_batch_size=5, map_layers=[], map_dendrograms=[0, 1], display_biases=[]); print("relu, tan, ce")
+#main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=1000, dims=[10, 50, 2], lrate=0.2, mbs=30, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=crossEntropy, map_batch_size=5, map_layers=[], map_dendrograms=[0, 1], display_biases=[]); print("relu, tan, ce")
 #main(data_funct=readFile, data_params=("../data/yeast.txt","avgdev"), epochs=500, dims=[8, 60, 50, 10], mbs=5, lrate=0.5, hl_funct=tf.nn.relu, ol_funct=tf.identity, loss_funct=crossEntropy, map_batch_size=5, map_dendrograms=[0, 1, 2]); print("relu, id, ce")
 #main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=1000, dims=[9, 10, 10, 7], mbs=10, lrate=0.7, hl_funct=tf.nn.tanh, ol_funct=tf.identity, loss_funct=meanSquaredError, map_batch_size=5, map_dendrograms=[0, 1, 2]); print("tan, id, mse")
 #main(data_funct=readFile, data_params=("../data/wine.txt","avgdev", True), epochs=2000, dims=[11, 50, 20, 8], mbs=10, lrate=0.4, hl_funct=tf.nn.tanh, ol_funct=tf.identity, loss_funct=meanSquaredError, map_batch_size=5, map_dendrograms=[0, 1, 2]); print("tan, id, mse")
