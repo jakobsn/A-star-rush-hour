@@ -464,7 +464,13 @@ def str2bool(v):
             raise argparse.ArgumentTypeError('Boolean value expected.')
 
 if __name__ == '__main__':
+    main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=1000, dims=[25, 30, 10, 9], lrate=0.6,mbs=20,vfrac=0.1,tfrac=0.1,cfrac=1, ol_funct=tf.identity , hl_funct=tf.nn.tanh, loss_funct=meanSquaredError, bestk=1, map_batch_size=10, map_layers=[0,2], map_dendrograms=[0,1])
 
+#main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=1000, dims=[25, 30, 10, 9],
+    #     lrate=0.6, mbs=20, vfrac=0.1, tfrac=0.1, cfrac=1, vint=100, ol_funct=tf.identity, hl_funct=tf.nn.tanh,
+    #     loss_funct=meanSquaredError, bestk=1, map_dendrograms=[0, 1], map_layers=[0, 1], display_weights=[0], display_biases=[0],map_batch_size=20,
+    #     mapping_time=20)  # , map_layers=[0,2])
+"""
     # Takes input from command line
     parser = argparse.ArgumentParser(description='General Artificial Neural Network')
 
@@ -490,7 +496,7 @@ if __name__ == '__main__':
             parameters[i]  = int(j)
 
     main(data_funct=funct, data_params=parameters,dims=dimensions)
-
+"""
 
 
 
@@ -501,7 +507,6 @@ main(data_funct=TFT.gen_all_parity_cases, data_params=(4,), epochs=100, dims=[4,
 """
 
 
-#main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=1000, dims=[25, 30, 10, 9], lrate=0.6,mbs=20,vfrac=0.1,tfrac=0.1,cfrac=1,vint=100, ol_funct=tf.identity , hl_funct=tf.nn.tanh, loss_funct=meanSquaredError, bestk=1, map_dendrograms=[], map_layers=[0], map_batch_size=30, mapping_time=10)#, map_layers=[0,2])
 
 
 #autoencoder, 100%. WILL NOT BE TESTED using gen_dense_autoencoder_cases is an option
