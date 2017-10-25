@@ -7,7 +7,7 @@ python3 tutor3.py \
 -ol identity \
 -lf meanSquaredError \
 -lr 0.7 \
--mbs 10\
+-mbs 10 \
 \
 -ms 5 \
 -ml 0,1,2 \
