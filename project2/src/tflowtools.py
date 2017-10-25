@@ -438,11 +438,9 @@ def dendrogram(features,labels,metric='euclidean',mode='average',ax=None,title='
     PLT.tight_layout()
     ax.set_title(title)
     ax.set_ylabel(metric + ' distance')
-    print("before show")
     PLT.show(block=False)
     sleep(sleep_time)
     PLT.close("all")
-    print("plt shown")
     return True
 
 #   **** Helping functions ****

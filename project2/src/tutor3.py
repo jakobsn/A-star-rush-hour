@@ -284,7 +284,6 @@ class Gann():
                 else:
                     din = TFT.bits_to_str(in_vals, komma).replace(".", "")
                 # Gather only unique cases
-                print("incoming din,", din)
                 if not din in in_pattern:
                     in_pattern.append(din)
                 if not self.allUnique(in_pattern):
@@ -445,8 +444,6 @@ class Caseman():
 
 #   ****  MAIN functions ****
 
-#main(data_funct=TFT.gen_vector_count_cases, data_params=(500, 15), epochs=100, dims=[15, 6, 16], hl_funct=tf.nn.relu, ol_funct=tf.nn.relu)
-
 def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=1000, dims=[9, 9, 7], lrate=0.1, mbs=10, showint=0, vint=1000,
          vfrac=0.1, tfrac=0.1,hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, weight_range=[-.1, .1],
          cfrac=1, map_batch_size=0,map_layers=[], map_dendrograms=[], display_weights=[], display_biases=[], bestk=1,
@@ -468,7 +465,6 @@ def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs
     #ann.runmore(1000,bestk=bestk)
 
     return ann
-
 
 def str2bool(v):
         if v.lower() in ('yes', 'true', 't', 'y', '1'):
