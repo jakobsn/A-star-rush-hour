@@ -1,11 +1,21 @@
 import tensorflow as tf
+from tensorflow.python.ops.math_ops import tanh, sigmoid
+from tensorflow import identity
 import numpy as np
 import math
 import matplotlib.pyplot as PLT
 import tflowtools as TFT
-from tflowtools import meanSquaredError, crossEntropy, readFile, scale_average_and_deviation, scale_min_max, get_mnist_data, readShrooms
+from tflowtools import meanSquaredError, crossEntropy, readFile, scale_average_and_deviation, \
+    scale_min_max, get_mnist_data, readShrooms, gen_segmented_vector_cases, gen_vector_count_cases, \
+    gen_all_parity_cases, gen_all_one_hot_cases
 from time import time, sleep
 from math import ceil, floor
+import argparse
+import sys
+
+relu = tf.nn.relu
+softmax = tf.nn.softmax
+
 
 
 # ******* A General Artificial Neural Network ********
@@ -129,11 +139,13 @@ class Gann():
         self.test_func = self.error
         testres, grabvals, _ = self.run_one_step(self.test_func, self.grabvars, self.probes, session=self.current_session, step="Postprocessing",
                                                  feed_dict=feeder, show_interval=None, mapping=True)
-
+        # Close mapping session
         sleep(mapping_time)
         PLT.close("all")
         self.grabvars = []
         self.grabvar_figures = []
+
+        # Start dendrogram session
         for dendro in map_dendrograms:
             self.add_grabvar(dendro, 'in')  # Add a grabvar (to be displayed in its own matplotlib window).
             self.add_grabvar(dendro, 'out')  # Add a grabvar (to be displayed in its own matplotlib window).
@@ -169,9 +181,6 @@ class Gann():
                     testres, grabvals, _ = self.run_one_step(self.test_func, self.grabvars, self.probes, session=self.current_session, step="Postprocessing",
                                                              feed_dict=feeder, show_interval=None, mapping=False, dendrogram=True,
                                                              onezero=True, komma=False, punktum=False, decimals=1,dendro_time=dendro_time)
-
-        #print("grabvals")
-        #print(grabvals)
 
         print('%s Set Error = %f ' % ("Map testing", testres))
         self.close_current_session()
@@ -423,10 +432,10 @@ class Caseman():
 
 #main(data_funct=TFT.gen_vector_count_cases, data_params=(500, 15), epochs=100, dims=[15, 6, 16], hl_funct=tf.nn.relu, ol_funct=tf.nn.relu)
 
-def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=1000, dims=[9, 9, 7], lrate=0.1, mbs=10,
-         vfrac=0.1, tfrac=0.1,showint=1000, vint=1000,hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, weight_range=[-.1, .1],
+def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=1000, dims=[9, 9, 7], lrate=0.1, mbs=10, showint=0, vint=100,
+         vfrac=0.1, tfrac=0.1,hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, weight_range=[-.1, .1],
          cfrac=1, map_batch_size=0,map_layers=[], map_dendrograms=[], display_weights=[], display_biases=[], bestk=1,
-         onezero=False, komma=True, punktum=False, decimals=2):
+         onezero=False, komma=True, punktum=False,  decimals=2, mapping_time=30, dendro_time=30):
     start = time()
     case_generator = (lambda : data_funct(*data_params))
     cman = Caseman(cfunc=case_generator,vfrac=vfrac,tfrac=tfrac,cfrac=cfrac)
@@ -440,10 +449,49 @@ def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs
         if not len(map_layers):
             ann.do_mapping(map_batch_size, map_layers, map_dendrograms, display_weights, display_biases, onezero, komma, punktum, decimals, mapping_time=0)
         else:
-            ann.do_mapping(map_batch_size, map_layers, map_dendrograms, display_weights, display_biases, onezero, komma, punktum, decimals)
+            ann.do_mapping(map_batch_size, map_layers, map_dendrograms, display_weights, display_biases, onezero, komma, punktum, decimals, mapping_time, dendro_time)
     #ann.runmore(1000,bestk=bestk)
 
     return ann
+
+
+def str2bool(v):
+        if v.lower() in ('yes', 'true', 't', 'y', '1'):
+            return True
+        elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+            return False
+        else:
+            raise argparse.ArgumentTypeError('Boolean value expected.')
+
+if __name__ == '__main__':
+
+    # Takes input from command line
+    parser = argparse.ArgumentParser(description='General Artificial Neural Network')
+
+    parser.add_argument('-fu', type=str, help='Data function')
+
+    parser.add_argument('-dp', type=str, help='Data parameters, separated with \"\'\"')
+
+    parser.add_argument('-ep', type=int,help='Epochs',nargs='?')
+    parser.add_argument('-di', type=str,help='Dimensions, separated with \"\'\"', nargs = '?')
+    parser.add_argument('-hl', type=float, help='Hidden layer activation function', nargs = '?')
+
+    args = parser.parse_args()
+
+    funct = globals()[args.fu]
+    parameters = args.dp.split(',')
+    dimensions = args.di.split(',')
+
+    for i, j in enumerate(dimensions):
+        dimensions[i] = int(j)
+
+    if funct is not get_mnist_data and funct is not readFile:
+        for i, j in enumerate(parameters):
+            parameters[i]  = int(j)
+
+    main(data_funct=funct, data_params=parameters,dims=dimensions)
+
+
 
 
 """
@@ -453,7 +501,7 @@ main(data_funct=TFT.gen_all_parity_cases, data_params=(4,), epochs=100, dims=[4,
 """
 
 
-main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=1000, dims=[25, 30, 10, 9], lrate=0.6,mbs=20,vfrac=0.1,tfrac=0.1,cfrac=1, ol_funct=tf.identity , hl_funct=tf.nn.tanh, loss_funct=meanSquaredError, bestk=1, map_dendrograms=[0,1], map_layers=[0], map_batch_size=30)#, map_layers=[0,2])
+#main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=1000, dims=[25, 30, 10, 9], lrate=0.6,mbs=20,vfrac=0.1,tfrac=0.1,cfrac=1,vint=100, ol_funct=tf.identity , hl_funct=tf.nn.tanh, loss_funct=meanSquaredError, bestk=1, map_dendrograms=[], map_layers=[0], map_batch_size=30, mapping_time=10)#, map_layers=[0,2])
 
 
 #autoencoder, 100%. WILL NOT BE TESTED using gen_dense_autoencoder_cases is an option

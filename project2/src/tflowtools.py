@@ -466,7 +466,6 @@ def readFile(targetFile, scale, colons=False):
                     elements.append(float(feature))
                 # Target features are ints
                 else:
-                    print("feature", feature)
                     elements.append(int(feature))
 
             # append all features
@@ -502,8 +501,6 @@ def format_target_datasets(data, target_length):
         target = [0] * target_length
         int_target = row[-1][0]
         if int_target is not 0:
-            print("target", target)
-            print("int_target", int_target)
             target[int_target-1] = 1
         row[-1] = target
     return data
