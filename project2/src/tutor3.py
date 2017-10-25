@@ -432,7 +432,7 @@ class Caseman():
 
 #main(data_funct=TFT.gen_vector_count_cases, data_params=(500, 15), epochs=100, dims=[15, 6, 16], hl_funct=tf.nn.relu, ol_funct=tf.nn.relu)
 
-def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=1000, dims=[9, 9, 7], lrate=0.1, mbs=10, showint=0, vint=100,
+def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs=1000, dims=[9, 9, 7], lrate=0.1, mbs=10, showint=0, vint=1000,
          vfrac=0.1, tfrac=0.1,hl_funct=tf.nn.sigmoid, ol_funct=tf.nn.softmax, loss_funct=crossEntropy, weight_range=[-.1, .1],
          cfrac=1, map_batch_size=0,map_layers=[], map_dendrograms=[], display_weights=[], display_biases=[], bestk=1,
          onezero=False, komma=True, punktum=False,  decimals=2, mapping_time=30, dendro_time=30):
@@ -489,13 +489,12 @@ if __name__ == '__main__':
     parser.add_argument('-dt', type=int, help='Dendrogram time', nargs='?')
     parser.add_argument('-si', type=int, help='Show interval', nargs='?')
     parser.add_argument('-vi', type=int, help='Validation interval', nargs='?')
-
     args = parser.parse_args()
 
     funct = globals()[args.fu]
     parameters = args.dp.split(',')
     # If the function is not a file reader, the arguments must be converted to int
-    if funct is not get_mnist_data and funct is not readFile and funct is not readShrooms:
+    if funct is not readFile and funct is not readShrooms:
         for i, j in enumerate(parameters):
             if len(j):
                 parameters[i] = int(j)
@@ -537,13 +536,15 @@ if __name__ == '__main__':
     else:
         display_weights = []
 
-
+    # Set default variables
+    if not args.ep: args.ep = 1000
     if not args.hl: hl_funct = relu
     if not args.ol: ol_funct = softmax
     if not args.lf: loss_funct = crossEntropy
     if not args.lr: args.lr = 0.3
     if not args.mbs: args.mbs = 10
     if not args.bk: args.bk = 1
+    if not args.ms: args.ms = 0
     if not args.oz: args.oz = False
     if not args.ko: args.ko = True
     if not args.pu: args.pu = True
@@ -551,12 +552,12 @@ if __name__ == '__main__':
     if not args.mt: args.mt = 20
     if not args.dt: args.dt = 20
     if not args.si: args.si = 0
-    if not args.vi: args.vi = 500
+    if not args.vi: args.vi = 1000
 
-    main(data_funct=funct, data_params=parameters,dims=dimensions, hl_funct=hl_funct, ol_funct=ol_funct,
-         loss_funct=loss_funct, lrate=args.lr, mbs=args.mbs, map_layers=map_layers, map_dendrograms=map_dendrograms,
+    main(data_funct=funct, data_params=parameters,dims=dimensions, epochs=args.ep, hl_funct=hl_funct, ol_funct=ol_funct,
+         loss_funct=loss_funct, lrate=args.lr, mbs=args.mbs, map_batch_size=args.ms, map_layers=map_layers, map_dendrograms=map_dendrograms,
          display_biases=display_biases, display_weights=display_weights, bestk=args.bk, onezero=args.oz, komma=args.ko,
-         punktum=args.pu, decimals=args.de, mapping_time=args.mt, dendro_time=args.mt, showint=args.si, vint=args.vi)
+         punktum=args.pu, decimals=args.de, mapping_time=args.mt, dendro_time=args.dt, showint=args.si, vint=args.vi)
 
 
 
@@ -599,7 +600,7 @@ main(data_funct=TFT.gen_all_parity_cases, data_params=(4,), epochs=100, dims=[4,
 #main(data_funct=TFT.gen_all_parity_cases, data_params=(10,), epochs=1000, dims=[10, 50, 2], lrate=0.2, mbs=30, hl_funct=tf.nn.relu, ol_funct=tf.nn.tanh, loss_funct=crossEntropy, map_batch_size=5, map_layers=[0], display_biases=[0]); print("relu, tan, ce")
 
 #countex, 97-100% DONE
-#main(data_funct=TFT.gen_vector_count_cases, data_params=(500, 15), epochs=4000, dims=[15, 55, 20, 16], hl_funct=tf.nn.sigmoid, ol_funct=tf.identity, loss_funct=meanSquaredError, lrate=0.6, mbs=5)#, map_batch_size=10, map_layers=[0,1])
+#main(data_funct=TFT.gen_vector_count_cases, data_params=(500, 15), epochs=4000, dims=[15, 55, 20, 16], hl_funct=tf.nn.sigmoid, ol_funct=tf.identity, loss_funct=meanSquaredError, lrate=0.6, mbs=5, vint=1000)#, map_batch_size=10, map_layers=[0,1])
 
 #segment counter 99% DONE
 #main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=1000, dims=[25, 30, 10, 9], lrate=0.6,mbs=20,vfrac=0.1,tfrac=0.1,cfrac=1, ol_funct=tf.identity , hl_funct=tf.nn.tanh, loss_funct=meanSquaredError, bestk=1)#, map_batch_size=10, map_layers=[0,2])
