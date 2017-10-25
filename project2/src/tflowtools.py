@@ -443,7 +443,7 @@ def dendrogram(features,labels,metric='euclidean',mode='average',ax=None,title='
     sleep(sleep_time)
     PLT.close("all")
     print("plt shown")
-
+    return True
 
 #   **** Helping functions ****
 

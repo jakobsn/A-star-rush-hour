@@ -40,6 +40,7 @@ class Gann():
         self.modules = []
         self.weight_range = weight_range
         self.build()
+        self.displayed_dendrograms = 0
 
     # Probed variables are to be displayed in the Tensorboard.
     def gen_probe(self, module_index, type, spec):
@@ -162,7 +163,7 @@ class Gann():
                     punktum = False
                 elif komma:
                     komma = False
-                testres, grabvals, _ = self.run_one_step(self.test_func, self.grabvars, self.probes, session=self.current_session, step="Postprocessing",
+                testres, grabvals, _ = self.run_one_step(self.test_func, self.grabvars[self.displayed_dendrograms-1:], self.probes, session=self.current_session, step="Postprocessing",
                                                          feed_dict=feeder, show_interval=None, mapping=False, dendrogram=True,
                                                          onezero=onezero, komma=komma, punktum=punktum, decimals=decimals, dendro_time=dendro_time)
             except:
@@ -173,12 +174,12 @@ class Gann():
                         punktum = False
                     elif komma:
                         komma = False
-                    testres, grabvals, _ = self.run_one_step(self.test_func, self.grabvars, self.probes,
+                    testres, grabvals, _ = self.run_one_step(self.test_func, self.grabvars[self.displayed_dendrograms-1:], self.probes,
                                                              session=self.current_session, step="Postprocessing",
                                                              feed_dict=feeder, show_interval=None, mapping=False, dendrogram=True,
                                                              onezero=onezero, komma=komma, punktum=punktum, decimals=decimals,dendro_time=dendro_time)
                 except:
-                    testres, grabvals, _ = self.run_one_step(self.test_func, self.grabvars, self.probes, session=self.current_session, step="Postprocessing",
+                    testres, grabvals, _ = self.run_one_step(self.test_func, self.grabvars[self.displayed_dendrograms-1:], self.probes, session=self.current_session, step="Postprocessing",
                                                              feed_dict=feeder, show_interval=None, mapping=False, dendrogram=True,
                                                              onezero=True, komma=False, punktum=False, decimals=1,dendro_time=dendro_time)
 
@@ -276,7 +277,8 @@ class Gann():
                 if not self.allUnique(in_pattern):
                     in_pattern.pop()
 
-            TFT.dendrogram(o, in_pattern, title="dendrogram: " + names[j], sleep_time=sleep_time)
+            if TFT.dendrogram(o, in_pattern, title="dendrogram: " + names[j], sleep_time=sleep_time):
+                self.displayed_dendrograms += 2
 
     def allUnique(self, x):
         seen = set()
@@ -447,7 +449,7 @@ def main(data_funct=readFile, data_params=("../data/glass.txt","avgdev"), epochs
     print("Time elapsed:", end - start, "s", (end-start)/60, "m")
     if map_batch_size:
         if not len(map_layers):
-            ann.do_mapping(map_batch_size, map_layers, map_dendrograms, display_weights, display_biases, onezero, komma, punktum, decimals, mapping_time=0)
+            ann.do_mapping(map_batch_size, map_layers, map_dendrograms, display_weights, display_biases, onezero, komma, punktum, decimals, mapping_time=0, dendro_time=dendro_time)
         else:
             ann.do_mapping(map_batch_size, map_layers, map_dendrograms, display_weights, display_biases, onezero, komma, punktum, decimals, mapping_time, dendro_time)
     #ann.runmore(1000,bestk=bestk)
