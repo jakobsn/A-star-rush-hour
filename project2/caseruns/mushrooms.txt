@@ -7,12 +7,13 @@ python3 tutor3.py \
 -ol tanh \
 -lf meanSquaredError \
 -lr 0.1 \
--mbs 10
--ms
--ml
--md
--db
--dw
+-mbs 10 \
+\
+-ms 5 \
+-ml 0,1,2 \
+-md 0,1,2 \
+-db 0,1,2 \
+-dw 0,1,2 
 -bk
 -oz
 -ko
