@@ -497,7 +497,9 @@ if __name__ == '__main__':
     # If the function is not a file reader, the arguments must be converted to int
     if funct is not get_mnist_data and funct is not readFile and funct is not readShrooms:
         for i, j in enumerate(parameters):
-            parameters[i] = int(j)
+            if len(j):
+                parameters[i] = int(j)
+            else: parameters.pop(i)
 
     dimensions = args.di.split(',')
     for i, j in enumerate(dimensions):
