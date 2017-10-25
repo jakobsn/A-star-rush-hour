@@ -464,39 +464,45 @@ def str2bool(v):
             raise argparse.ArgumentTypeError('Boolean value expected.')
 
 if __name__ == '__main__':
-    main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=1000, dims=[25, 30, 10, 9], lrate=0.6,mbs=20,vfrac=0.1,tfrac=0.1,cfrac=1, ol_funct=tf.identity , hl_funct=tf.nn.tanh, loss_funct=meanSquaredError, bestk=1, map_batch_size=10, map_layers=[0,2], map_dendrograms=[0,1])
 
-#main(data_funct=TFT.gen_segmented_vector_cases, data_params=(25, 1000, 0, 8), epochs=1000, dims=[25, 30, 10, 9],
-    #     lrate=0.6, mbs=20, vfrac=0.1, tfrac=0.1, cfrac=1, vint=100, ol_funct=tf.identity, hl_funct=tf.nn.tanh,
-    #     loss_funct=meanSquaredError, bestk=1, map_dendrograms=[0, 1], map_layers=[0, 1], display_weights=[0], display_biases=[0],map_batch_size=20,
-    #     mapping_time=20)  # , map_layers=[0,2])
-"""
     # Takes input from command line
     parser = argparse.ArgumentParser(description='General Artificial Neural Network')
-
     parser.add_argument('-fu', type=str, help='Data function')
-
     parser.add_argument('-dp', type=str, help='Data parameters, separated with \"\'\"')
-
+    parser.add_argument('-di', type=str,help='Dimensions, separated with \"\'\"')
     parser.add_argument('-ep', type=int,help='Epochs',nargs='?')
-    parser.add_argument('-di', type=str,help='Dimensions, separated with \"\'\"', nargs = '?')
-    parser.add_argument('-hl', type=float, help='Hidden layer activation function', nargs = '?')
+    parser.add_argument('-hl', type=str, help='Hidden layer activation function', nargs = '?')
+    parser.add_argument('-ol', type=str,help='Output layer activation function',nargs='?')
+    parser.add_argument('-lf', type=str,help='Loss function, \'crossEntropy\' or \'meanSquaredError\'',nargs='?')
+    parser.add_argument('-lr', type=float,help='Learning rate',nargs='?')
+    parser.add_argument('-mbs', type=int,help='Mini batch size',nargs='?')
+    parser.add_argument('-ms', type=int,help='Map batch size',nargs='?')
 
     args = parser.parse_args()
 
     funct = globals()[args.fu]
     parameters = args.dp.split(',')
-    dimensions = args.di.split(',')
-
-    for i, j in enumerate(dimensions):
-        dimensions[i] = int(j)
-
-    if funct is not get_mnist_data and funct is not readFile:
+    # If the function is not a file reader, the arguments must be converted to int
+    if funct is not get_mnist_data and funct is not readFile and funct is not readShrooms:
         for i, j in enumerate(parameters):
             parameters[i]  = int(j)
 
-    main(data_funct=funct, data_params=parameters,dims=dimensions)
-"""
+    dimensions = args.di.split(',')
+    for i, j in enumerate(dimensions):
+        dimensions[i] = int(j)
+
+    hl_funct = globals()[args.hl]
+    ol_funct = globals()[args.ol]
+    loss_funct = globals()[args.lf]
+
+    if not hl_funct: hl_funct = relu
+    if not ol_funct: ol_funct = softmax
+    if not loss_funct: loss_funct = crossEntropy
+    if not args.lr: args.lr = 0.3
+    if not args.mbs: args.mbs = 10
+
+    main(data_funct=funct, data_params=parameters,dims=dimensions, hl_funct=hl_funct, ol_funct=ol_funct,
+         loss_funct=loss_funct, lrate=args.lr, mbs=args.mbs)
 
 
 
@@ -572,7 +578,7 @@ x casefraction: length of sublist ca of cases < organize cases < caseman
 x implement do_mapping, use ann.grabvar()
 x how to  show graphical visualization of output layer
 x support long bias vectors (maximize window...)
-- visualize dendrograms
+x visualize dendrograms
 x Find dims automaticly (or not?) not
 x Implement reading from mnist
 x Implement scaling by deviation
