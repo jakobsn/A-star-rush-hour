@@ -290,7 +290,7 @@ class Gann():
                 if not self.allUnique(in_pattern):
                     in_pattern.pop()
 
-            if TFT.dendrogram(o, in_pattern, title="dendrogram: " + names[self.displayed_dendrograms].replace('out','')[:-1], sleep_time=sleep_time, leaf_font_size=leaf_font_size):
+            if TFT.dendrogram(o, in_pattern, title="dendrogram: " + names[self.displayed_dendrograms].replace('out',''), sleep_time=sleep_time, leaf_font_size=leaf_font_size):
                 self.displayed_dendrograms += 2
 
     def allUnique(self, x):

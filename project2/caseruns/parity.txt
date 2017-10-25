@@ -10,10 +10,10 @@ python3 tutor3.py \
 -mbs 30 \
 \
 -ms 5 \
--ml 0,1,2 \
--md 0,1,2 \
--db 0,1,2 \
--dw 0,1,2 
+-ml 0,1 \
+-md 0,1 \
+-db 0,1 \
+-dw 0,1 
 -bk
 -oz
 -ko
