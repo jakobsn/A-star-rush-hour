@@ -134,8 +134,6 @@ class Gann():
             self.add_grabvar(bias, "bias")
 
         inputs = [c[0] for c in self.caseman.get_training_cases()[:map_batch_size]]; targets = [c[1] for c in self.caseman.get_training_cases()[:map_batch_size]]
-        print("input")
-        print(inputs)
         feeder = {self.input: inputs, self.target: targets}
         self.test_func = self.error
         testres, grabvals, _ = self.run_one_step(self.test_func, self.grabvars, self.probes, session=self.current_session, step="Postprocessing",
@@ -550,7 +548,7 @@ if __name__ == '__main__':
     if not args.hl: hl_funct = relu
     if not args.ol: ol_funct = softmax
     if not args.lf: loss_funct = crossEntropy
-    if not args.lr: args.lr = 0.3
+    #if not args.lr: args.lr = 0.3
     if not args.mbs: args.mbs = 10
     if not args.bk: args.bk = 1
     if not args.ms: args.ms = 0
