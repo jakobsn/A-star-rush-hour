@@ -64,7 +64,8 @@ class SOM:
         print("argmin", np.argmin(distances))
         return distances, min_distance, winner_neuron
 
-    def adjust_weights(self, winner_index):
+    def adjust_weights(self, neighboors):
+        for n in neighboors:
         #TODO
         return
 
