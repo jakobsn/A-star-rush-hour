@@ -47,9 +47,10 @@ class SOM:
             np.random.shuffle(self.features)
             for feature in self.features:
                 distances, min_distance, winner_neuron = self.findWinner(feature)
-                neighboors = self.get_neighboors(winner_neuron)
-                print("neigboors", neighboors)
-                self.adjust_weights(neighboors)
+                neighbours = self.get_neighbours(winner_neuron)
+                print("neigboors", neighbours)
+                self.adjust_clusters(neighbours)
+                print(self.weights)
             break
         return
 
@@ -64,34 +65,55 @@ class SOM:
         print("argmin", np.argmin(distances))
         return distances, min_distance, winner_neuron
 
-    def adjust_weights(self, neighboors):
-        for n in neighboors:
-        #TODO
+    def adjust_clusters(self, neighbours):
+        adjust_cluster = np.vectorize(self.adjust_cluster, cache=True)
+        print("neig", neighbours[0], neighbours[1])
+        adjust_cluster(neighbours[0], neighbours[1])
         return
 
+    def adjust_cluster(self, index, hood):
+        adjust_weight = np.vectorize(self.adjust_weight, cache=True)
+        print("index, hood", index, hood)
+        self.row = 0
+        self.index = index
+        adjust_weight(self.weights[:,index], index, hood)
+
+    def adjust_weight(self, weight, index, hood):
+        #TODO
+        print("change weight", weight)
+        print("i h", index, hood)
+        print(type(index), type(22))
+        print(self.weights[self.row][index])
+        self.weights[self.row][index] = 1
+        self.row += 1
+
+
     # Get weight indexes
-    def get_neighboors(self, winner_neuron):
+    def get_neighbours(self, winner_neuron):
         if self.topo == "ring":
             print("ring")
-            return self.get_ring_neighboors(winner_neuron)
+            return np.array(self.get_ring_neighbours(winner_neuron))
         else:
             # TODO: matrix topology
             pass
         return
 
-    def get_ring_neighboors(self, winner_neuron):
+    # Return neighbour indices with degree of neighbourhood
+    def get_ring_neighbours(self, winner_neuron):
         #TODO
-        ring_neighboors = []
+        ring_neighbours = [[],[]]
         print("winner:", winner_neuron)
-        for n in range(winner_neuron-self.hoodsize, winner_neuron+self.hoodsize+1):
+        for n, i in zip(range(winner_neuron-self.hoodsize, winner_neuron+self.hoodsize+1),range(-self.hoodsize, winner_neuron+self.hoodsize+1)):
             if n < 0:
-                ring_neighboors.append(n + self.outsize)
-            elif n > self.outsize:
-                ring_neighboors.append(n - self.outsize)
+                ring_neighbours[0].append(n + self.outsize)
+            elif n >= self.outsize:
+                ring_neighbours[0].append(n - self.outsize)
             else:
-                ring_neighboors.append(n)
+                ring_neighbours[0].append(n)
 
-        return ring_neighboors
+            ring_neighbours[1].append(abs(i))
+
+        return np.array(ring_neighbours)
 
     def euclidian_distance(self, *weights):
         #print("in", self.input_vector)
