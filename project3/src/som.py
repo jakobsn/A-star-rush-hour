@@ -3,7 +3,7 @@
 import numpy as np
 import somtools as st
 import numpy_indexed as npi
-from math import sqrt, ceil
+from math import sqrt
 import six.moves.cPickle as cPickle
 
 
@@ -41,21 +41,32 @@ class SOM:
     def do_training(self):
         # TODO: Find winning neuron for each vector
         # TODO: Update weights for winner and neighbours
-        eDistance = np.vectorize(self.euclidian_distance)
         for epoch in range(self.epochs):
-            for feature in self.features:
-                self.input_vector = feature
-                e = eDistance(self.weights[0], self.weights[1])
-                print("e", e)
-                break
+            features = np.random.shuffle(self.features)
+            for feature in features:
+                distances, min_distance, winner_neuron = self.findWinner(feature)
             break
-            self.features = np.random.shuffle(self.features)
         return
 
-    def euclidian_distance(self, x, y):
+    def findWinner(self, feature):
+        #TODO
+        eDistance = np.vectorize(self.euclidian_distance)
+        self.input_vector = feature
+        distances = eDistance(*self.weights)
+        print("e", distances)
+        min_distance = np.min(distances)
+        print("min", min_distance)
+        winner_neuron = np.argmin(distances)
+        print("argmin", np.argmin(distances))
+        return distances, min_distance, winner_neuron
+
+
+    def euclidian_distance(self, *weights):
         # TODO
-        print("ed", self.input_vector, x, y)
-        return 1
+        #print("in", self.input_vector)
+        #print("weights", *weights)
+        #print("sub, power", np.power(np.subtract(self.input_vector, np.array(weights)), 2))
+        return np.sqrt(np.sum(np.power(np.subtract(self.input_vector, np.array(weights)), 2)))
 
     def run_one_step(self):
         #TODO
@@ -66,7 +77,7 @@ class SOM:
         return np.zeros(shape=[self.outsize])
 
     def initial_weights(self):
-        return np.random.uniform(-0.1, 0.1, [self.insize, self.outsize])
+        return np.random.uniform(self.weight_range[0], self.weight_range[1], [self.insize, self.outsize])
 
     def adjust_weigths(self):
         #TODO
@@ -76,17 +87,13 @@ class SOM:
         #TODO
         return
 
-    def findWinner(self):
-        #TODO
-        return
-
 #class SOMModule:
 #    def __init__(self, som, index, input, ):
 
 
 #print(st.readTSP('../data/1.txt'))
 def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=100,  lrate=0.1, insize=None, outsize=None, radius=1,
-         weight_range=[-0.1,0.1], lrate_decay=0, hood_decay=0):
+         weight_range=[10,40], lrate_decay=0, hood_decay=0):
     features =  data_funct(*data_params)
     som = SOM(epochs=epochs, lrate=lrate, features=features, insize=insize, outsize=outsize, radius=radius, weight_range=weight_range,
               lrate_decay=lrate_decay, hood_decay=hood_decay)
