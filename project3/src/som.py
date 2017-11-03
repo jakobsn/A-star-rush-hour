@@ -67,21 +67,23 @@ class SOM:
         return distances, min_distance, winner_neuron
 
     def adjust_clusters(self, neighbours):
-        adjust_cluster = np.vectorize(self.adjust_cluster, cache=True)
+        adjust_cluster = np.vectorize(self.adjust_cluster, cache=True, excluded=self.input_vector)
         print("neig", neighbours[0], neighbours[1])
+
         adjust_cluster(neighbours[0], neighbours[1], self.weights[:, neighbours[0]], self.input_vector)
         return
 
-    def adjust_cluster(self, index, hood, weight, input_value):
-        print("adjust", weight, "input", input_value, "index", index, "hood", hood)
+    def adjust_cluster(self, index, hood, weight, values):
+        print("adjust", weight, "input", values, "index", index, "hood", hood)
         #adjust_weight = np.vectorize(self.adjust_weight, cache=True)
         #adjust_weight(weight, index, hood, input)
         #self.weights[0][index] = weight + self.lrate*hood*np.subtract(input_value, weight)
+        #print("index", index, "input_value", input_value, "hood", hood, "weight", weight, "new weight", self.weights[0][index])
+
 
 
     #def adjust_weight(self, weight, index, hood, input_value):
         #TODO
-        #print("index", index, "input_value", input_value, "hood", hood, "weight", weight, "new weight", self.weights[0][index])
 
 
     # Get weight indexes
