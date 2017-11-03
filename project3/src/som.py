@@ -3,7 +3,7 @@
 import numpy as np
 import somtools as st
 import numpy_indexed as npi
-from math import sqrt
+from math import sqrt, ceil, floor
 import six.moves.cPickle as cPickle
 
 
@@ -48,6 +48,7 @@ class SOM:
             for feature in self.features:
                 distances, min_distance, winner_neuron = self.findWinner(feature)
                 neighbours = self.get_neighbours(winner_neuron)
+                self.neuronRing[winner_neuron] += 1
                 print("neigboors", neighbours)
                 self.adjust_clusters(neighbours)
                 print(self.weights)
@@ -55,37 +56,32 @@ class SOM:
         return
 
     def findWinner(self, feature):
-        eDistance = np.vectorize(self.euclidian_distance)
+        eDistance = np.vectorize(self.euclidian_distance, cache=True)
         self.input_vector = feature
         distances = eDistance(*self.weights)
-        print("e", distances)
+        #print("e", distances)
         min_distance = np.min(distances)
-        print("min", min_distance)
+        #print("min", min_distance)
         winner_neuron = np.argmin(distances)
-        print("argmin", np.argmin(distances))
+        #print("argmin", np.argmin(distances))
         return distances, min_distance, winner_neuron
 
     def adjust_clusters(self, neighbours):
         adjust_cluster = np.vectorize(self.adjust_cluster, cache=True)
         print("neig", neighbours[0], neighbours[1])
-        adjust_cluster(neighbours[0], neighbours[1])
+        adjust_cluster(neighbours[0], neighbours[1], self.weights[:, neighbours[0]], self.input_vector)
         return
 
-    def adjust_cluster(self, index, hood):
-        adjust_weight = np.vectorize(self.adjust_weight, cache=True)
-        print("index, hood", index, hood)
-        self.row = 0
-        self.index = index
-        adjust_weight(self.weights[:,index], index, hood)
+    def adjust_cluster(self, index, hood, weight, input_value):
+        print("adjust", weight, "input", input_value, "index", index, "hood", hood)
+        #adjust_weight = np.vectorize(self.adjust_weight, cache=True)
+        #adjust_weight(weight, index, hood, input)
+        #self.weights[0][index] = weight + self.lrate*hood*np.subtract(input_value, weight)
 
-    def adjust_weight(self, weight, index, hood):
+
+    #def adjust_weight(self, weight, index, hood, input_value):
         #TODO
-        print("change weight", weight)
-        print("i h", index, hood)
-        print(type(index), type(22))
-        print(self.weights[self.row][index])
-        self.weights[self.row][index] = 1
-        self.row += 1
+        #print("index", index, "input_value", input_value, "hood", hood, "weight", weight, "new weight", self.weights[0][index])
 
 
     # Get weight indexes
@@ -103,7 +99,7 @@ class SOM:
         #TODO
         ring_neighbours = [[],[]]
         print("winner:", winner_neuron)
-        for n, i in zip(range(winner_neuron-self.hoodsize, winner_neuron+self.hoodsize+1),range(-self.hoodsize, winner_neuron+self.hoodsize+1)):
+        for n, i in zip(range(winner_neuron-self.hoodsize, winner_neuron+self.hoodsize+1),range(floor(-self.hoodsize), ceil(winner_neuron+self.hoodsize+1))):
             if n < 0:
                 ring_neighbours[0].append(n + self.outsize)
             elif n >= self.outsize:
@@ -142,13 +138,13 @@ class SOM:
 
 
 #print(st.readTSP('../data/1.txt'))
-def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=100,  lrate=0.1, hoodsize=3, insize=None, outsize=None, radius=1,
+def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=100,  lrate=0.1, hoodsize=0, insize=None, outsize=None, radius=1,
          weight_range=[10,40], lrate_decay=0, hood_decay=0, topo='ring'):
     features =  data_funct(*data_params)
     som = SOM(epochs=epochs, lrate=lrate, hoodsize=hoodsize, features=features, insize=insize, outsize=outsize, radius=radius,
               weight_range=weight_range, lrate_decay=lrate_decay, hood_decay=hood_decay, topo=topo)
     print("features", som.features)
-
+    print(som.neuronRing)
 main()
 
 """
