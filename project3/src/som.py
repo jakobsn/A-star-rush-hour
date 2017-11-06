@@ -116,18 +116,14 @@ class SOM:
         #TODO
         return
 
-#class SOMModule:
-#    def __init__(self, som, index, input, ):
 
-
-#print(st.readTSP('../data/1.txt'))
 def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=1000,  lrate=0.1, hoodsize=4, insize=None, outsize=None, radius=1,
          weight_range=[10,40], lrate_decay=st.exponentialDecay, hood_decay=st.exponentialDecay, topo='ring'):
     features =  data_funct(*data_params)
     som = SOM(epochs=epochs, lrate=lrate, hoodsize=hoodsize, features=features, insize=insize, outsize=outsize, radius=radius,
               weight_range=weight_range, lrate_decay=lrate_decay, hood_decay=hood_decay, topo=topo)
-    print("features", som.features)
     print(som.neuronRing)
+
 main()
 
 """
