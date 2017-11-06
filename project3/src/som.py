@@ -41,6 +41,7 @@ class SOM:
         #       Update lrate and hoodsize
         print(self.weights)
         for epoch in range(self.epochs):
+            print("epoch", epoch)
             if self.hoodsize == 0 or self.lrate == 0:
                 break
             np.random.shuffle(self.features)
@@ -52,8 +53,7 @@ class SOM:
                 self.adjust_clusters(neighbours)
             self.hoodsize = ceil(self.hood_decay(epoch, self.initial_hood, 15))
             self.lrate = self.lrate_decay(epoch, self.initial_lrate, self.epochs)
-            print("hood, lrate", self.hoodsize, self.lrate)
-        self.do_mapping()
+            #print("hood, lrate", self.hoodsize, self.lrate)
         return
 
     def findWinner(self, feature):
@@ -139,11 +139,16 @@ class SOM:
         return
 
 
-def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=2000,  lrate=0.9, hoodsize=8, insize=None, outsize=None,
+def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=200,  lrate=1, hoodsize=6, insize=2, outsize=200,
          weight_range=[0.1,0.9], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, topo='ring'):
     features =  data_funct(*data_params)
     som = SOM(epochs=epochs, lrate=lrate, hoodsize=hoodsize, features=features, insize=insize, outsize=outsize,
               weight_range=weight_range, lrate_decay=lrate_decay, hood_decay=hood_decay, topo=topo)
+    print('funct', data_funct, 'params', data_params, 'epochs', epochs, 'lrate', lrate,
+          'hoodsize', hoodsize, 'insize', insize, 'outsize', outsize,  'weight_range', weight_range,
+          'lrate_deacay', lrate_decay, 'hood_decay', hood_decay, 'topo', topo)
+    som.do_mapping()
+
 
 main()
 
