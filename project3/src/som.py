@@ -8,11 +8,10 @@ import six.moves.cPickle as cPickle
 
 
 class SOM:
-    def __init__(self, epochs, lrate, hoodsize, insize, outsize, features, radius, weight_range, lrate_decay, hood_decay, topo):
+    def __init__(self, epochs, lrate, hoodsize, insize, outsize, features, weight_range, lrate_decay, hood_decay, topo):
         self.epochs = epochs
         self.features = features
         np.random.shuffle(self.features)
-        self.radius = radius
         self.weight_range = weight_range
         self.lrate = lrate
         self.lrate_decay = lrate_decay
@@ -24,7 +23,7 @@ class SOM:
         self.topo = topo
         if insize is None or outsize is None:
             self.insize = len(features[0])
-            self.outsize = len(features)
+            self.outsize = len(features)*2
         else:
             self.insize = insize
             self.outsize = outsize
@@ -38,7 +37,10 @@ class SOM:
         # TODO: Find winning neuron for each vector
         #       Update weights for winner and neighbours
         #       Update lrate and hoodsize
+        print(self.weights)
         for epoch in range(self.epochs):
+            if self.hoodsize == 0 or self.lrate == 0:
+                break
             np.random.shuffle(self.features)
             self.neuronRing = self.create_neuron_ring()
             for feature in self.features:
@@ -46,8 +48,8 @@ class SOM:
                 neighbours = self.get_neighbours(winner_neuron)
                 self.neuronRing[winner_neuron] += 1
                 self.adjust_clusters(neighbours)
-            self.hoodsize = ceil(self.hood_decay(epoch, self.initial_hood, 1))
-            self.lrate = self.lrate_decay(epoch, self.initial_lrate, 1)
+            self.hoodsize = ceil(self.hood_decay(epoch, self.initial_hood, 15))
+            self.lrate = self.lrate_decay(epoch, self.initial_lrate, self.epochs)
             print("hood, lrate", self.hoodsize, self.lrate)
         return
 
@@ -103,6 +105,7 @@ class SOM:
         #TODO
         return
 
+    # ~Twice as many possibilities as cities
     def create_neuron_ring(self):
         #TODO: Is that all?
         return np.zeros(shape=[self.outsize])
@@ -117,10 +120,10 @@ class SOM:
         return
 
 
-def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=1000,  lrate=0.1, hoodsize=4, insize=None, outsize=None, radius=1,
-         weight_range=[10,40], lrate_decay=st.exponentialDecay, hood_decay=st.exponentialDecay, topo='ring'):
+def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=500,  lrate=0.7, hoodsize=8, insize=None, outsize=None,
+         weight_range=[10,40], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, topo='ring'):
     features =  data_funct(*data_params)
-    som = SOM(epochs=epochs, lrate=lrate, hoodsize=hoodsize, features=features, insize=insize, outsize=outsize, radius=radius,
+    som = SOM(epochs=epochs, lrate=lrate, hoodsize=hoodsize, features=features, insize=insize, outsize=outsize,
               weight_range=weight_range, lrate_decay=lrate_decay, hood_decay=hood_decay, topo=topo)
     print(som.neuronRing)
 
@@ -132,4 +135,5 @@ TODO:
 - Neighborhood decay
 - lrate decay
 - TOPOGRAPHY
+- Normalize input
 """

@@ -28,8 +28,14 @@ def euclidian_distance(x, y):
     return 1
 
 
-def linearDecay(t):
-    return 1/t
+def linearDecay(t, valAtZero, time_constant):
+    return valAtZero * 1/(t/time_constant)
 
 def exponentialDecay(t, valAtZero, time_constant):
     return valAtZero*exp(-(t/time_constant))
+
+def powerDecay(t, valAtZero, time_constant):
+    if t == 0:
+        return valAtZero
+    else:
+        return valAtZero**(t/time_constant)
