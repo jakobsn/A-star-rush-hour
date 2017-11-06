@@ -5,6 +5,8 @@ import somtools as st
 import numpy_indexed as npi
 from math import sqrt, ceil, floor, exp
 import six.moves.cPickle as cPickle
+import matplotlib.pyplot as PLT
+from time import sleep
 
 
 class SOM:
@@ -51,6 +53,7 @@ class SOM:
             self.hoodsize = ceil(self.hood_decay(epoch, self.initial_hood, 15))
             self.lrate = self.lrate_decay(epoch, self.initial_lrate, self.epochs)
             print("hood, lrate", self.hoodsize, self.lrate)
+        self.do_mapping()
         return
 
     def findWinner(self, feature):
@@ -112,20 +115,35 @@ class SOM:
 
     # Weight matrix of zeros
     def initial_weights(self):
+        print(np.random.uniform(self.weight_range[0], self.weight_range[1], [self.insize, self.outsize]))
         return np.random.uniform(self.weight_range[0], self.weight_range[1], [self.insize, self.outsize])
 
 
     def do_mapping(self):
+        print(self.features)
+        for wx, wy, feature in zip(self.weights[0], self.weights[1], self.features):
+            PLT.scatter(feature[0], feature[1], c="black")
+            PLT.scatter(wx, wy, c="red")
+        PLT.plot(self.weights[0], self.weights[1])
+            #else:
+            #    PLT.plot(wx, wy, 'g-', self.weights[0][0], self.weights[0][1], 'g-')
+        #for wx, wy in zip(self.weights[0], self.weights[1]):
+        #    print("map:", wx, wy)
+        #    PLT.scatter(wx, wy, c="red")
+        #sleep(10)
+        print(self.neuronRing)
+
+        PLT.show()
+
         #TODO
         return
 
 
-def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=500,  lrate=0.7, hoodsize=8, insize=None, outsize=None,
-         weight_range=[10,40], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, topo='ring'):
+def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=2000,  lrate=0.9, hoodsize=8, insize=None, outsize=None,
+         weight_range=[0.1,0.9], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, topo='ring'):
     features =  data_funct(*data_params)
     som = SOM(epochs=epochs, lrate=lrate, hoodsize=hoodsize, features=features, insize=insize, outsize=outsize,
               weight_range=weight_range, lrate_decay=lrate_decay, hood_decay=hood_decay, topo=topo)
-    print(som.neuronRing)
 
 main()
 
