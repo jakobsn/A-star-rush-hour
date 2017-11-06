@@ -1,6 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/py   thon
 
 import numpy as np
+from math import exp
 
 def readTSP(targetFile):
     with open(targetFile) as file:
@@ -26,6 +27,9 @@ def euclidian_distance(x, y):
     print(x, y)
     return 1
 
-def exponential_decay(value, constant, time):
-    #TODO
-    return
+
+def linearDecay(t):
+    return 1/t
+
+def exponentialDecay(t, valAtZero, time_constant):
+    return valAtZero*exp(-(t/time_constant))
