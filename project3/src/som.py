@@ -30,6 +30,7 @@ class SOM:
         self.weights2 = cPickle.loads(cPickle.dumps(self.weights, -1))
         self.weights2 = np.rot90(self.weights2)
         self.neuronRing = self.create_neuron_ring()
+        self.i = 0 # Keep track of which weight being changed for input neuron
         print("inout", self.insize, self.outsize)
         print("weights")
         print(self.weights)
@@ -67,14 +68,19 @@ class SOM:
         return distances, min_distance, winner_neuron
 
     def adjust_clusters(self, neighbours):
-        adjust_cluster = np.vectorize(self.adjust_cluster, cache=True, excluded=self.input_vector)
+        adjust_cluster = np.vectorize(self.adjust_cluster, cache=True)
         print("neig", neighbours[0], neighbours[1])
-
-        adjust_cluster(neighbours[0], neighbours[1], self.weights[:, neighbours[0]], self.input_vector)
+        print("in", self.input_vector)
+        adjust_cluster(neighbours[0], neighbours[1], self.weights[:, neighbours[0]])
         return
 
-    def adjust_cluster(self, index, hood, weight, values):
-        print("adjust", weight, "input", values, "index", index, "hood", hood)
+    def adjust_cluster(self, index, hood, weight):
+        print(self.i)
+        print("adjust", weight, "input", self.input_vector[self.i], "index", index, "hood", hood)
+        if self.i < (len(self.input_vector)-1):
+            self.i += 1
+        else:
+            self.i = 0
         #adjust_weight = np.vectorize(self.adjust_weight, cache=True)
         #adjust_weight(weight, index, hood, input)
         #self.weights[0][index] = weight + self.lrate*hood*np.subtract(input_value, weight)
@@ -140,7 +146,7 @@ class SOM:
 
 
 #print(st.readTSP('../data/1.txt'))
-def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=100,  lrate=0.1, hoodsize=0, insize=None, outsize=None, radius=1,
+def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=100,  lrate=0.1, hoodsize=1, insize=None, outsize=None, radius=1,
          weight_range=[10,40], lrate_decay=0, hood_decay=0, topo='ring'):
     features =  data_funct(*data_params)
     som = SOM(epochs=epochs, lrate=lrate, hoodsize=hoodsize, features=features, insize=insize, outsize=outsize, radius=radius,
