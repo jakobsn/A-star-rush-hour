@@ -42,8 +42,8 @@ def linearDecay(t, valAtZero, time_constant):
 def exponentialDecay(t, valAtZero, time_constant):
     return valAtZero*exp(-(t/time_constant))
 
-def powerDecay(t, valAtZero, time_constant):
+def powerDecay(t, valAtZero, epochs):
     if t == 0:
         return valAtZero
     else:
-        return valAtZero*valAtZero**(t/time_constant)
+        return valAtZero*0.9**(t/epochs)
