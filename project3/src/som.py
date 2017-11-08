@@ -123,8 +123,13 @@ class SOM:
         return np.random.uniform(self.weight_range[0], self.weight_range[1], [self.insize, self.outsize])
 
 
-    def do_mapping(self):
+    def do_mapping(self, weight_range=None, hood=None, lrate=None, epochs=None, step='NA'):
+        if hood == None: hood=self.hoodsize
+        if lrate == None: lrate=self.lrate
+        if epochs == None: epochs=self.epochs
+        if weight_range == None: weight_range=self.weight_range
         print(self.features)
+        fig = PLT.figure()
         for wx, wy, feature in zip(self.weights[0], self.weights[1], self.features):
             PLT.scatter(feature[0], feature[1], c="black")
             PLT.scatter(wx, wy, c="red")
@@ -136,24 +141,26 @@ class SOM:
         #    PLT.scatter(wx, wy, c="red")
         #sleep(10)
         print(self.neuronRing)
-
+        fig.suptitle("Run " + str(step) + " Epochs " + str(epochs) + " Lrate " + str(lrate) \
+                     + " Hood " + str(hood) + " Weight range " + str(weight_range))
         PLT.show()
 
         #TODO
         return
 
 
-def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=200,  lrate=0.5, hoodsize=4,
-         insize=2, outsize=104, weight_range=[0.1,0.9], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-         topo='ring', lrConstant=0.5, hoodConstant=10):
+def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=20,  lrate=0.5, hoodsize=3,
+         insize=2, outsize=200, weight_range=[0.3,0.7], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+         topo='ring', lrConstant=0.8, hoodConstant=100):
     features =  data_funct(*data_params)
     som = SOM(epochs=epochs, lrate=lrate, hoodsize=hoodsize, features=features, insize=insize, outsize=outsize,
               weight_range=weight_range, lrate_decay=lrate_decay, hood_decay=hood_decay, topo=topo,
               lrConstant=lrConstant, hoodConstant=hoodConstant)
-    print('funct', data_funct, 'params', data_params, 'epochs', epochs, 'lrate', lrate,
-          'hoodsize', hoodsize, 'insize', insize, 'outsize', outsize,  'weight_range', weight_range,
-          'lrate_deacay', lrate_decay, 'hood_decay', hood_decay, 'topo', topo)
-    som.do_mapping()
+    print('funct', data_funct, 'params', data_params, 'epochs', epochs, 'lrate', lrate, '\n',
+          'hoodsize', hoodsize, 'insize', insize, 'outsize', outsize,  'weight_range', weight_range, '\n',
+          'lrate_deacay', lrate_decay, 'hood_decay', hood_decay,   '\n',
+          'topo', topo, "lrConstant", lrConstant, "hoodConstant", hoodConstant)
+    som.do_mapping(weight_range, hoodsize, lrate, epochs)
 
 
 main()
