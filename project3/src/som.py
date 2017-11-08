@@ -10,7 +10,8 @@ from time import sleep
 
 
 class SOM:
-    def __init__(self, epochs, lrate, hoodsize, insize, outsize, features, weight_range, lrate_decay, hood_decay, topo):
+    def __init__(self, epochs, lrate, hoodsize, insize, outsize, features, weight_range,
+                 lrate_decay, hood_decay, topo, lrConstant, hoodConstant):
         self.epochs = epochs
         self.features = features
         np.random.shuffle(self.features)
@@ -18,9 +19,11 @@ class SOM:
         self.lrate = lrate
         self.lrate_decay = lrate_decay
         self.initial_lrate = lrate
+        self.lrConstant = lrConstant
         self.hoodsize = hoodsize
         self.hood_decay = hood_decay
         self.initial_hood = hoodsize
+        self.hoodConstant = hoodConstant
         self.global_training_step = 0
         self.topo = topo
         if insize is None or outsize is None:
@@ -51,8 +54,8 @@ class SOM:
                 neighbours = self.get_neighbours(winner_neuron)
                 self.neuronRing[winner_neuron] += 1
                 self.adjust_clusters(neighbours)
-            self.hoodsize = ceil(self.hood_decay(epoch, self.initial_hood, 600))
-            self.lrate = self.lrate_decay(epoch, self.initial_lrate, self.epochs)
+            self.hoodsize = ceil(self.hood_decay(epoch, self.initial_hood, self.hoodConstant, self.epochs))
+            self.lrate = self.lrate_decay(epoch, self.initial_lrate,self.lrConstant, self.epochs)
             print("hood, lrate", self.hoodsize, self.lrate)
         return
 
@@ -90,7 +93,8 @@ class SOM:
     def get_ring_neighbours(self, winner_neuron):
         #TODO
         ring_neighbours = [[], []]
-        for n, i in zip(range(winner_neuron-self.hoodsize, winner_neuron+self.hoodsize+1), range(floor(-self.hoodsize), ceil(winner_neuron+self.hoodsize+1))):
+        for n, i in zip(range(winner_neuron-self.hoodsize, winner_neuron+self.hoodsize+1),
+                        range(floor(-self.hoodsize), ceil(winner_neuron+self.hoodsize+1))):
             if n < 0:
                 ring_neighbours[0].append(n + self.outsize)
             elif n >= self.outsize:
@@ -139,11 +143,13 @@ class SOM:
         return
 
 
-def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=200,  lrate=0.5, hoodsize=4, insize=2, outsize=104,
-         weight_range=[0.1,0.9], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, topo='ring'):
+def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=200,  lrate=0.5, hoodsize=4,
+         insize=2, outsize=104, weight_range=[0.1,0.9], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+         topo='ring', lrConstant=0.5, hoodConstant=10):
     features =  data_funct(*data_params)
     som = SOM(epochs=epochs, lrate=lrate, hoodsize=hoodsize, features=features, insize=insize, outsize=outsize,
-              weight_range=weight_range, lrate_decay=lrate_decay, hood_decay=hood_decay, topo=topo)
+              weight_range=weight_range, lrate_decay=lrate_decay, hood_decay=hood_decay, topo=topo,
+              lrConstant=lrConstant, hoodConstant=hoodConstant)
     print('funct', data_funct, 'params', data_params, 'epochs', epochs, 'lrate', lrate,
           'hoodsize', hoodsize, 'insize', insize, 'outsize', outsize,  'weight_range', weight_range,
           'lrate_deacay', lrate_decay, 'hood_decay', hood_decay, 'topo', topo)

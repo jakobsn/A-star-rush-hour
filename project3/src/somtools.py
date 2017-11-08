@@ -74,14 +74,14 @@ def scale_min_max(data, min_feature, max_feature):
     print(data)
     return data
 
-def linearDecay(t, valAtZero, time_constant):
+def linearDecay(t, valAtZero, time_constant, epochs):
     return valAtZero * 1/(t/time_constant)
 
-def exponentialDecay(t, valAtZero, time_constant):
+def exponentialDecay(t, valAtZero, time_constant, epochs):
     return valAtZero*exp(-(t/time_constant))
 
-def powerDecay(t, valAtZero, epochs):
+def powerDecay(t, valAtZero, time_constant, epochs):
     if t == 0:
         return valAtZero
     else:
-        return valAtZero*0.9**(t/epochs)
+        return valAtZero*time_constant**(t/epochs)
