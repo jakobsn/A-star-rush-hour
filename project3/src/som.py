@@ -54,7 +54,7 @@ class SOM:
                 neighbours = self.get_neighbours(winner_neuron)
                 self.neuronRing[winner_neuron] += 1
                 self.adjust_clusters(neighbours)
-            self.hoodsize = ceil(self.hood_decay(epoch, self.initial_hood, self.hoodConstant, self.epochs))
+            self.hoodsize = floor(self.hood_decay(epoch, self.initial_hood, self.hoodConstant, self.epochs))
             self.lrate = self.lrate_decay(epoch, self.initial_lrate,self.lrConstant, self.epochs)
             print("hood, lrate", self.hoodsize, self.lrate)
         return
@@ -77,7 +77,7 @@ class SOM:
             self.i += 1
         else:
             self.i = 0
-        self.weights[0][index] = weight + self.lrate*hood*np.subtract(self.input_vector[self.i], weight)
+        self.weights[self.i][index] = weight + self.lrate*hood*np.subtract(self.input_vector[self.i], weight)
         #print("index", index, "input_value", self.input_vector[self.i], "hood", hood, "weight", weight, "new weight", self.weights[0][index])
 
     # Get weight indexes
@@ -142,16 +142,17 @@ class SOM:
         #sleep(10)
         print(self.neuronRing)
         fig.suptitle("Run " + str(step) + " Epochs " + str(epochs) + " Lrate " + str(lrate) \
-                     + " Hood " + str(hood) + " Weight range " + str(weight_range))
+                     + " Hood " + str(hood) + " Weight range " + str(weight_range) + \
+                     " Outsize " + str(self.outsize) + " constants " + str(self.lrConstant) + ',' + str(self.hoodConstant))
         PLT.show()
 
         #TODO
         return
 
 
-def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=20,  lrate=0.5, hoodsize=3,
-         insize=2, outsize=200, weight_range=[0.3,0.7], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-         topo='ring', lrConstant=0.8, hoodConstant=100):
+def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=500,  lrate=0.4, hoodsize=6,
+         insize=2, outsize=102, weight_range=[0.1,0.9], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+         topo='ring', lrConstant=0.05, hoodConstant=60):
     features =  data_funct(*data_params)
     som = SOM(epochs=epochs, lrate=lrate, hoodsize=hoodsize, features=features, insize=insize, outsize=outsize,
               weight_range=weight_range, lrate_decay=lrate_decay, hood_decay=hood_decay, topo=topo,
