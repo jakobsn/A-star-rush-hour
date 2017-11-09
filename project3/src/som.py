@@ -50,6 +50,7 @@ class SOM:
             np.random.shuffle(self.features)
             self.neuronRing = self.create_neuron_ring()
             for feature in self.features:
+                print("current feature", feature)
                 distances, min_distance, winner_neuron = self.findWinner(feature)
                 neighbours = self.get_neighbours(winner_neuron)
                 self.neuronRing[winner_neuron] += 1
@@ -79,8 +80,8 @@ class SOM:
             self.i += 1
         else:
             self.i = 0
-        self.weights[self.i][index] = weight + self.lrate*hood*np.subtract(self.input_vector[self.i], weight)
-        #print("index", index, "input_value", self.input_vector[self.i], "hood", hood, "weight", weight, "new weight", self.weights[0][index])
+        self.weights[self.i][index] = weight + self.lrate*(hood+1)*np.subtract(self.input_vector[self.i], weight)
+        print("index", index, "input_value", self.input_vector[self.i], "hood", hood, "weight", weight, "new weight", self.weights[0][index])
 
     # Get weight indexes
     def get_neighbours(self, winner_neuron):
@@ -132,8 +133,7 @@ class SOM:
         if weight_range == None: weight_range=self.weight_range
         print(self.features)
         fig = PLT.figure()
-        for feature in self.features:
-            PLT.scatter(feature[0], feature[1], c="black")
+
         for wx, wy in zip(self.weights[0], self.weights[1]):
             PLT.scatter(wx, wy, c="red")
         print(self.weights[0], self.weights[1])
@@ -142,6 +142,8 @@ class SOM:
         # Plot edge from last node to first node
         PLT.plot([self.weights[0][0], self.weights[0][-1]], [self.weights[1][0], self.weights[1][-1]], c='blue')
         print([self.weights[0][0], self.weights[0][1]], [self.weights[-1][0], self.weights[-1][1]])
+        for feature in self.features:
+            PLT.scatter(feature[0], feature[1], c="black")
             #else:
             #    PLT.plot(wx, wy, 'g-', self.weights[0][0], self.weights[0][1], 'g-')
         #for wx, wy in zip(self.weights[0], self.weights[1]):
@@ -158,7 +160,7 @@ class SOM:
         return
 
 
-def main(data_funct=st.readTSP, data_params=('../data/small.txt',), epochs=1000,  lrate=0.5, hoodsize=3,
+def main(data_funct=st.readTSP, data_params=('../data/small.txt',), epochs=1000,  lrate=0.5, hoodsize=0,
          insize=2, outsize=10, weight_range=[-0.5,1], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
          topo='ring', lrConstant=0.07, hoodConstant=50):
     features =  data_funct(*data_params)
