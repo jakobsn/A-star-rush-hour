@@ -36,6 +36,7 @@ class SOM:
         self.weights = self.initial_weights()
         self.neuronRing = self.create_neuron_ring()
         self.i = 0 # Keep track of which weight being changed for input neuron
+        self.isDisplayed = False
         self.do_training()
 
 
@@ -43,6 +44,7 @@ class SOM:
         # TODO: Find winning neuron for each vector
         #       Update weights for winner and neighbours
         #       Update lrate and hoodsize
+        #PLT.ion()
         print(self.weights)
         self.neuronRing = self.create_neuron_ring()
         for epoch in range(self.epochs):
@@ -133,7 +135,12 @@ class SOM:
         if epochs == None: epochs=self.epochs
         if weight_range == None: weight_range=self.weight_range
         #print(self.features)
+        if self.isDisplayed:
+            sleep(1)
+            PLT.close("all")
+
         fig = PLT.figure()
+
 
         for wx, wy in zip(self.weights[0], self.weights[1]):
             PLT.scatter(wx, wy, c="red")
@@ -155,8 +162,13 @@ class SOM:
         fig.suptitle("Run " + str(step) + " Epochs " + str(epochs) + " Lrate " + str(lrate) \
                      + " Hood " + str(hood) + " Weight range " + str(weight_range) + \
                      " Outsize " + str(self.outsize) + " constants " + str(self.lrConstant) + ',' + str(self.hoodConstant))
-        PLT.show()
+        #if self.isDisplayed:
+        #    fig.canvas.draw()
+        #else:
+        #    fig.show()
 
+        PLT.show(block=False)
+        self.isDisplayed = True
         #TODO
         return
 
