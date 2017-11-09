@@ -3,7 +3,7 @@
 import numpy as np
 from math import exp, sqrt
 
-def readTSP(targetFile, scale='avgdev'):
+def readTSP(targetFile, scale='avdev'):
     with open(targetFile) as file:
         data = []
         lines = 0
@@ -20,8 +20,10 @@ def readTSP(targetFile, scale='avgdev'):
             data.pop()
     if scale == 'avgdev':
         return scale_min_max(data, np.amin(data), np.amax(data))
-    else:
+    elif scale == 'minmax':
         return scale_min_max(data, np.amin(data), np.amax(data))
+    else:
+        return data
 
 # Scale data by average and standard deviation
 def scale_average_and_deviation(data):

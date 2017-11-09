@@ -51,7 +51,7 @@ class SOM:
                 break
             np.random.shuffle(self.features)
             feature = self.features[randint(0, len(self.features)-1)]
-            print("current feature", feature)
+            #print("current feature", feature)
             distances, min_distance, winner_neuron = self.findWinner(feature)
             neighbours = self.get_neighbours(winner_neuron)
             self.neuronRing[winner_neuron] += 1
@@ -59,7 +59,7 @@ class SOM:
             self.hoodsize = round(self.hood_decay(epoch, self.initial_hood, self.hoodConstant, self.epochs))
             self.lrate = self.lrate_decay(epoch, self.initial_lrate,self.lrConstant, self.epochs)
             print("hood, lrate", self.hoodsize, self.lrate)
-            if epoch == 0 or epoch % 20 == 0:
+            if epoch == 0 or epoch % 1000 == 0:
                 self.do_mapping(self.weight_range, self.hoodsize, self.lrate, epoch)
         return
 
@@ -78,7 +78,7 @@ class SOM:
 
     def adjust_cluster(self, index, hood, weight):
         self.weights[self.i][index] = weight + self.lrate*(hood+1)*np.subtract(self.input_vector[self.i], weight)
-        print("index", index, "input_value", self.input_vector[self.i], "hood", hood, "weight", weight, "new weight", self.weights[0][index])
+        #print("index", index, "input_value", self.input_vector[self.i], "hood", hood, "weight", weight, "new weight", self.weights[0][index])
         if self.i < (len(self.input_vector)-1):
             self.i += 1
         else:
@@ -132,17 +132,17 @@ class SOM:
         if lrate == None: lrate=self.lrate
         if epochs == None: epochs=self.epochs
         if weight_range == None: weight_range=self.weight_range
-        print(self.features)
+        #print(self.features)
         fig = PLT.figure()
 
         for wx, wy in zip(self.weights[0], self.weights[1]):
             PLT.scatter(wx, wy, c="red")
-        print(self.weights[0], self.weights[1])
+        #print(self.weights[0], self.weights[1])
         # Plot edges
         PLT.plot(self.weights[0], self.weights[1])
         # Plot edge from last node to first node
         PLT.plot([self.weights[0][0], self.weights[0][-1]], [self.weights[1][0], self.weights[1][-1]], c='blue')
-        print([self.weights[0][0], self.weights[0][1]], [self.weights[-1][0], self.weights[-1][1]])
+        #print([self.weights[0][0], self.weights[0][1]], [self.weights[-1][0], self.weights[-1][1]])
         for feature in self.features:
             PLT.scatter(feature[0], feature[1], c="black")
             #else:
@@ -161,9 +161,9 @@ class SOM:
         return
 
 
-def main(data_funct=st.readTSP, data_params=('../data/small.txt',), epochs=1000,  lrate=0.2, hoodsize=1,
-         insize=2, outsize=10, weight_range=[-0.5,1], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-         topo='ring', lrConstant=0.005, hoodConstant=200):
+def main(data_funct=st.readTSP, data_params=('../data/6.txt','avgdev'), epochs=10000,  lrate=0.1, hoodsize=4,
+         insize=2, outsize=60, weight_range=[0.45,0.55], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+         topo='ring', lrConstant=0.09, hoodConstant=200):
     features =  data_funct(*data_params)
     som = SOM(epochs=epochs, lrate=lrate, hoodsize=hoodsize, features=features, insize=insize, outsize=outsize,
               weight_range=weight_range, lrate_decay=lrate_decay, hood_decay=hood_decay, topo=topo,
