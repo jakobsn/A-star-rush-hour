@@ -7,6 +7,7 @@ from math import sqrt, ceil, floor, exp
 import six.moves.cPickle as cPickle
 import matplotlib.pyplot as PLT
 from time import sleep
+from random import randint
 
 
 class SOM:
@@ -43,18 +44,18 @@ class SOM:
         #       Update weights for winner and neighbours
         #       Update lrate and hoodsize
         print(self.weights)
+        self.neuronRing = self.create_neuron_ring()
         for epoch in range(self.epochs):
             print("epoch", epoch)
             if self.lrate == 0:
                 break
             np.random.shuffle(self.features)
-            self.neuronRing = self.create_neuron_ring()
-            for feature in self.features:
-                print("current feature", feature)
-                distances, min_distance, winner_neuron = self.findWinner(feature)
-                neighbours = self.get_neighbours(winner_neuron)
-                self.neuronRing[winner_neuron] += 1
-                self.adjust_clusters(neighbours)
+            feature = self.features[randint(0, len(self.features)-1)]
+            print("current feature", feature)
+            distances, min_distance, winner_neuron = self.findWinner(feature)
+            neighbours = self.get_neighbours(winner_neuron)
+            self.neuronRing[winner_neuron] += 1
+            self.adjust_clusters(neighbours)
             self.hoodsize = round(self.hood_decay(epoch, self.initial_hood, self.hoodConstant, self.epochs))
             self.lrate = self.lrate_decay(epoch, self.initial_lrate,self.lrConstant, self.epochs)
             print("hood, lrate", self.hoodsize, self.lrate)
@@ -76,12 +77,12 @@ class SOM:
         return
 
     def adjust_cluster(self, index, hood, weight):
+        self.weights[self.i][index] = weight + self.lrate*(hood+1)*np.subtract(self.input_vector[self.i], weight)
+        print("index", index, "input_value", self.input_vector[self.i], "hood", hood, "weight", weight, "new weight", self.weights[0][index])
         if self.i < (len(self.input_vector)-1):
             self.i += 1
         else:
             self.i = 0
-        self.weights[self.i][index] = weight + self.lrate*(hood+1)*np.subtract(self.input_vector[self.i], weight)
-        print("index", index, "input_value", self.input_vector[self.i], "hood", hood, "weight", weight, "new weight", self.weights[0][index])
 
     # Get weight indexes
     def get_neighbours(self, winner_neuron):
@@ -160,9 +161,9 @@ class SOM:
         return
 
 
-def main(data_funct=st.readTSP, data_params=('../data/small.txt',), epochs=1000,  lrate=0.5, hoodsize=0,
+def main(data_funct=st.readTSP, data_params=('../data/small.txt',), epochs=1000,  lrate=0.2, hoodsize=1,
          insize=2, outsize=10, weight_range=[-0.5,1], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-         topo='ring', lrConstant=0.07, hoodConstant=50):
+         topo='ring', lrConstant=0.005, hoodConstant=200):
     features =  data_funct(*data_params)
     som = SOM(epochs=epochs, lrate=lrate, hoodsize=hoodsize, features=features, insize=insize, outsize=outsize,
               weight_range=weight_range, lrate_decay=lrate_decay, hood_decay=hood_decay, topo=topo,
