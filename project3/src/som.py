@@ -54,9 +54,11 @@ class SOM:
                 neighbours = self.get_neighbours(winner_neuron)
                 self.neuronRing[winner_neuron] += 1
                 self.adjust_clusters(neighbours)
-            self.hoodsize = floor(self.hood_decay(epoch, self.initial_hood, self.hoodConstant, self.epochs))
+            self.hoodsize = round(self.hood_decay(epoch, self.initial_hood, self.hoodConstant, self.epochs))
             self.lrate = self.lrate_decay(epoch, self.initial_lrate,self.lrConstant, self.epochs)
             print("hood, lrate", self.hoodsize, self.lrate)
+            if epoch == 0 or epoch % 20 == 0:
+                self.do_mapping(self.weight_range, self.hoodsize, self.lrate, epoch)
         return
 
     def findWinner(self, feature):
@@ -130,10 +132,16 @@ class SOM:
         if weight_range == None: weight_range=self.weight_range
         print(self.features)
         fig = PLT.figure()
-        for wx, wy, feature in zip(self.weights[0], self.weights[1], self.features):
+        for feature in self.features:
             PLT.scatter(feature[0], feature[1], c="black")
+        for wx, wy in zip(self.weights[0], self.weights[1]):
             PLT.scatter(wx, wy, c="red")
+        print(self.weights[0], self.weights[1])
+        # Plot edges
         PLT.plot(self.weights[0], self.weights[1])
+        # Plot edge from last node to first node
+        PLT.plot([self.weights[0][0], self.weights[0][-1]], [self.weights[1][0], self.weights[1][-1]], c='blue')
+        print([self.weights[0][0], self.weights[0][1]], [self.weights[-1][0], self.weights[-1][1]])
             #else:
             #    PLT.plot(wx, wy, 'g-', self.weights[0][0], self.weights[0][1], 'g-')
         #for wx, wy in zip(self.weights[0], self.weights[1]):
@@ -150,9 +158,9 @@ class SOM:
         return
 
 
-def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=500,  lrate=0.4, hoodsize=6,
-         insize=2, outsize=102, weight_range=[0.1,0.9], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-         topo='ring', lrConstant=0.05, hoodConstant=60):
+def main(data_funct=st.readTSP, data_params=('../data/small.txt',), epochs=1000,  lrate=0.5, hoodsize=3,
+         insize=2, outsize=10, weight_range=[-0.5,1], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+         topo='ring', lrConstant=0.07, hoodConstant=50):
     features =  data_funct(*data_params)
     som = SOM(epochs=epochs, lrate=lrate, hoodsize=hoodsize, features=features, insize=insize, outsize=outsize,
               weight_range=weight_range, lrate_decay=lrate_decay, hood_decay=hood_decay, topo=topo,
