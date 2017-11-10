@@ -42,29 +42,25 @@ class SOM:
         self.show_sleep = show_sleep
         self.do_training()
 
-
-
+    # Pick random input feature
+    # Update weights for winner and neighbours
+    # Update lrate and hoodsize
     def do_training(self):
-        # TODO: Find winning neuron for each vector
-        #       Update weights for winner and neighbours
-        #       Update lrate and hoodsize
-        #PLT.ion()
         print(self.weights)
         self.neuronRing = self.create_neuron_ring()
         for epoch in range(self.epochs):
-            print("epoch", epoch)
             if self.lrate == 0:
                 break
             np.random.shuffle(self.features)
             feature = self.features[randint(0, len(self.features)-1)]
-            #print("current feature", feature)
             distances, min_distance, winner_neuron = self.findWinner(feature)
             neighbours = self.get_neighbours(winner_neuron)
             self.neuronRing[winner_neuron] += 1
             self.adjust_clusters(neighbours)
             self.hoodsize = round(self.hood_decay(epoch, self.initial_hood, self.hoodConstant, self.epochs))
             self.lrate = self.lrate_decay(epoch, self.initial_lrate,self.lrConstant, self.epochs)
-            print("hood, lrate", self.hoodsize, self.lrate)
+            print(str('['+str(epoch)+']'), "hood, lrate", self.hoodsize, self.lrate)
+            print("Neuron ring", self.neuronRing)
             if epoch == 0 or epoch % self.showint == 0:
                 self.do_mapping(self.weight_range, self.hoodsize, self.lrate, epoch, self.show_sleep)
         return
@@ -122,9 +118,7 @@ class SOM:
         #TODO
         return
 
-    # ~Twice as many possibilities as cities
     def create_neuron_ring(self):
-        #TODO: Is that all?
         return np.zeros(shape=[self.outsize])
 
     # Weight matrix of zeros
@@ -138,58 +132,42 @@ class SOM:
         if lrate == None: lrate=self.lrate
         if epochs == None: epochs=self.epochs
         if weight_range == None: weight_range=self.weight_range
-        #print(self.features)
         if self.isDisplayed:
             sleep(sleep_time)
             PLT.close("all")
 
         fig = PLT.figure()
-
-
+        # Scatter weights
         for wx, wy in zip(self.weights[0], self.weights[1]):
             PLT.scatter(wx, wy, c="red")
-        #print(self.weights[0], self.weights[1])
-        # Plot edges
+        # Plot weight edges
         PLT.plot(self.weights[0], self.weights[1])
-        # Plot edge from last node to first node
         PLT.plot([self.weights[0][0], self.weights[0][-1]], [self.weights[1][0], self.weights[1][-1]], c='blue')
-        #print([self.weights[0][0], self.weights[0][1]], [self.weights[-1][0], self.weights[-1][1]])
+        # Scatter features
         for feature in self.features:
             PLT.scatter(feature[0], feature[1], c="black")
-            #else:
-            #    PLT.plot(wx, wy, 'g-', self.weights[0][0], self.weights[0][1], 'g-')
-        #for wx, wy in zip(self.weights[0], self.weights[1]):
-        #    print("map:", wx, wy)
-        #    PLT.scatter(wx, wy, c="red")
-        #sleep(10)
-        print(self.neuronRing)
         fig.suptitle("Run " + str(step) + " Epochs " + str(epochs) + " Lrate " + str(lrate) \
                      + " Hood " + str(hood) + " Weight range " + str(weight_range) + \
                      " Outsize " + str(self.outsize) + " constants " + str(self.lrConstant) + ',' + str(self.hoodConstant))
-        #if self.isDisplayed:
-        #    fig.canvas.draw()
-        #else:
-        #    fig.show()
-
         PLT.show(block=False)
         self.isDisplayed = True
 
-        #TODO
-        return
 
-
-def main(data_funct=st.readTSP, data_params=('../data/6.txt',None), epochs=10000,  lrate=0.2, hoodsize=4,
-         insize=2, outsize=60, weight_range=[1,5], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+def main(data_funct=st.readTSP, data_params=('../data/6.txt','avgdev'), epochs=10000,  lrate=0.1, hoodsize=3,
+         insize=2, outsize=70, weight_range=[0.49,0.51], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
          topo='ring', lrConstant=0.09, hoodConstant=200, showint=2000, show_sleep=1, final_sleep=20):
     features =  data_funct(*data_params)
+
     som = SOM(epochs=epochs, lrate=lrate, hoodsize=hoodsize, features=features, insize=insize, outsize=outsize,
               weight_range=weight_range, lrate_decay=lrate_decay, hood_decay=hood_decay, topo=topo,
               lrConstant=lrConstant, hoodConstant=hoodConstant, showint=showint, show_sleep=show_sleep)
+
     print('funct', data_funct, 'params', data_params, 'epochs', epochs, 'lrate', lrate, '\n',
           'hoodsize', hoodsize, 'insize', insize, 'outsize', outsize,  'weight_range', weight_range, '\n',
           'lrate_deacay', lrate_decay, 'hood_decay', hood_decay,   '\n',
           'topo', topo, "lrConstant", lrConstant, "hoodConstant", hoodConstant, '\n',
           "showint", showint, 'show_sleep', show_sleep, 'final_sleep', final_sleep)
+
     som.do_mapping(weight_range, hoodsize, lrate, epochs, 'Final', final_sleep)
 
 
@@ -202,4 +180,6 @@ TODO:
 - lrate decay
 - TOPOGRAPHY
 - Normalize input
+- Find path distance
+- Create initial ring
 """
