@@ -40,7 +40,7 @@ class SOM:
         self.isDisplayed = False
         self.showint = showint
         self.show_sleep = show_sleep
-        self.do_training()
+        self.distance = self.do_training()
 
     # Pick random input feature
     # Update weights for winner and neighbours
@@ -49,9 +49,8 @@ class SOM:
         print(self.weights)
         self.neuronRing = self.create_neuron_ring()
         for epoch in range(self.epochs):
-            if self.lrate == 0:
-                break
-            np.random.shuffle(self.features)
+            #if self.lrate == 0:
+            #    break
             feature = self.features[randint(0, len(self.features)-1)]
             distances, min_distance, winner_neuron = self.findWinner(feature)
             neighbours = self.get_neighbours(winner_neuron)
@@ -59,11 +58,16 @@ class SOM:
             self.adjust_clusters(neighbours)
             self.hoodsize = round(self.hood_decay(epoch, self.initial_hood, self.hoodConstant, self.epochs))
             self.lrate = self.lrate_decay(epoch, self.initial_lrate,self.lrConstant, self.epochs)
-            print(str('['+str(epoch)+']'), "hood, lrate", self.hoodsize, self.lrate)
-            print("Neuron ring", self.neuronRing)
+            print(str('[' + str(epoch) + ']'), "hood, lrate", self.hoodsize, self.lrate)
             if epoch == 0 or epoch % self.showint == 0:
                 self.do_mapping(self.weight_range, self.hoodsize, self.lrate, epoch, self.show_sleep)
-        return
+                print("Neuron ring", self.neuronRing)
+        return self.findTotalDistance()
+
+    def findTotalDistance(self):
+        distance = 0
+
+        return distance
 
     def findWinner(self, feature):
         eDistance = np.vectorize(self.euclidian_distance, cache=True)
@@ -153,9 +157,9 @@ class SOM:
         self.isDisplayed = True
 
 
-def main(data_funct=st.readTSP, data_params=('../data/6.txt','avgdev'), epochs=10000,  lrate=0.1, hoodsize=3,
-         insize=2, outsize=70, weight_range=[0.49,0.51], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-         topo='ring', lrConstant=0.09, hoodConstant=200, showint=2000, show_sleep=1, final_sleep=20):
+def main(data_funct=st.readTSP, data_params=('../data/6.txt',None), epochs=10000,  lrate=0.2, hoodsize=4,
+         insize=2, outsize=70, weight_range=[0.49,5], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+         topo='ring', lrConstant=0.09, hoodConstant=300, showint=2000, show_sleep=1, final_sleep=20):
     features =  data_funct(*data_params)
 
     som = SOM(epochs=epochs, lrate=lrate, hoodsize=hoodsize, features=features, insize=insize, outsize=outsize,
@@ -166,7 +170,7 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt','avgdev'), epochs=1
           'hoodsize', hoodsize, 'insize', insize, 'outsize', outsize,  'weight_range', weight_range, '\n',
           'lrate_deacay', lrate_decay, 'hood_decay', hood_decay,   '\n',
           'topo', topo, "lrConstant", lrConstant, "hoodConstant", hoodConstant, '\n',
-          "showint", showint, 'show_sleep', show_sleep, 'final_sleep', final_sleep)
+          "showint", showint, 'show_sleep', show_sleep, 'final_sleep', final_sleep, 'distance', som.distance)
 
     som.do_mapping(weight_range, hoodsize, lrate, epochs, 'Final', final_sleep)
 
@@ -181,5 +185,5 @@ TODO:
 - TOPOGRAPHY
 - Normalize input
 - Find path distance
-- Create initial ring
+- Create initial weight ring
 """
