@@ -107,15 +107,30 @@ class SOM:
     # Get weight indexes
     def get_neighbours(self, winner_neuron):
         if self.topo == "ring":
-            return np.array(self.get_ring_neighbours(winner_neuron))
+            return self.get_ring_neighbours(winner_neuron)
         else:
+            print(self.weights)
             # TODO: matrix topology
-            pass
-        return
+            return self.get_matrix_neighbours(winner_neuron)
+
+    # Return neighbour indices with degree of neighbourhood
+    def get_matrix_neighbours(self, winner_neuron):
+        matrix_neighbours = [[], []]
+        neuron_matrix = np.zeros(self.network_dims)
+        neuron_count = 0
+        for i in range(self.network_dims[0]):
+            for j in range(self.network_dims[1]):
+                if neuron_count >= self.outsize:
+                    break
+                neuron_matrix[i][j] = 1
+                neuron_count += 1
+        print(neuron_count)
+        print(neuron_matrix)
+        sleep(10)
+        return np.array(matrix_neighbours)
 
     # Return neighbour indices with degree of neighbourhood
     def get_ring_neighbours(self, winner_neuron):
-        #TODO
         ring_neighbours = [[], []]
         for n, i in zip(range(winner_neuron-self.hoodsize, winner_neuron+self.hoodsize+1),
                         range(floor(-self.hoodsize), ceil(winner_neuron+self.hoodsize+1))):
@@ -176,9 +191,9 @@ class SOM:
         self.isDisplayed = True
 
 
-def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=6000,  lrate=0.2, hoodsize=4,
+def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=3000,  lrate=0.2, hoodsize=4,
          insize=2, outsize=90, weight_range=[0.49, 5], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-         lrConstant=0.09, hoodConstant=300, showint=0, show_sleep=1, final_sleep=20, network_dims=None):
+         lrConstant=0.09, hoodConstant=300, showint=20, show_sleep=2, final_sleep=20, network_dims=None):
     features = data_funct(*data_params)
     start = time()
 
@@ -198,7 +213,7 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=6000,  lr
 
 #main()
 
-main(data_funct=st.get_mnist_data, data_params=(100,), epochs=200, lrate=0.2, hoodsize=4, insize=784, outsize=16,
+main(data_funct=st.get_mnist_data, data_params=(100,), epochs=200, lrate=0.2, hoodsize=1, insize=784, outsize=16,
      weight_range=[0, 1], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, lrConstant=0.09,
      hoodConstant=300, showint=2000, show_sleep=1, final_sleep=20, network_dims=[4, 4])
 
