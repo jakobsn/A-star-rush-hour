@@ -122,11 +122,12 @@ class SOM:
             for j in range(self.network_dims[1]):
                 if neuron_count >= self.outsize:
                     break
-                neuron_matrix[i][j] = 1
+                neuron_matrix[i][j] = neuron_count
                 neuron_count += 1
         print(neuron_count)
         print(neuron_matrix)
         sleep(10)
+        # TODO: USE MATRIX TO GET NEIGHBOUR INDEXES
         return np.array(matrix_neighbours)
 
     # Return neighbour indices with degree of neighbourhood
