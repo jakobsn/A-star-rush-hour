@@ -57,7 +57,11 @@ class SOM:
         for epoch in range(self.epochs):
             if self.lrate == 0:
                 break
-            feature = self.features[randint(0, len(self.features)-1)]
+            if self.topo == "matrix":
+                feature = self.features[randint(0, len(self.features)-1)][0]
+            else:
+                feature = self.features[randint(0, len(self.features)-1)]
+            print("feature", feature)
             distances, min_distance, winner_neuron = self.findWinner(feature)
             neighbours = self.get_neighbours(winner_neuron)
             self.neuronRing[winner_neuron] += 1
@@ -123,6 +127,10 @@ class SOM:
         return np.array(ring_neighbours)
 
     def euclidian_distance(self, *weights):
+        #print("ED", len(weights))
+        #print(*weights)
+        #print("input", len(self.input_vector))
+        #print(self.input_vector)
         return np.sqrt(np.sum(np.power(np.subtract(self.input_vector, np.array(weights)), 2)))
 
     def create_neuron_ring(self):
@@ -176,9 +184,9 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=6000,  lr
     som.do_mapping(weight_range, hoodsize, lrate, epochs, 'Final', final_sleep)
 
 
-#main()
+main()
 
-main(data_funct=st.get_mnist_data, data_params=(1000,), epochs=200, lrate=0.2, hoodsize=4, insize=784, outsize=16,
+main(data_funct=st.get_mnist_data, data_params=(100,), epochs=200, lrate=0.2, hoodsize=4, insize=784, outsize=16,
      weight_range=[0, 1], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, lrConstant=0.09,
      hoodConstant=300, showint=2000, show_sleep=1, final_sleep=20, network_dims=[4, 4])
 
