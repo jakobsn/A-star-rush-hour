@@ -6,7 +6,7 @@ import numpy_indexed as npi
 from math import sqrt, ceil, floor, exp
 import six.moves.cPickle as cPickle
 import matplotlib.pyplot as PLT
-from time import sleep
+from time import sleep, time
 from random import randint
 
 
@@ -69,7 +69,7 @@ class SOM:
             self.hoodsize = round(self.hood_decay(epoch, self.initial_hood, self.hoodConstant, self.epochs))
             self.lrate = self.lrate_decay(epoch, self.initial_lrate,self.lrConstant, self.epochs)
             print(str('[' + str(epoch) + ']'), "hood, lrate", self.hoodsize, self.lrate)
-            if epoch == 0 or epoch % self.showint == 0:
+            if not self.showint is 0 and (epoch == 0 or epoch % self.showint == 0):
                 self.do_mapping(self.weight_range, self.hoodsize, self.lrate, epoch, self.show_sleep)
                 print("Neuron ring", self.neuronRing)
         return self.findTotalDistance()
@@ -91,6 +91,7 @@ class SOM:
         return distances, min_distance, winner_neuron
 
     def adjust_clusters(self, neighbours):
+        print("neighbours", neighbours)
         adjust_cluster = np.vectorize(self.adjust_cluster, cache=True)
         adjust_cluster(neighbours[0], neighbours[1], self.weights[:, neighbours[0]])
         return
@@ -177,23 +178,25 @@ class SOM:
 
 def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=6000,  lrate=0.2, hoodsize=4,
          insize=2, outsize=90, weight_range=[0.49, 5], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-         lrConstant=0.09, hoodConstant=300, showint=2000, show_sleep=1, final_sleep=20, network_dims=None):
+         lrConstant=0.09, hoodConstant=300, showint=0, show_sleep=1, final_sleep=20, network_dims=None):
     features = data_funct(*data_params)
+    start = time()
 
     som = SOM(epochs=epochs, lrate=lrate, hoodsize=hoodsize, features=features, insize=insize, outsize=outsize,
               weight_range=weight_range, lrate_decay=lrate_decay, hood_decay=hood_decay, lrConstant=lrConstant,
               hoodConstant=hoodConstant, showint=showint, show_sleep=show_sleep, network_dims=network_dims)
-
     print('funct', data_funct, 'params', data_params, 'epochs', epochs, 'lrate', lrate, '\n',
           'hoodsize', hoodsize, 'insize', insize, 'outsize', outsize,  'weight_range', weight_range, '\n',
           'lrate_deacay', lrate_decay, 'hood_decay', hood_decay,   '\n',
           'topo', som.topo, "lrConstant", lrConstant, "hoodConstant", hoodConstant, '\n',
           "showint", showint, 'show_sleep', show_sleep, 'final_sleep', final_sleep, 'distance', som.distance)
 
+    end = time()
+    print("Time elapsed:", end - start, "s", (end-start)/60, "m")
     som.do_mapping(weight_range, hoodsize, lrate, epochs, 'Final', final_sleep)
 
 
-main()
+#main()
 
 main(data_funct=st.get_mnist_data, data_params=(100,), epochs=200, lrate=0.2, hoodsize=4, insize=784, outsize=16,
      weight_range=[0, 1], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, lrConstant=0.09,
