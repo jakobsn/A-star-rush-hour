@@ -11,12 +11,11 @@ from random import randint
 
 
 class SOM:
-    def __init__(self, epochs, lrate, hoodsize, insize, outsize, features, weight_range,
-                 lrate_decay, hood_decay, topo, lrConstant, hoodConstant, showint,
-                 show_sleep):
+    def __init__(self, epochs, lrate, hoodsize, insize, outsize, features,
+                 weight_range, lrate_decay, hood_decay, lrConstant,
+                 hoodConstant, showint,show_sleep, network_dims=None):
         self.epochs = epochs
         self.features = features
-        np.random.shuffle(self.features)
         self.weight_range = weight_range
         self.lrate = lrate
         self.lrate_decay = lrate_decay
@@ -27,7 +26,11 @@ class SOM:
         self.initial_hood = hoodsize
         self.hoodConstant = hoodConstant
         self.global_training_step = 0
-        self.topo = topo
+        self.network_dims = network_dims
+        if self.network_dims is not None:
+            self.topo = "matrix"
+        else:
+            self.topo = "ring"
         if insize is None or outsize is None:
             self.insize = len(features[0])
             self.outsize = len(features)*2
@@ -49,8 +52,8 @@ class SOM:
         print(self.weights)
         self.neuronRing = self.create_neuron_ring()
         for epoch in range(self.epochs):
-            #if self.lrate == 0:
-            #    break
+            if self.lrate == 0:
+                break
             feature = self.features[randint(0, len(self.features)-1)]
             distances, min_distance, winner_neuron = self.findWinner(feature)
             neighbours = self.get_neighbours(winner_neuron)
@@ -65,8 +68,8 @@ class SOM:
         return self.findTotalDistance()
 
     def findTotalDistance(self):
+        #TODO
         distance = 0
-
         return distance
 
     def findWinner(self, feature):
@@ -157,33 +160,37 @@ class SOM:
         self.isDisplayed = True
 
 
-def main(data_funct=st.readTSP, data_params=('../data/6.txt',None), epochs=10000,  lrate=0.2, hoodsize=4,
-         insize=2, outsize=70, weight_range=[0.49,5], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-         topo='ring', lrConstant=0.09, hoodConstant=300, showint=2000, show_sleep=1, final_sleep=20):
-    features =  data_funct(*data_params)
+def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=10000,  lrate=0.2, hoodsize=4,
+         insize=2, outsize=90, weight_range=[0.49,5], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+         lrConstant=0.09, hoodConstant=300, showint=2000, show_sleep=1, final_sleep=20, network_dims=None):
+    features = data_funct(*data_params)
 
     som = SOM(epochs=epochs, lrate=lrate, hoodsize=hoodsize, features=features, insize=insize, outsize=outsize,
-              weight_range=weight_range, lrate_decay=lrate_decay, hood_decay=hood_decay, topo=topo,
-              lrConstant=lrConstant, hoodConstant=hoodConstant, showint=showint, show_sleep=show_sleep)
+              weight_range=weight_range, lrate_decay=lrate_decay, hood_decay=hood_decay, lrConstant=lrConstant,
+              hoodConstant=hoodConstant, showint=showint, show_sleep=show_sleep, network_dims=network_dims)
 
     print('funct', data_funct, 'params', data_params, 'epochs', epochs, 'lrate', lrate, '\n',
           'hoodsize', hoodsize, 'insize', insize, 'outsize', outsize,  'weight_range', weight_range, '\n',
           'lrate_deacay', lrate_decay, 'hood_decay', hood_decay,   '\n',
-          'topo', topo, "lrConstant", lrConstant, "hoodConstant", hoodConstant, '\n',
+          'topo', som.topo, "lrConstant", lrConstant, "hoodConstant", hoodConstant, '\n',
           "showint", showint, 'show_sleep', show_sleep, 'final_sleep', final_sleep, 'distance', som.distance)
 
     som.do_mapping(weight_range, hoodsize, lrate, epochs, 'Final', final_sleep)
 
 
+#main()
+
 main()
+
 
 """
 TODO:
-- Visualize at step k with total length
-- Neighborhood decay
-- lrate decay
+- Visualize at step k (for ring)
+- Neighborhood decay (exponentialatm)
+- lrate decay (power atm)
 - TOPOGRAPHY
-- Normalize input
+x Normalize input
 - Find path distance
 - Create initial weight ring
+- Implement for mnist
 """
