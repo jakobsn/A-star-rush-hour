@@ -29,6 +29,8 @@ class SOM:
         self.network_dims = network_dims
         if self.network_dims is not None:
             self.topo = "matrix"
+            print("MNIST")
+            print(features)
         else:
             self.topo = "ring"
         if insize is None or outsize is None:
@@ -39,6 +41,7 @@ class SOM:
             self.outsize = outsize
         self.weights = self.initial_weights()
         self.neuronRing = self.create_neuron_ring()
+        self.input_vector = None # Keep track of current input vector
         self.i = 0 # Keep track of which weight being changed for input neuron
         self.isDisplayed = False
         self.showint = showint
@@ -67,6 +70,7 @@ class SOM:
                 print("Neuron ring", self.neuronRing)
         return self.findTotalDistance()
 
+    # Find distance for TSP solution
     def findTotalDistance(self):
         #TODO
         distance = 0
@@ -121,18 +125,12 @@ class SOM:
     def euclidian_distance(self, *weights):
         return np.sqrt(np.sum(np.power(np.subtract(self.input_vector, np.array(weights)), 2)))
 
-    def run_one_step(self):
-        #TODO
-        return
-
     def create_neuron_ring(self):
         return np.zeros(shape=[self.outsize])
 
     # Weight matrix of zeros
     def initial_weights(self):
-        print(np.random.uniform(self.weight_range[0], self.weight_range[1], [self.insize, self.outsize]))
         return np.random.uniform(self.weight_range[0], self.weight_range[1], [self.insize, self.outsize])
-
 
     def do_mapping(self, weight_range=None, hood=None, lrate=None, epochs=None, step='NA', sleep_time=1):
         if hood == None: hood=self.hoodsize
@@ -160,8 +158,8 @@ class SOM:
         self.isDisplayed = True
 
 
-def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=10000,  lrate=0.2, hoodsize=4,
-         insize=2, outsize=90, weight_range=[0.49,5], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=6000,  lrate=0.2, hoodsize=4,
+         insize=2, outsize=90, weight_range=[0.49, 5], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
          lrConstant=0.09, hoodConstant=300, showint=2000, show_sleep=1, final_sleep=20, network_dims=None):
     features = data_funct(*data_params)
 
@@ -180,7 +178,10 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=10000,  l
 
 #main()
 
-main()
+main(data_funct=st.get_mnist_data, data_params=(1000,), epochs=200, lrate=0.2, hoodsize=4, insize=784, outsize=16,
+     weight_range=[0, 1], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, lrConstant=0.09,
+     hoodConstant=300, showint=2000, show_sleep=1, final_sleep=20, network_dims=[4, 4])
+
 
 
 """
