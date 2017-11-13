@@ -83,7 +83,9 @@ class SOM:
     def findWinner(self, feature):
         eDistance = np.vectorize(self.euclidian_distance, cache=True)
         self.input_vector = feature
-        distances = eDistance(*self.weights)
+        #print("weights", self.weights)
+        weights = np.rot90(self.weights, 1)[::-1]
+        distances = self.euclidian_distance(weights)
         min_distance = np.min(distances)
         winner_neuron = np.argmin(distances)
         return distances, min_distance, winner_neuron
@@ -126,12 +128,19 @@ class SOM:
             ring_neighbours[1].append(abs(i))
         return np.array(ring_neighbours)
 
-    def euclidian_distance(self, *weights):
+    def euclidian_distance(self, weights):
         #print("ED", len(weights))
-        #print(*weights)
+        #print(weights)
         #print("input", len(self.input_vector))
         #print(self.input_vector)
-        return np.sqrt(np.sum(np.power(np.subtract(self.input_vector, np.array(weights)), 2)))
+        distances = []
+        for weight_vector in weights:
+            #print("vector", weight_vector)
+            distances.append(np.sum(np.power(np.subtract(self.input_vector, weight_vector), 2)))
+
+        #print("distances", len(distances), distances)
+        return distances
+        #return np.sqrt(np.sum(np.power(np.subtract(self.input_vector, weights))))
 
     def create_neuron_ring(self):
         return np.zeros(shape=[self.outsize])
