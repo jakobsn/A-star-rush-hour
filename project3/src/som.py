@@ -27,16 +27,17 @@ class SOM:
         self.hoodConstant = hoodConstant
         self.global_training_step = 0
         self.network_dims = network_dims
-        if self.network_dims is not None:
-            self.topo = "matrix"
-        else:
-            self.topo = "ring"
         if insize is None or outsize is None:
             self.insize = len(features[0])
             self.outsize = len(features)*2
         else:
             self.insize = insize
             self.outsize = outsize
+        if self.network_dims is not None:
+            self.topo = "matrix"
+            self.neuron_matrix = self.create_neuron_matrix()
+        else:
+            self.topo = "ring"
         self.weights = self.initial_weights()
         self.neuronRing = self.create_neuron_ring()
         self.input_vector = None # Keep track of current input vector
@@ -111,25 +112,23 @@ class SOM:
     # Return neighbour indices with degree of neighbourhood
     def get_matrix_neighbours(self, winner_neuron):
         matrix_neighbours = [[], []]
-        neuron_matrix = np.zeros(self.network_dims)
-        neuron_count = 0
+        broke = False
         for i in range(self.network_dims[0]):
             for j in range(self.network_dims[1]):
-                if neuron_count >= self.outsize:
-                    neuron_matrix[i][j] = None
-                else:
-                    neuron_matrix[i][j] = neuron_count
-                    if neuron_count == winner_neuron:
-                        winner_y, winner_x = i, j
-                    neuron_count += 1
+                if self.neuron_matrix[i][j] == winner_neuron:
+                    winner_y, winner_x = i, j
+                    broke = True
+                    break
+            if broke:
+                break
 
         for i in range(winner_y-self.hoodsize, winner_y + self.hoodsize+1):
             if 0 <= i < self.network_dims[0]:
                 for j in range(winner_x-self.hoodsize, winner_x+self.hoodsize+1):
                     if 0 <= j < self.network_dims[1]:
                         hoodsizes = [abs(winner_y - i), abs(winner_x - j)]
-                        if not np.isnan(neuron_matrix[i][j]):
-                            matrix_neighbours[0].append(int(neuron_matrix[i][j]))
+                        if not np.isnan(self.neuron_matrix[i][j]):
+                            matrix_neighbours[0].append(int(self.neuron_matrix[i][j]))
                             matrix_neighbours[1].append(hoodsizes[np.argmax(hoodsizes)])
         return np.array(matrix_neighbours)
 
@@ -153,6 +152,18 @@ class SOM:
         for weight_vector in weights:
             distances.append(np.sum(np.power(np.subtract(self.input_vector, weight_vector), 2)))
         return distances
+
+    def create_neuron_matrix(self):
+        neuron_matrix = np.zeros(self.network_dims)
+        neuron_count = 0
+        for i in range(self.network_dims[0]):
+            for j in range(self.network_dims[1]):
+                if neuron_count >= self.outsize:
+                    neuron_matrix[i][j] = None
+                else:
+                    neuron_matrix[i][j] = neuron_count
+                    neuron_count += 1
+        return neuron_matrix
 
     def create_neuron_ring(self):
         return np.zeros(shape=[self.outsize])
@@ -204,10 +215,13 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=3000,  lr
     print(som.weights)
     end = time()
     print("Time elapsed:", end - start, "s", (end-start)/60, "m")
-    som.do_mapping(weight_range, hoodsize, lrate, epochs, 'Final', final_sleep)
     print("Neuron ring", som.neuronRing)
 
-#main(network_dims=[9, 10])
+    som.do_mapping(weight_range, hoodsize, lrate, epochs, 'Final', final_sleep)
+
+
+# main(network_dims=[9, 10])
+
 
 main(data_funct=st.get_mnist_data, data_params=(60,), epochs=10, lrate=0.2, hoodsize=2, insize=784, outsize=10,
      weight_range=[0, 1], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, lrConstant=0.09,
