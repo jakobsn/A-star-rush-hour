@@ -232,11 +232,11 @@ main(data_funct=st.get_mnist_data, data_params=(60,), epochs=10, lrate=0.2, hood
 """
 TODO:
 - Visualize at step k (for ring)
-- Neighborhood decay (exponentialatm)
+- Neighborhood decay (exponential atm)
 - lrate decay (power atm)
-- TOPOGRAPHY
+x TOPOGRAPHY
 x Normalize input
 - Find path distance
 - Create initial weight ring
-- Implement for mnist
+- Visualize for mnist
 """
