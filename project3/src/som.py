@@ -74,18 +74,35 @@ class SOM:
             self.hoodsize = round(self.hood_decay(epoch, self.initial_hood, self.hoodConstant, self.epochs))
             self.lrate = self.lrate_decay(epoch, self.initial_lrate,self.lrConstant, self.epochs)
             if self.topo == "matrix":
-                print(winner_neuron)
-                print(self.triggered_targets)
                 self.triggered_targets[winner_neuron].append(target)
-                print(self.triggered_targets)
             print(str('[' + str(epoch) + ']'), "hood, lrate", self.hoodsize, self.lrate)
-            if not self.showint is 0 and (epoch == 0 or epoch % self.showint == 0):
+            if self.showint != 0 and (epoch == 0 or epoch % self.showint == 0):
                 self.do_mapping(self.weight_range, self.hoodsize, self.lrate, self.epochs, epoch, self.show_sleep)
                 if self.topo == "ring":
                     # TODO:
                     self.findTotalDistance()
                 print("Neuron ring", self.neuronRing)
 
+    def do_testing(self, datasets):
+        correct = 0
+        cases = 0
+        axises = np.arange(self.outsize)
+        average_targets = []
+        for targets in self.triggered_targets:
+            if len(targets):
+                average_target = np.mean(targets, axis=axises[0])
+                target_number = np.argmax(average_target)
+                average_targets.append(target_number)
+            else:
+                average_targets.append(None)
+        for feature, target in datasets:
+            distances, min_distance, winner_neuron = self.findWinner(feature)
+            if average_targets[winner_neuron] == np.argmax(target):
+                correct += 1
+                print(average_targets[winner_neuron], "matches", np.argmax(target))
+            cases += 1
+        print("Correct:", correct, "of", cases)
+        print("Precent;", 10*(correct/cases), "%")
         return
 
     # Find distance for TSP solution
@@ -205,10 +222,11 @@ class SOM:
                      + " Hood " + str(hood) + " Weight range " + str(weight_range) + \
                      " Outsize " + str(self.outsize) + " constants " + str(self.lrConstant) + ',' + str(self.hoodConstant))
         PLT.show(block=False)
+        if step == 'Final':
+            sleep(sleep_time)
         self.isDisplayed = True
 
     def map_mnist(self):
-        average_targets = []
         axises = np.arange(self.outsize)
         coordinates = []
         color_list = ['red', 'blue', 'green', 'black', 'purple', 'yellow', 'pink', 'gray', 'brown', 'orange']
@@ -216,14 +234,13 @@ class SOM:
             for x in range(self.network_dims[1]):
                 coordinates.append([x, y])
         for targets in self.triggered_targets:
+            x, y = coordinates.pop(0)
             if len(targets):
                 average_target = np.mean(targets, axis=axises[0])
-                average_targets.append(average_target)
                 target_number = np.argmax(average_target)
-                x, y = coordinates.pop(0)
                 PLT.scatter(x, y, c=color_list[target_number])
             else:
-                average_targets.append(None)
+                PLT.scatter(x, y, c='white')
 
         fig, ax = PLT.subplots()
         cmap = colors.ListedColormap(color_list)
@@ -270,17 +287,20 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=3000,  lr
     print("Time elapsed:", end - start, "s", (end-start)/60, "m")
     print("Neuron ring", som.neuronRing)
 
+    print("test train")
+    som.do_testing(som.features)
+    print("test test")
+    som.do_testing(st.get_mnist_test_data())
     som.do_mapping(weight_range, hoodsize, lrate, epochs, 'Final', final_sleep)
-    for targets in som.triggered_targets:
-        print(targets)
+
 
 
 #main()
 
 
-main(data_funct=st.get_mnist_data, data_params=(1000,), epochs=500, lrate=0.2, hoodsize=2, insize=784, outsize=10,
+main(data_funct=st.get_mnist_data, data_params=(1000,), epochs=1000, lrate=0.2, hoodsize=2, insize=784, outsize=100,
      weight_range=[0, 1], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, lrConstant=0.09,
-     hoodConstant=300, showint=50, show_sleep=2, final_sleep=20, network_dims=[4, 3])
+     hoodConstant=300, showint=0, show_sleep=0, final_sleep=20, network_dims=[10, 10])
 
 
 

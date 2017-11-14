@@ -106,3 +106,11 @@ def get_mnist_data(size):
     for i in range(len(features)):
         output.append(np.array([np.array(features[i].tolist()), np.array(labels[i].tolist())]))
     return output
+
+def get_mnist_test_data(size=100):
+    mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
+    features, labels = mnist.test.next_batch(size)
+    output = []
+    for i in range(len(features)):
+        output.append(np.array([np.array(features[i].tolist()), np.array(labels[i].tolist())]))
+    return output
