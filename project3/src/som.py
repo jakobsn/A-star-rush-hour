@@ -287,15 +287,17 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=3000,  lr
     print("Time elapsed:", end - start, "s", (end-start)/60, "m")
     print("Neuron ring", som.neuronRing)
 
-    print("test train")
-    som.do_testing(som.features)
-    print("test test")
-    som.do_testing(st.get_mnist_test_data())
+    if som.network_dims is not None:
+        print("test train")
+        som.do_testing(som.features)
+        print("test test")
+        som.do_testing(st.get_mnist_test_data())
+
     som.do_mapping(weight_range, hoodsize, lrate, epochs, 'Final', final_sleep)
 
 
 
-#main()
+main()
 
 
 main(data_funct=st.get_mnist_data, data_params=(1000,), epochs=1000, lrate=0.2, hoodsize=2, insize=784, outsize=100,
@@ -314,5 +316,5 @@ x Normalize input
 - Find path distance
 - Create initial weight ring
 x Visualize for mnist
-- Check how well mnist is classified
+x Check how well mnist is classified
 """
