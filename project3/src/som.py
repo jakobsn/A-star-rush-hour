@@ -29,8 +29,6 @@ class SOM:
         self.network_dims = network_dims
         if self.network_dims is not None:
             self.topo = "matrix"
-            print("MNIST")
-            print(features)
         else:
             self.topo = "ring"
         if insize is None or outsize is None:
@@ -52,7 +50,7 @@ class SOM:
     # Update weights for winner and neighbours
     # Update lrate and hoodsize
     def do_training(self):
-        print(self.weights)
+        #print(self.weights)
         self.neuronRing = self.create_neuron_ring()
         for epoch in range(self.epochs):
             if self.lrate == 0:
@@ -61,7 +59,7 @@ class SOM:
                 feature = self.features[randint(0, len(self.features)-1)][0]
             else:
                 feature = self.features[randint(0, len(self.features)-1)]
-            print("feature", feature)
+            #print("feature", feature)
             distances, min_distance, winner_neuron = self.findWinner(feature)
             neighbours = self.get_neighbours(winner_neuron)
             self.neuronRing[winner_neuron] += 1
@@ -91,7 +89,6 @@ class SOM:
         return distances, min_distance, winner_neuron
 
     def adjust_clusters(self, neighbours):
-        print("neighbours", neighbours)
         adjust_cluster = np.vectorize(self.adjust_cluster, cache=True)
         adjust_cluster(neighbours[0], neighbours[1], self.weights[:, neighbours[0]])
         return
@@ -109,8 +106,6 @@ class SOM:
         if self.topo == "ring":
             return self.get_ring_neighbours(winner_neuron)
         else:
-            print(self.weights)
-            # TODO: matrix topology
             return self.get_matrix_neighbours(winner_neuron)
 
     # Return neighbour indices with degree of neighbourhood
@@ -133,12 +128,9 @@ class SOM:
                 for j in range(winner_x-self.hoodsize, winner_x+self.hoodsize+1):
                     if 0 <= j < self.network_dims[1]:
                         hoodsizes = [abs(winner_y - i), abs(winner_x - j)]
-                        if neuron_matrix[i][j] is not None:
-                            matrix_neighbours[0].append(neuron_matrix[i][j])
+                        if not np.isnan(neuron_matrix[i][j]):
+                            matrix_neighbours[0].append(int(neuron_matrix[i][j]))
                             matrix_neighbours[1].append(hoodsizes[np.argmax(hoodsizes)])
-        print(matrix_neighbours)
-        sleep(10)
-        # TODO: USE MATRIX TO GET NEIGHBOUR INDEXES
         return np.array(matrix_neighbours)
 
     # Return neighbour indices with degree of neighbourhood
@@ -157,18 +149,10 @@ class SOM:
         return np.array(ring_neighbours)
 
     def euclidian_distance(self, weights):
-        #print("ED", len(weights))
-        #print(weights)
-        #print("input", len(self.input_vector))
-        #print(self.input_vector)
         distances = []
         for weight_vector in weights:
-            #print("vector", weight_vector)
             distances.append(np.sum(np.power(np.subtract(self.input_vector, weight_vector), 2)))
-
-        #print("distances", len(distances), distances)
         return distances
-        #return np.sqrt(np.sum(np.power(np.subtract(self.input_vector, weights))))
 
     def create_neuron_ring(self):
         return np.zeros(shape=[self.outsize])
@@ -204,8 +188,8 @@ class SOM:
 
 
 def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=3000,  lrate=0.2, hoodsize=4,
-         insize=2, outsize=90, weight_range=[0.49, 5], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-         lrConstant=0.09, hoodConstant=300, showint=20, show_sleep=2, final_sleep=20, network_dims=None):
+         insize=2, outsize=60, weight_range=[0.49, 5], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+         lrConstant=0.09, hoodConstant=300, showint=1000, show_sleep=2, final_sleep=20, network_dims=None):
     features = data_funct(*data_params)
     start = time()
 
@@ -217,17 +201,17 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=3000,  lr
           'lrate_deacay', lrate_decay, 'hood_decay', hood_decay,   '\n',
           'topo', som.topo, "lrConstant", lrConstant, "hoodConstant", hoodConstant, '\n',
           "showint", showint, 'show_sleep', show_sleep, 'final_sleep', final_sleep, 'distance', som.distance)
-
+    print(som.weights)
     end = time()
     print("Time elapsed:", end - start, "s", (end-start)/60, "m")
     som.do_mapping(weight_range, hoodsize, lrate, epochs, 'Final', final_sleep)
+    print("Neuron ring", som.neuronRing)
 
+#main(network_dims=[9, 10])
 
-#main()
-
-main(data_funct=st.get_mnist_data, data_params=(10,), epochs=200, lrate=0.2, hoodsize=2, insize=784, outsize=27,
+main(data_funct=st.get_mnist_data, data_params=(60,), epochs=10, lrate=0.2, hoodsize=2, insize=784, outsize=10,
      weight_range=[0, 1], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, lrConstant=0.09,
-     hoodConstant=300, showint=2000, show_sleep=1, final_sleep=20, network_dims=[7, 5])
+     hoodConstant=300, showint=0, show_sleep=1, final_sleep=20, network_dims=[3, 4])
 
 
 
