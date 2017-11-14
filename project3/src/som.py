@@ -6,6 +6,7 @@ import numpy_indexed as npi
 from math import sqrt, ceil, floor, exp
 import six.moves.cPickle as cPickle
 import matplotlib.pyplot as PLT
+from matplotlib import colors, colorbar
 from time import sleep, time
 from random import randint
 
@@ -36,8 +37,12 @@ class SOM:
         if self.network_dims is not None:
             self.topo = "matrix"
             self.neuron_matrix = self.create_neuron_matrix()
+            self.triggered_targets = [None] * self.outsize
+            for targets in range(len(self.triggered_targets)):
+                self.triggered_targets[targets] = list()
         else:
             self.topo = "ring"
+            self.triggered_targets = None
         self.weights = self.initial_weights()
         self.neuronRing = self.create_neuron_ring()
         self.input_vector = None # Keep track of current input vector
@@ -58,6 +63,7 @@ class SOM:
                 break
             if self.topo == "matrix":
                 feature = self.features[randint(0, len(self.features)-1)][0]
+                target = self.features[randint(0, len(self.features)-1)][1]
             else:
                 feature = self.features[randint(0, len(self.features)-1)]
             #print("feature", feature)
@@ -67,11 +73,20 @@ class SOM:
             self.adjust_clusters(neighbours)
             self.hoodsize = round(self.hood_decay(epoch, self.initial_hood, self.hoodConstant, self.epochs))
             self.lrate = self.lrate_decay(epoch, self.initial_lrate,self.lrConstant, self.epochs)
+            if self.topo == "matrix":
+                print(winner_neuron)
+                print(self.triggered_targets)
+                self.triggered_targets[winner_neuron].append(target)
+                print(self.triggered_targets)
             print(str('[' + str(epoch) + ']'), "hood, lrate", self.hoodsize, self.lrate)
             if not self.showint is 0 and (epoch == 0 or epoch % self.showint == 0):
-                self.do_mapping(self.weight_range, self.hoodsize, self.lrate, epoch, self.show_sleep)
+                self.do_mapping(self.weight_range, self.hoodsize, self.lrate, self.epochs, epoch, self.show_sleep)
+                if self.topo == "ring":
+                    # TODO:
+                    self.findTotalDistance()
                 print("Neuron ring", self.neuronRing)
-        return self.findTotalDistance()
+
+        return
 
     # Find distance for TSP solution
     def findTotalDistance(self):
@@ -181,7 +196,50 @@ class SOM:
             sleep(sleep_time)
             PLT.close("all")
 
-        fig = PLT.figure()
+        if self.topo == "ring":
+            self.map_tsp()
+        else:
+            self.map_mnist()
+
+        PLT.title("Run " + str(step) + " Epochs " + str(epochs) + " Lrate " + str(lrate) \
+                     + " Hood " + str(hood) + " Weight range " + str(weight_range) + \
+                     " Outsize " + str(self.outsize) + " constants " + str(self.lrConstant) + ',' + str(self.hoodConstant))
+        PLT.show(block=False)
+        self.isDisplayed = True
+
+    def map_mnist(self):
+        average_targets = []
+        axises = np.arange(self.outsize)
+        coordinates = []
+        color_list = ['red', 'blue', 'green', 'black', 'purple', 'yellow', 'pink', 'gray', 'brown', 'orange']
+        for y in range(self.network_dims[0]):
+            for x in range(self.network_dims[1]):
+                coordinates.append([x, y])
+        for targets in self.triggered_targets:
+            if len(targets):
+                average_target = np.mean(targets, axis=axises[0])
+                average_targets.append(average_target)
+                target_number = np.argmax(average_target)
+                x, y = coordinates.pop(0)
+                PLT.scatter(x, y, c=color_list[target_number])
+            else:
+                average_targets.append(None)
+
+        fig, ax = PLT.subplots()
+        cmap = colors.ListedColormap(color_list)
+        cmap.set_over('0.25')
+        cmap.set_under('0.75')
+        bounds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        norm = colors.BoundaryNorm(bounds, cmap.N)
+        cb2 = colorbar.ColorbarBase(ax, cmap=cmap,
+                                        norm=norm,
+                                        boundaries=[-1] + bounds + [11],
+                                        extend='both',
+                                        orientation='horizontal')
+        cb2.set_label('Colors in range 0-9')
+        fig.show()
+
+    def map_tsp(self):
         # Scatter weights
         for wx, wy in zip(self.weights[0], self.weights[1]):
             PLT.scatter(wx, wy, c="red")
@@ -191,11 +249,6 @@ class SOM:
         # Scatter features
         for feature in self.features:
             PLT.scatter(feature[0], feature[1], c="black")
-        fig.suptitle("Run " + str(step) + " Epochs " + str(epochs) + " Lrate " + str(lrate) \
-                     + " Hood " + str(hood) + " Weight range " + str(weight_range) + \
-                     " Outsize " + str(self.outsize) + " constants " + str(self.lrConstant) + ',' + str(self.hoodConstant))
-        PLT.show(block=False)
-        self.isDisplayed = True
 
 
 def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=3000,  lrate=0.2, hoodsize=4,
@@ -218,14 +271,16 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=3000,  lr
     print("Neuron ring", som.neuronRing)
 
     som.do_mapping(weight_range, hoodsize, lrate, epochs, 'Final', final_sleep)
+    for targets in som.triggered_targets:
+        print(targets)
 
 
-# main(network_dims=[9, 10])
+#main()
 
 
-main(data_funct=st.get_mnist_data, data_params=(60,), epochs=10, lrate=0.2, hoodsize=2, insize=784, outsize=10,
+main(data_funct=st.get_mnist_data, data_params=(1000,), epochs=500, lrate=0.2, hoodsize=2, insize=784, outsize=10,
      weight_range=[0, 1], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, lrConstant=0.09,
-     hoodConstant=300, showint=0, show_sleep=1, final_sleep=20, network_dims=[3, 4])
+     hoodConstant=300, showint=50, show_sleep=2, final_sleep=20, network_dims=[4, 3])
 
 
 
