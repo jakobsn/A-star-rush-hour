@@ -121,11 +121,22 @@ class SOM:
         for i in range(self.network_dims[0]):
             for j in range(self.network_dims[1]):
                 if neuron_count >= self.outsize:
-                    break
-                neuron_matrix[i][j] = neuron_count
-                neuron_count += 1
-        print(neuron_count)
-        print(neuron_matrix)
+                    neuron_matrix[i][j] = None
+                else:
+                    neuron_matrix[i][j] = neuron_count
+                    if neuron_count == winner_neuron:
+                        winner_y, winner_x = i, j
+                    neuron_count += 1
+
+        for i in range(winner_y-self.hoodsize, winner_y + self.hoodsize+1):
+            if 0 <= i < self.network_dims[0]:
+                for j in range(winner_x-self.hoodsize, winner_x+self.hoodsize+1):
+                    if 0 <= j < self.network_dims[1]:
+                        hoodsizes = [abs(winner_y - i), abs(winner_x - j)]
+                        if neuron_matrix[i][j] is not None:
+                            matrix_neighbours[0].append(neuron_matrix[i][j])
+                            matrix_neighbours[1].append(hoodsizes[np.argmax(hoodsizes)])
+        print(matrix_neighbours)
         sleep(10)
         # TODO: USE MATRIX TO GET NEIGHBOUR INDEXES
         return np.array(matrix_neighbours)
@@ -214,9 +225,9 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=3000,  lr
 
 #main()
 
-main(data_funct=st.get_mnist_data, data_params=(100,), epochs=200, lrate=0.2, hoodsize=1, insize=784, outsize=16,
+main(data_funct=st.get_mnist_data, data_params=(10,), epochs=200, lrate=0.2, hoodsize=2, insize=784, outsize=27,
      weight_range=[0, 1], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, lrConstant=0.09,
-     hoodConstant=300, showint=2000, show_sleep=1, final_sleep=20, network_dims=[4, 4])
+     hoodConstant=300, showint=2000, show_sleep=1, final_sleep=20, network_dims=[7, 5])
 
 
 
