@@ -293,5 +293,6 @@ x TOPOGRAPHY
 x Normalize input
 - Find path distance
 - Create initial weight ring
-- Visualize for mnist
+x Visualize for mnist
+- Check how well mnist is classified
 """
