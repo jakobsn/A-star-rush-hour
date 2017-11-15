@@ -62,20 +62,23 @@ class SOM:
             if self.lrate == 0:
                 break
             if self.topo == "matrix":
-                feature = self.features[randint(0, len(self.features)-1)][0]
-                target = self.features[randint(0, len(self.features)-1)][1]
+                feature = self.features[randint(0, len(self.features)-1)]
+                #target = self.features[randint(0, len(self.features)-1)][1]
             else:
                 feature = self.features[randint(0, len(self.features)-1)]
             #print("feature", feature)
             distances, min_distance, winner_neuron = self.findWinner(feature)
             neighbours = self.get_neighbours(winner_neuron)
+            print("Winner:", winner_neuron)
+            print("Neighbours:", neighbours)
             self.neuronRing[winner_neuron] += 1
             self.adjust_clusters(neighbours)
             self.hoodsize = round(self.hood_decay(epoch, self.initial_hood, self.hoodConstant, self.epochs))
             self.lrate = self.lrate_decay(epoch, self.initial_lrate,self.lrConstant, self.epochs)
             if self.topo == "matrix":
-                self.triggered_targets[winner_neuron].append(target)
-            print(str('[' + str(epoch) + ']'), "hood, lrate", self.hoodsize, self.lrate)
+                pass
+                #self.triggered_targets[winner_neuron].append(target)
+            print(str('[' + str(epoch) + ']'), "hood, lrate", self.hoodsize, ';', self.lrate)
             if self.showint != 0 and (epoch == 0 or epoch % self.showint == 0):
                 self.do_mapping(self.weight_range, self.hoodsize, self.lrate, self.epochs, epoch, self.show_sleep)
                 if self.topo == "ring":
@@ -138,6 +141,7 @@ class SOM:
         if self.topo == "ring":
             return self.get_ring_neighbours(winner_neuron)
         else:
+            return self.get_matrix_close_neighbours(winner_neuron)
             return self.get_matrix_neighbours(winner_neuron)
 
     # Return neighbour indices with degree of neighbourhood
@@ -153,14 +157,37 @@ class SOM:
             if broke:
                 break
 
-        for i in range(winner_y-self.hoodsize, winner_y + self.hoodsize+1):
+        for i in range(winner_y - self.hoodsize, winner_y + self.hoodsize+1):
             if 0 <= i < self.network_dims[0]:
                 for j in range(winner_x-self.hoodsize, winner_x+self.hoodsize+1):
                     if 0 <= j < self.network_dims[1]:
                         hoodsizes = [abs(winner_y - i), abs(winner_x - j)]
                         if not np.isnan(self.neuron_matrix[i][j]):
                             matrix_neighbours[0].append(int(self.neuron_matrix[i][j]))
-                            matrix_neighbours[1].append(hoodsizes[np.argmax(hoodsizes)])
+                            matrix_neighbours[1].append(sum(hoodsizes))
+        return np.array(matrix_neighbours)
+
+    def get_matrix_close_neighbours(self, winner_neuron):
+        matrix_neighbours = [[], []]
+        broke = False
+        for i in range(self.network_dims[0]):
+            for j in range(self.network_dims[1]):
+                if self.neuron_matrix[i][j] == winner_neuron:
+                    winner_y, winner_x = i, j
+                    broke = True
+                    break
+            if broke:
+                break
+
+        for i in range(winner_y - self.hoodsize, winner_y + self.hoodsize+1):
+            if 0 <= i < self.network_dims[0]:
+                for j in range(winner_x-self.hoodsize, winner_x+self.hoodsize+1):
+                    if 0 <= j < self.network_dims[1]:
+                        hoodsizes = [abs(winner_y - i), abs(winner_x - j)]
+                        if not np.isnan(self.neuron_matrix[i][j]):
+                            if sum(hoodsizes) <= self.hoodsize:
+                                matrix_neighbours[0].append(int(self.neuron_matrix[i][j]))
+                                matrix_neighbours[1].append(sum(hoodsizes))
         return np.array(matrix_neighbours)
 
     # Return neighbour indices with degree of neighbourhood
@@ -218,7 +245,7 @@ class SOM:
         if self.topo == "ring":
             self.map_tsp()
         else:
-            self.map_mnist()
+            self.map_tsp()
 
         PLT.title("Run " + str(step) + " Epochs " + str(epochs) + " Lrate " + str(lrate) \
                      + " Hood " + str(hood) + " Weight range " + str(weight_range) + \
@@ -287,20 +314,26 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=4000,  lr
     end = time()
     print("Time elapsed:", end - start, "s", (end-start)/60, "m")
     print("Neuron ring", som.neuronRing)
-
+    """
     if som.network_dims is not None:
         print("test train")
         som.do_testing(som.features)
         print("test test")
         som.do_testing(st.get_mnist_test_data())
+    """
     if final_sleep:
         som.do_mapping(weight_range, hoodsize, lrate, epochs, 'Final', final_sleep)
 
 
 # Good solution for TSP
 #main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=4000,  lrate=0.1, hoodsize=6,
-#         insize=2, outsize=90, weight_range=[0.49, 5], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+#         insize=2, outsize=150, weight_range=[0.49, 0.5], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
 #         lrConstant=0.5, hoodConstant=300, showint=1000, show_sleep=2, final_sleep=200, network_dims=None, sort=True)
+
+#main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=4000,  lrate=0.1, hoodsize=8,
+#         insize=2, outsize=150, weight_range=[30, 31], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+#         lrConstant=0.5, hoodConstant=300, showint=1000, show_sleep=2, final_sleep=200, network_dims=None, sort=True)
+
 
 
 #main(data_funct=st.get_mnist_data, data_params=(500,), epochs=10000, lrate=0.3, hoodsize=3, insize=784, outsize=49,
@@ -313,9 +346,11 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=4000,  lr
 #     hoodConstant=200, showint=0,show_sleep=0, final_sleep=20, network_dims=[10, 10])
 
 
-main(data_funct=st.get_mnist_data, data_params=(100,), epochs=1000, lrate=0.5, hoodsize=3, insize=784, outsize=80,
-     weight_range=[0, 1], lrate_decay=st.exponentialDecay, hood_decay=st.exponentialDecay, lrConstant=500,
-     hoodConstant=200, showint=0, show_sleep=0, final_sleep=0, network_dims=[5, 16])
+#main(data_funct=st.get_mnist_data, data_params=(100,), epochs=1000, lrate=0.5, hoodsize=3, insize=784, outsize=80,
+#     weight_range=[0, 1], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, lrConstant=500,
+#     hoodConstant=200, showint=0, show_sleep=0, final_sleep=200, network_dims=[5, 16]
+
+main(data_params=('../data/small.txt',), network_dims=[4,4], outsize=16, hoodsize=1, lrate=0.2, weight_range=[35,36], epochs=3000, showint=20, lrConstant=0.09, hoodConstant=200, sort=True)
 
 """
 TODO:
