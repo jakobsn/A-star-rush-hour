@@ -12,7 +12,9 @@ def readTSP(targetFile, scale='avdev'):
         for line in file:
             row = []
             if not lines == 0 and not lines == 1:
-                coords = line.replace('\n', '').split(' ')[1:]
+                coords = line.replace('\n', '').split(' ')[-2:]
+                if coords[0] == 'EOF':
+                    break
                 for coord in coords:
                     row.append(float(coord))
                 data.append(np.array(row))
@@ -20,6 +22,7 @@ def readTSP(targetFile, scale='avdev'):
         # Remove empty lines
         while not len(data[-1]):
             data.pop()
+    print(data)
     if scale == 'avgdev':
         return scale_min_max(data, np.amin(data), np.amax(data))
     elif scale == 'minmax':

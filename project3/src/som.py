@@ -14,7 +14,7 @@ from random import randint
 class SOM:
     def __init__(self, epochs, lrate, hoodsize, insize, outsize, features,
                  weight_range, lrate_decay, hood_decay, lrConstant,
-                 hoodConstant, showint,show_sleep, network_dims=None):
+                 hoodConstant, showint,show_sleep, network_dims, sort):
         self.epochs = epochs
         self.features = features
         self.weight_range = weight_range
@@ -43,7 +43,7 @@ class SOM:
         else:
             self.topo = "ring"
             self.triggered_targets = None
-        self.weights = self.initial_weights()
+        self.weights = self.initial_weights(sort)
         self.neuronRing = self.create_neuron_ring()
         self.input_vector = None # Keep track of current input vector
         self.i = 0 # Keep track of which weight being changed for input neuron
@@ -99,10 +99,9 @@ class SOM:
             distances, min_distance, winner_neuron = self.findWinner(feature)
             if average_targets[winner_neuron] == np.argmax(target):
                 correct += 1
-                print(average_targets[winner_neuron], "matches", np.argmax(target))
             cases += 1
         print("Correct:", correct, "of", cases)
-        print("Precent;", 10*(correct/cases), "%")
+        print("Precent;", 100*(correct/cases), "%")
         return
 
     # Find distance for TSP solution
@@ -201,8 +200,11 @@ class SOM:
         return np.zeros(shape=[self.outsize])
 
     # Weight matrix of zeros
-    def initial_weights(self):
-        return np.random.uniform(self.weight_range[0], self.weight_range[1], [self.insize, self.outsize])
+    def initial_weights(self, sort=False):
+        weights = np.random.uniform(self.weight_range[0], self.weight_range[1], [self.insize, self.outsize])
+        if sort:
+            np.sort(weights)
+        return weights
 
     def do_mapping(self, weight_range=None, hood=None, lrate=None, epochs=None, step='NA', sleep_time=1):
         if hood == None: hood=self.hoodsize
@@ -268,21 +270,20 @@ class SOM:
             PLT.scatter(feature[0], feature[1], c="black")
 
 
-def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=3000,  lrate=0.2, hoodsize=4,
-         insize=2, outsize=60, weight_range=[0.49, 5], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-         lrConstant=0.09, hoodConstant=300, showint=1000, show_sleep=2, final_sleep=20, network_dims=None):
+def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=4000,  lrate=0.1, hoodsize=6,
+         insize=2, outsize=90, weight_range=[0.49, 5], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+         lrConstant=0.5, hoodConstant=300, showint=1000, show_sleep=2, final_sleep=200, network_dims=None, sort=False):
     features = data_funct(*data_params)
     start = time()
 
     som = SOM(epochs=epochs, lrate=lrate, hoodsize=hoodsize, features=features, insize=insize, outsize=outsize,
               weight_range=weight_range, lrate_decay=lrate_decay, hood_decay=hood_decay, lrConstant=lrConstant,
-              hoodConstant=hoodConstant, showint=showint, show_sleep=show_sleep, network_dims=network_dims)
-    print('funct', data_funct, 'params', data_params, 'epochs', epochs, 'lrate', lrate, '\n',
-          'hoodsize', hoodsize, 'insize', insize, 'outsize', outsize,  'weight_range', weight_range, '\n',
+              hoodConstant=hoodConstant, showint=showint, show_sleep=show_sleep, network_dims=network_dims, sort=sort)
+    print('funct', data_funct, 'params', data_params, 'epochs', epochs, '\n',
+          'lrate', lrate, 'hoodsize', hoodsize, 'insize', insize, 'outsize', outsize,  'weight_range', weight_range, '\n',
           'lrate_deacay', lrate_decay, 'hood_decay', hood_decay,   '\n',
           'topo', som.topo, "lrConstant", lrConstant, "hoodConstant", hoodConstant, '\n',
           "showint", showint, 'show_sleep', show_sleep, 'final_sleep', final_sleep, 'distance', som.distance)
-    print(som.weights)
     end = time()
     print("Time elapsed:", end - start, "s", (end-start)/60, "m")
     print("Neuron ring", som.neuronRing)
@@ -292,29 +293,39 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=3000,  lr
         som.do_testing(som.features)
         print("test test")
         som.do_testing(st.get_mnist_test_data())
-
-    som.do_mapping(weight_range, hoodsize, lrate, epochs, 'Final', final_sleep)
-
-
-
-main()
+    if final_sleep:
+        som.do_mapping(weight_range, hoodsize, lrate, epochs, 'Final', final_sleep)
 
 
-main(data_funct=st.get_mnist_data, data_params=(1000,), epochs=1000, lrate=0.2, hoodsize=2, insize=784, outsize=100,
-     weight_range=[0, 1], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, lrConstant=0.09,
-     hoodConstant=300, showint=0, show_sleep=0, final_sleep=20, network_dims=[10, 10])
+# Good solution for TSP
+#main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=4000,  lrate=0.1, hoodsize=6,
+#         insize=2, outsize=90, weight_range=[0.49, 5], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+#         lrConstant=0.5, hoodConstant=300, showint=1000, show_sleep=2, final_sleep=200, network_dims=None, sort=True)
 
 
+#main(data_funct=st.get_mnist_data, data_params=(500,), epochs=10000, lrate=0.3, hoodsize=3, insize=784, outsize=49,
+#     weight_range=[0, 784], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, lrConstant=0.1,
+#     hoodConstant=200, showint=0,show_sleep=0, final_sleep=0, network_dims=[7, 7])
+
+
+#main(data_funct=st.get_mnist_data, data_params=(100,), epochs=1000, lrate=0.3, hoodsize=3, insize=784, outsize=100,
+#     weight_range=[0, 1], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, lrConstant=0.01,
+#     hoodConstant=200, showint=0,show_sleep=0, final_sleep=20, network_dims=[10, 10])
+
+
+main(data_funct=st.get_mnist_data, data_params=(100,), epochs=1000, lrate=0.5, hoodsize=3, insize=784, outsize=80,
+     weight_range=[0, 1], lrate_decay=st.exponentialDecay, hood_decay=st.exponentialDecay, lrConstant=500,
+     hoodConstant=200, showint=0, show_sleep=0, final_sleep=0, network_dims=[5, 16])
 
 """
 TODO:
-- Visualize at step k (for ring)
+x Visualize at step k (for ring)
 - Neighborhood decay (exponential atm)
 - lrate decay (power atm)
 x TOPOGRAPHY
 x Normalize input
 - Find path distance
-- Create initial weight ring
+x Create initial weight ring
 x Visualize for mnist
 x Check how well mnist is classified
 """
