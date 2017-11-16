@@ -363,9 +363,9 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=4000,  lr
 
 #print(st.generate_points(5.0, 7.0, 1.0, 0.1, 8))
 
-main(data_funct=st.readTSP, data_params=('../data/small.txt',), epochs=3000, lrate=0.3, hoodsize=1,
-     insize=2, outsize=9, weight_range=[30, 40], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-     lrConstant=0.5, hoodConstant=500, showint=1000, show_sleep=0, final_sleep=200, network_dims=None, sort=False)
+#main(data_funct=st.readTSP, data_params=('../data/small.txt',), epochs=3000, lrate=0.3, hoodsize=1,
+#     insize=2, outsize=9, weight_range=[30, 40], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+#     lrConstant=0.5, hoodConstant=500, showint=1000, show_sleep=0, final_sleep=200, network_dims=None, sort=False)
 
 # Good run for nr. 6
 #main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=7000,  lrate=0.1, hoodsize=6,
@@ -373,8 +373,15 @@ main(data_funct=st.readTSP, data_params=('../data/small.txt',), epochs=3000, lra
 #         lrConstant=0.5, hoodConstant=3000, showint=1000, show_sleep=2, final_sleep=200, network_dims=None,
 #         sort=False, radius=1)
 
+
+main(data_funct=st.readTSP, data_params=('../data/5.txt',), epochs=7000,  lrate=0.1, hoodsize=6,
+         insize=2, outsize=150, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+         lrConstant=0.5, hoodConstant=3000, showint=1000, show_sleep=2, final_sleep=200, network_dims=None,
+         sort=False, radius=1)
+
+# Close nr. 8
 #main(data_funct=st.readTSP, data_params=('../data/8.txt',), epochs=7000,  lrate=0.1, hoodsize=6,
-#         insize=2, outsize=200, weight_range=[350, 280], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+#         insize=2, outsize=250, weight_range=[350, 280], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
 #         lrConstant=0.5, hoodConstant=500, showint=1000, show_sleep=2, final_sleep=200, network_dims=None,
 #         sort=False, radius=3)
 

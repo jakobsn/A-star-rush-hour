@@ -13,7 +13,7 @@ def readTSP(targetFile, scale='avdev'):
         lines = 0
         for line in file:
             row = []
-            if not lines == 0 and not lines == 1:
+            if not lines == 0 and not lines == 1 and not lines == 2 and not lines == 3 and not lines == 4:
                 coords = line.replace('\n', '').split(' ')[-2:]
                 if coords[0] == 'EOF':
                     break
