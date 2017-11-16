@@ -115,14 +115,35 @@ class SOM:
     def findTotalDistance(self):
         #TODO
         distance = 0
+        path = self.findPath()
+        print("path")
+        print(path)
+        first_node = []
+        while not len(first_node):
+            first_node = path.pop()
+
+        current_node = first_node
+
+
         return distance
+
+    def findPath(self):
+        path = [None] * len(self.weights[0])
+        for nodes in range(len(self.weights[0])):
+            path[nodes] = list()
+
+        for feature in self.features:
+            distances, min_distance, winner_neuron = self.findWinner(feature)
+            path[winner_neuron].append(feature)
+        # TODO: Flatten path
+        return path
 
     def findWinner(self, feature):
         eDistance = np.vectorize(self.euclidian_distance, cache=True)
         self.input_vector = feature
         #print("weights", self.weights)
         weights = np.rot90(self.weights, 1)[::-1]
-        distances = self.euclidian_distance(weights)
+        distances = self.euclidian_distance(weights, self.input_vector)
         min_distance = np.min(distances)
         winner_neuron = np.argmin(distances)
         return distances, min_distance, winner_neuron
@@ -186,10 +207,10 @@ class SOM:
             ring_neighbours[1].append(abs(i))
         return np.array(ring_neighbours)
 
-    def euclidian_distance(self, weights):
+    def euclidian_distance(self, weights, input_vector):
         distances = []
         for weight_vector in weights:
-            distances.append(np.sum(np.power(np.subtract(self.input_vector, weight_vector), 2)))
+            distances.append(np.sum(np.power(np.subtract(input_vector, weight_vector), 2)))
         return distances
 
     def create_neuron_matrix(self):
@@ -310,14 +331,14 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=4000,  lr
 
 #print(st.generate_points(5.0, 7.0, 1.0, 0.1, 8))
 
-#main(data_funct=st.readTSP, data_params=('../data/small.txt',), epochs=2000, lrate=0.2, hoodsize=2,
-#     insize=2, outsize=8, weight_range=[30, 40], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-#     lrConstant=0.5, hoodConstant=500, showint=1000, show_sleep=1008, final_sleep=200, network_dims=None, sort=False)
+main(data_funct=st.readTSP, data_params=('../data/small.txt',), epochs=3000, lrate=0.3, hoodsize=1,
+     insize=2, outsize=3, weight_range=[30, 40], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+     lrConstant=0.5, hoodConstant=500, showint=1000, show_sleep=0, final_sleep=200, network_dims=None, sort=False)
 
-main(data_funct=st.readTSP, data_params=('../data/8.txt',), epochs=4000,  lrate=0.1, hoodsize=6,
-         insize=2, outsize=150, weight_range=[250, 201], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-         lrConstant=0.5, hoodConstant=3000, showint=1000, show_sleep=2, final_sleep=200, network_dims=None,
-         sort=False, radius=1)
+#main(data_funct=st.readTSP, data_params=('../data/8.txt',), epochs=7000,  lrate=0.1, hoodsize=6,
+#         insize=2, outsize=150, weight_range=[250, 201], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+#         lrConstant=0.5, hoodConstant=3000, showint=1000, show_sleep=2, final_sleep=200, network_dims=None,
+#         sort=False, radius=1)
 
 
 #main(data_funct=st.get_mnist_data, data_params=(500,), epochs=10000, lrate=0.3, hoodsize=3, insize=784, outsize=49,
