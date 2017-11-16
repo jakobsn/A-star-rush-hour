@@ -3,6 +3,8 @@
 import numpy as np
 from math import exp, sqrt
 from tensorflow.examples.tutorials.mnist import input_data
+import math
+import random
 
 
 def readTSP(targetFile, scale='avdev'):
@@ -117,3 +119,14 @@ def get_mnist_test_data(size=100):
     for i in range(len(features)):
         output.append(np.array([np.array(features[i].tolist()), np.array(labels[i].tolist())]))
     return output
+
+def generate_points(center_x, center_y, mean_radius, sigma_radius, num_points):
+    points = [[], []]
+    for theta in np.linspace(0, 2 * math.pi - (2 * math.pi / num_points), num_points):
+        radius = random.gauss(mean_radius, sigma_radius)
+        x = center_x + radius * math.cos(theta)
+        y = center_y + radius * math.sin(theta)
+        points[0].append(x)
+        points[1].append(y)
+    npoints = np.array(points)
+    return npoints
