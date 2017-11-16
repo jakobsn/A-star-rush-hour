@@ -93,13 +93,6 @@ class SOM:
                     self.do_mapping(self.weight_range, self.hoodsize, self.lrate, self.epochs, epoch, self.show_sleep)
                 print("Neuron ring", self.neuronRing)
 
-    def map_path(self, path):
-        print("path")
-        print(path)
-        print(len(path))
-        PLT.plot(path[0], path[1], c='pink')
-        PLT.plot([path[0][0], path[0][-1]], [path[1][0], path[1][-1]], c='pink')
-
     def do_testing(self, datasets):
         correct = 0
         cases = 0
@@ -124,16 +117,24 @@ class SOM:
     # Find distance for TSP solution
     def findTotalDistance(self):
         #TODO
-        distance = 0
+        #distance = 0
+        actual_distance = 0
         path = self.findPath()
-        first_node = []
-        #while not len(first_node):
-        #    first_node = path.pop()
-
-        current_node = first_node
-
-
-        return distance, path
+        for p in range(len(path[0])-1):
+            node1, node2 = [path[0][p], path[1][p]], [path[0][p+1], path[1][p+1]]
+            #print(node1, node2)
+            #distance += np.sum(np.power(np.subtract(node1, node2), 2))
+            #print("distnce from", node1, "to", node2)
+            #print("is:", sqrt((abs(node1[0] - node2[0])**2 + abs(node1[1] - node2[1])**2)))
+            actual_distance += sqrt((abs(node1[0] - node2[0])**2 + abs(node1[1] - node2[1])**2))
+        node1, node2 = [path[-1][0], path[-1][0]], [path[0][0], path[1][0]]
+        #distance += np.sum(np.power(np.subtract(node1, node2), 2))
+        actual_distance += sqrt((abs(node1[0] - node2[0])**2 + abs(node1[1] - node2[1]))**2)
+        print("********DISTANCE*************")
+        #print(distance)
+        print(actual_distance)
+        print("*****************************")
+        return actual_distance, path
 
     def findPath(self):
         path = [None] * len(self.weights[0])
@@ -156,8 +157,6 @@ class SOM:
                     flat_path[0].append(node[0])
                     flat_path[1].append(node[1])
                 # TODO: Pick best sequence
-        print("PATH*************")
-        print(flat_path)
         return flat_path
 
     def findWinner(self, feature):
@@ -283,6 +282,10 @@ class SOM:
             sleep(sleep_time)
         self.isDisplayed = True
 
+    def map_path(self, path):
+        PLT.plot(path[0], path[1], c='pink')
+        PLT.plot([path[0][0], path[0][-1]], [path[1][0], path[1][-1]], c='pink')
+
     def map_mnist(self):
         axises = np.arange(self.outsize)
         coordinates = []
@@ -361,13 +364,13 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=4000,  lr
 
 main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=7000,  lrate=0.1, hoodsize=6,
          insize=2, outsize=150, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-         lrConstant=0.5, hoodConstant=3000, showint=200, show_sleep=2, final_sleep=200, network_dims=None,
+         lrConstant=0.5, hoodConstant=3000, showint=1000, show_sleep=2, final_sleep=200, network_dims=None,
          sort=False, radius=1)
 
 
 #main(data_funct=st.get_mnist_data, data_params=(500,), epochs=10000, lrate=0.3, hoodsize=3, insize=784, outsize=49,
 #     weight_range=[0, 784], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, lrConstant=0.1,
-#     hoodConstant=200, showint=0,show_sleep=0, final_sleep=0, network_dims=[7, 7])
+#     hoodConstant=200, showint=100,show_sleep=1, final_sleep=0, network_dims=[7, 7])
 
 
 #main(data_funct=st.get_mnist_data, data_params=(100,), epochs=1000, lrate=0.3, hoodsize=3, insize=784, outsize=100,
