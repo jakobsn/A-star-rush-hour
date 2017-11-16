@@ -89,6 +89,8 @@ class SOM:
                     distance, path = self.findTotalDistance()
                     #self.map_path(path)
                     self.do_mapping(self.weight_range, self.hoodsize, self.lrate, self.epochs, epoch, self.show_sleep, path)
+                    print('path')
+                    print(path)
                 else:
                     self.do_mapping(self.weight_range, self.hoodsize, self.lrate, self.epochs, epoch, self.show_sleep)
                 print("Neuron ring", self.neuronRing)
@@ -124,12 +126,15 @@ class SOM:
             node1, node2 = [path[0][p], path[1][p]], [path[0][p+1], path[1][p+1]]
             #print(node1, node2)
             #distance += np.sum(np.power(np.subtract(node1, node2), 2))
-            #print("distnce from", node1, "to", node2)
-            #print("is:", sqrt((abs(node1[0] - node2[0])**2 + abs(node1[1] - node2[1])**2)))
+            print("distnce from", node1, "to", node2)
+            print("is:", sqrt((abs(node1[0] - node2[0])**2 + abs(node1[1] - node2[1])**2)))
             actual_distance += sqrt((abs(node1[0] - node2[0])**2 + abs(node1[1] - node2[1])**2))
-        node1, node2 = [path[-1][0], path[-1][0]], [path[0][0], path[1][0]]
+        node1, node2 = [path[0][-1], path[1][-1]], [path[0][0], path[1][0]]
+
+        print("distnce from", node1, "to", node2)
+        print("is:", sqrt((abs(node1[0] - node2[0]) ** 2 + abs(node1[1] - node2[1])**2)))
         #distance += np.sum(np.power(np.subtract(node1, node2), 2))
-        actual_distance += sqrt((abs(node1[0] - node2[0])**2 + abs(node1[1] - node2[1]))**2)
+        actual_distance += sqrt((abs(node1[0] - node2[0])**2 + abs(node1[1] - node2[1])**2))
         print("********DISTANCE*************")
         #print(distance)
         print(actual_distance)
@@ -358,14 +363,26 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=4000,  lr
 
 #print(st.generate_points(5.0, 7.0, 1.0, 0.1, 8))
 
-#main(data_funct=st.readTSP, data_params=('../data/small.txt',), epochs=3000, lrate=0.3, hoodsize=1,
-#     insize=2, outsize=9, weight_range=[30, 40], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-#     lrConstant=0.5, hoodConstant=500, showint=1000, show_sleep=0, final_sleep=200, network_dims=None, sort=False)
+main(data_funct=st.readTSP, data_params=('../data/small.txt',), epochs=3000, lrate=0.3, hoodsize=1,
+     insize=2, outsize=9, weight_range=[30, 40], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+     lrConstant=0.5, hoodConstant=500, showint=1000, show_sleep=0, final_sleep=200, network_dims=None, sort=False)
 
-main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=7000,  lrate=0.1, hoodsize=6,
-         insize=2, outsize=150, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-         lrConstant=0.5, hoodConstant=3000, showint=1000, show_sleep=2, final_sleep=200, network_dims=None,
-         sort=False, radius=1)
+# Good run for nr. 6
+#main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=7000,  lrate=0.1, hoodsize=6,
+#         insize=2, outsize=150, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+#         lrConstant=0.5, hoodConstant=3000, showint=1000, show_sleep=2, final_sleep=200, network_dims=None,
+#         sort=False, radius=1)
+
+#main(data_funct=st.readTSP, data_params=('../data/8.txt',), epochs=7000,  lrate=0.1, hoodsize=6,
+#         insize=2, outsize=200, weight_range=[350, 280], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+#         lrConstant=0.5, hoodConstant=500, showint=1000, show_sleep=2, final_sleep=200, network_dims=None,
+#         sort=False, radius=3)
+
+
+#main(data_funct=st.readTSP, data_params=('../data/9.txt',), epochs=7000,  lrate=0.1, hoodsize=6,
+#         insize=2, outsize=150, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+#         lrConstant=0.5, hoodConstant=3000, showint=1000, show_sleep=2, final_sleep=200, network_dims=None,
+#         sort=False, radius=1)
 
 
 #main(data_funct=st.get_mnist_data, data_params=(500,), epochs=10000, lrate=0.3, hoodsize=3, insize=784, outsize=49,
