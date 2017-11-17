@@ -388,9 +388,9 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=4000,  lr
 #         sort=False, radius=1)
 
 
-main(data_funct=st.get_mnist_data, data_params=(500,), epochs=10000, lrate=0.3, hoodsize=3, insize=784, outsize=49,
-     weight_range=[0, 784], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, lrConstant=0.1,
-     hoodConstant=200, showint=9999,show_sleep=1, final_sleep=0, network_dims=[7, 7])
+#main(data_funct=st.get_mnist_data, data_params=(500,), epochs=10000, lrate=0.3, hoodsize=3, insize=784, outsize=49,
+#     weight_range=[0, 784], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, lrConstant=0.1,
+#     hoodConstant=200, showint=9999,show_sleep=1, final_sleep=0, network_dims=[7, 7])
 
 
 #main(data_funct=st.get_mnist_data, data_params=(100,), epochs=1000, lrate=0.3, hoodsize=3, insize=784, outsize=100,
@@ -420,4 +420,11 @@ x Batch training
 #main(data_funct=st.readTSP, data_params=('../data/5.txt',), epochs=7001,  lrate=0.1, hoodsize=6,
 #         insize=2, outsize=150, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
 #         lrConstant=0.5, hoodConstant=3000, showint=0, show_sleep=5, network_dims=None,
+#         sort=False, radius=1)
+
+
+# Sometimes
+#main(data_funct=st.readTSP, data_params=('../data/8.txt',), epochs=7001,  lrate=0.1, hoodsize=6,
+#         insize=2, outsize=150, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+#         lrConstant=0.5, hoodConstant=3000, showint=7000, show_sleep=10, network_dims=None,
 #         sort=False, radius=1)
