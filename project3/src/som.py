@@ -58,7 +58,7 @@ class SOM:
         self.isDisplayed = False
         self.showint = showint
         self.show_sleep = show_sleep
-        if self.mbs < 2:
+        if self.mbs < 1:
             self.do_training()
         else:
             self.do_batch_training()
@@ -219,21 +219,16 @@ class SOM:
         distances = self.euclidian_distance(weights, self.input_vector)
         min_distance = np.min(distances)
         winner_neuron = np.argmin(distances)
-        print("found winner", winner_neuron)
+        #print("found winner", winner_neuron)
         return winner_neuron
 
     def adjust_clusters(self, neighbours):
-        print(neighbours)
-        print(neighbours[0])
-        print(type(neighbours))
-        print(self.weights[0])
         adjust_cluster = np.vectorize(self.adjust_cluster, cache=True)
-        print(self.weights[0])
         adjust_cluster(neighbours[0], neighbours[1], self.weights[:, neighbours[0]])
         return
 
     def adjust_cluster(self, index, hood, weight):
-        print(self.input_vector[self.i])
+        # print(self.input_vector[self.i])
         self.weights[self.i][index] = weight + self.lrate*(hood+1)*np.subtract(self.input_vector[self.i], weight)
         #print("index", index, "input_value", self.input_vector[self.i], "hood", hood, "weight", weight, "new weight", self.weights[0][index])
         if self.i < (len(self.input_vector)-1):
@@ -418,7 +413,7 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=4000,  lr
 
 #main(data_funct=st.readTSP, data_params=('../data/small.txt',), epochs=3000, lrate=0.3, hoodsize=1,
 #     insize=2, outsize=9, weight_range=[30, 40], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-#     lrConstant=0.5, hoodConstant=500, showint=1000, show_sleep=0, final_sleep=200, network_dims=None, sort=False)
+#     lrConstant=0.5, hoodConstant=500, showint=1000, show_sleep=2, final_sleep=200, network_dims=None, sort=False, mbs=0)
 
 # Good run for nr. 6
 #main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=7000,  lrate=0.1, hoodsize=6,
@@ -471,7 +466,7 @@ x Check how well mnist is classified
 main(data_funct=st.readTSP, data_params=('../data/5.txt',), epochs=10001,  lrate=0.1, hoodsize=6,
          insize=2, outsize=200, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
          lrConstant=0.5, hoodConstant=3000, showint=100, show_sleep=1, network_dims=None,
-         sort=False, radius=1, mbs=3)
+         sort=False, radius=1, mbs=1)
 
 
 # Sometimes
