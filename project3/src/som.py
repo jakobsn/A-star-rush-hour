@@ -58,7 +58,7 @@ class SOM:
         self.isDisplayed = False
         self.showint = showint
         self.show_sleep = show_sleep
-        if self.mbs < 2:
+        if self.mbs < 1:
             self.do_training()
         else:
             self.do_batch_training()
@@ -82,8 +82,13 @@ class SOM:
                 #target = self.features[randint(0, len(self.features)-1)][1]
                 features = self.features
                 np.random.shuffle(features)
-                features, targets = features[:self.mbs]
-                print("features", features)
+                #print("features", features)
+                features, targets = np.rot90(features[:self.mbs], 1)[::-1]
+                #print("rotate")
+                #for f, t in zip(features, targets):
+                #    print(f,t)
+                #sleep(10)
+                #print("features", features)
             else:
                 features = self.features
                 np.random.shuffle(features)
@@ -94,22 +99,23 @@ class SOM:
             #print("features", features)
             winners = []
             for feature in features:
-                print('feature')
-                print(feature)
+                #print('feature')
+                #print(feature)
                 winners.append(self.findWinner(feature))
             # findWinners(features)
             #print("winners", winners)
 
             #findNeighbours = np.vectorize(self.get_neighbours, cache=True)
 
-            for winner_neuron, feature in zip(winners, features):
+            #for winner_neuron, feature in zip(winners, features):
+            for i in range(len(winners)):
                 #print("neuron", winner_neuron)
-                neighbours = self.get_neighbours(winner_neuron)
+                neighbours = self.get_neighbours(winners[i])
                 #print(neighbours)
-                self.input_vector = feature
+                self.input_vector = features[i]
                 self.adjust_clusters(neighbours)
                 if self.topo == "matrix":
-                    self.triggered_targets[winner_neuron].append(target)
+                    self.triggered_targets[winners[i]].append(targets[i])
             #print(str('[' + str(epoch) + ']'), "hood, lrate", self.hoodsize, self.lrate)
             self.hoodsize = round(self.hood_decay(epoch, self.initial_hood, self.hoodConstant, self.epochs))
             self.lrate = self.lrate_decay(epoch, self.initial_lrate, self.lrConstant, self.epochs)
@@ -420,14 +426,15 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=4000,  lr
 
 #print(st.generate_points(5.0, 7.0, 1.0, 0.1, 8))
 
-#main(data_funct=st.readTSP, data_params=('../data/small.txt',), epochs=3000, lrate=0.2, hoodsize=2,
+#main(data_funct=st.readTSP, data_params=('../data/small.txt',), epochs=1200, lrate=0.2, hoodsize=2,
 #     insize=2, outsize=19, weight_range=[30, 40], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, radius=3,
-#     lrConstant=0.5, hoodConstant=100, showint=1000, show_sleep=2, final_sleep=200, network_dims=None, sort=False, mbs=1)
+#     lrConstant=0.5, hoodConstant=100, showint=0, show_sleep=2, final_sleep=200, network_dims=None, sort=False, mbs=1)
 
 # Good run for nr. 6
-#main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=7000,  lrate=0.1, hoodsize=6,
+#
+# main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=10000,  lrate=0.1, hoodsize=6,
 #         insize=2, outsize=150, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-#         lrConstant=0.5, hoodConstant=3000, showint=1000, show_sleep=2, final_sleep=200, network_dims=None,
+#         lrConstant=0.5, hoodConstant=3000, showint=0, show_sleep=2, final_sleep=200, network_dims=None,
 #         sort=False, radius=1)
 
 
@@ -444,9 +451,9 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=4000,  lr
 #         sort=False, radius=1)
 
 
-main(data_funct=st.get_mnist_data, data_params=(500,), epochs=100, lrate=0.3, hoodsize=3, insize=784, outsize=49,
-     weight_range=[0, 784], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, lrConstant=0.1,
-     hoodConstant=200, showint=9999,show_sleep=1, final_sleep=0, network_dims=[7, 7], mbs=10)
+main(data_funct=st.get_mnist_data, data_params=(500,), epochs=1000, lrate=0.3, hoodsize=3, insize=784, outsize=49,
+     weight_range=[0, 1], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, lrConstant=0.1,
+     hoodConstant=200, showint=0,show_sleep=1, final_sleep=0, network_dims=[7, 7], mbs=200)
 
 
 #main(data_funct=st.get_mnist_data, data_params=(100,), epochs=1000, lrate=0.3, hoodsize=3, insize=784, outsize=100,
