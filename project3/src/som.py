@@ -402,9 +402,9 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=4000,  lr
 
 """
 TODO:
+- Batch training
 x Visualize at step k (for ring)
-- Neighborhood decay (exponential atm)
-- lrate decay (power atm)
+- Decay (exponential and power atm)
 x TOPOGRAPHY
 x Normalize input
 x Find path distance
