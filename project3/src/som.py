@@ -453,7 +453,7 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=4000,  lr
 
 main(data_funct=st.get_mnist_data, data_params=(500,), epochs=1000, lrate=0.3, hoodsize=3, insize=784, outsize=49,
      weight_range=[0, 1], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, lrConstant=0.1,
-     hoodConstant=200, showint=0,show_sleep=1, final_sleep=0, network_dims=[7, 7], mbs=200)
+     hoodConstant=200, showint=0,show_sleep=1, final_sleep=0, network_dims=[7, 7], mbs=0)
 
 
 #main(data_funct=st.get_mnist_data, data_params=(100,), epochs=1000, lrate=0.3, hoodsize=3, insize=784, outsize=100,
