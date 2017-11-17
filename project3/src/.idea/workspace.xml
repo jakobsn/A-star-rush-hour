@@ -11,7 +11,7 @@
   </component>
   <component name="CoverageDataManager">
     <SUITE FILE_PATH="coverage/src$somtools.coverage" NAME="somtools Coverage Results" MODIFIED="1509963302399" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/src$som.coverage" NAME="som Coverage Results" MODIFIED="1510913176736" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/src$som.coverage" NAME="som Coverage Results" MODIFIED="1510913445459" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
@@ -30,8 +30,8 @@
       <file leaf-file-name="som.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/som.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="470">
-              <caret line="425" column="3" lean-forward="false" selection-start-line="425" selection-start-column="3" selection-end-line="425" selection-end-column="3" />
+            <state relative-caret-position="460">
+              <caret line="426" column="52" lean-forward="false" selection-start-line="426" selection-start-column="52" selection-end-line="426" selection-end-column="52" />
               <folding>
                 <element signature="e#19#37#0" expanded="true" />
               </folding>
@@ -100,6 +100,8 @@
       <find>pr</find>
       <find>path</find>
       <find>dendro</find>
+      <find>neuron</find>
+      <find>neuronR</find>
     </findStrings>
   </component>
   <component name="IdeDocumentHistory">
@@ -787,8 +789,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/som.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="470">
-          <caret line="425" column="3" lean-forward="false" selection-start-line="425" selection-start-column="3" selection-end-line="425" selection-end-column="3" />
+        <state relative-caret-position="460">
+          <caret line="426" column="52" lean-forward="false" selection-start-line="426" selection-start-column="52" selection-end-line="426" selection-end-column="52" />
           <folding>
             <element signature="e#19#37#0" expanded="true" />
           </folding>

@@ -73,7 +73,7 @@ class SOM:
                     self.do_mapping(self.weight_range, self.hoodsize, self.lrate, self.epochs, epoch, self.show_sleep, path, distance)
                 else:
                     self.do_mapping(self.weight_range, self.hoodsize, self.lrate, self.epochs, epoch, self.show_sleep)
-                print("Neuron ring", self.neuronRing)
+                    print("Neuron ring", self.neuronRing)
 
             if self.lrate == 0:
                 break
@@ -276,7 +276,6 @@ class SOM:
             self.map_mnist()
 
         if path != None:
-            print("map path")
             self.map_path(path)
             PLT.suptitle("Run: " + str(step) + " Distance: " + str(round(distance, 0)) + \
                          " Problem: " + str(self.problem).replace("../data/", "").replace("txt",""))
@@ -352,7 +351,6 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=4000,  lr
           'topo', som.topo, "lrConstant", lrConstant, "hoodConstant", hoodConstant)
     end = time()
     print("Time elapsed:", end - start, "s", (end-start)/60, "m")
-    print("Neuron ring", som.neuronRing)
 
     if som.network_dims is not None:
         print("test train")
@@ -409,7 +407,7 @@ x Visualize at step k (for ring)
 - lrate decay (power atm)
 x TOPOGRAPHY
 x Normalize input
-- Find path distance
+x Find path distance
 x Create initial weight ring
 x Visualize for mnist
 x Check how well mnist is classified
@@ -424,7 +422,7 @@ x Batch training
 
 
 # Sometimes
-#main(data_funct=st.readTSP, data_params=('../data/8.txt',), epochs=7001,  lrate=0.1, hoodsize=6,
+#main(data_funct=st.readTSP, data_params=('../data/8.txt',), epochs=10001,  lrate=0.1, hoodsize=6,
 #         insize=2, outsize=150, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-#         lrConstant=0.5, hoodConstant=3000, showint=7000, show_sleep=10, network_dims=None,
+#         lrConstant=0.5, hoodConstant=3000, showint=0, show_sleep=0, network_dims=None,
 #         sort=False, radius=1)
