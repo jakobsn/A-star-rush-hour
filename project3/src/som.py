@@ -16,7 +16,8 @@ import random
 class SOM:
     def __init__(self, epochs, lrate, hoodsize, insize, outsize, features,
                  weight_range, lrate_decay, hood_decay, lrConstant,
-                 hoodConstant, showint,show_sleep, network_dims, sort, radius):
+                 hoodConstant, showint,show_sleep, network_dims, sort, radius,
+                 problem, full_screen):
         self.epochs = epochs
         self.features = features
         self.weight_range = weight_range
@@ -31,6 +32,8 @@ class SOM:
         self.global_training_step = 0
         self.network_dims = network_dims
         self.radius = radius
+        self.problem = problem
+        self.full_screen = full_screen
         if insize is None or outsize is None:
             self.insize = len(features[0])
             self.outsize = len(features)*2
@@ -48,15 +51,12 @@ class SOM:
             self.topo = "ring"
             self.triggered_targets = None
             self.weights = st.generate_points(self.weight_range[0], self.weight_range[1], self.radius, 0.1, self.outsize)
-        print("WEIGHTS")
-        print(self.weights)
         self.neuronRing = self.create_neuron_ring()
         self.input_vector = None # Keep track of current input vector
         self.i = 0 # Keep track of which weight being changed for input neuron
         self.isDisplayed = False
         self.showint = showint
         self.show_sleep = show_sleep
-        self.do_mapping(sleep_time=10)
         self.do_training()
 
     # Pick random input feature
@@ -66,6 +66,15 @@ class SOM:
         #print(self.weights)
         self.neuronRing = self.create_neuron_ring()
         for epoch in range(self.epochs):
+
+            if self.showint != 0 and (epoch == 0 or epoch % self.showint == 0):
+                if self.topo == "ring":
+                    distance, path = self.findTotalDistance()
+                    self.do_mapping(self.weight_range, self.hoodsize, self.lrate, self.epochs, epoch, self.show_sleep, path, distance)
+                else:
+                    self.do_mapping(self.weight_range, self.hoodsize, self.lrate, self.epochs, epoch, self.show_sleep)
+                print("Neuron ring", self.neuronRing)
+
             if self.lrate == 0:
                 break
             if self.topo == "matrix":
@@ -82,18 +91,9 @@ class SOM:
             self.lrate = self.lrate_decay(epoch, self.initial_lrate,self.lrConstant, self.epochs)
             if self.topo == "matrix":
                 self.triggered_targets[winner_neuron].append(target)
-            print(str('[' + str(epoch) + ']'), "hood, lrate", self.hoodsize, self.lrate)
-            if self.showint != 0 and (epoch == 0 or epoch % self.showint == 0):
-                if self.topo == "ring":
-                    # TODO:
-                    distance, path = self.findTotalDistance()
-                    #self.map_path(path)
-                    self.do_mapping(self.weight_range, self.hoodsize, self.lrate, self.epochs, epoch, self.show_sleep, path)
-                    print('path')
-                    print(path)
-                else:
-                    self.do_mapping(self.weight_range, self.hoodsize, self.lrate, self.epochs, epoch, self.show_sleep)
-                print("Neuron ring", self.neuronRing)
+            #print(str('[' + str(epoch) + ']'), "hood, lrate", self.hoodsize, self.lrate)
+        if self.topo == "ring":
+            self.findTotalDistance()
 
     def do_testing(self, datasets):
         correct = 0
@@ -126,13 +126,13 @@ class SOM:
             node1, node2 = [path[0][p], path[1][p]], [path[0][p+1], path[1][p+1]]
             #print(node1, node2)
             #distance += np.sum(np.power(np.subtract(node1, node2), 2))
-            print("distnce from", node1, "to", node2)
-            print("is:", sqrt((abs(node1[0] - node2[0])**2 + abs(node1[1] - node2[1])**2)))
+            #print("distance from", node1, "to", node2)
+            #print("is:", sqrt((abs(node1[0] - node2[0])**2 + abs(node1[1] - node2[1])**2)))
             actual_distance += sqrt((abs(node1[0] - node2[0])**2 + abs(node1[1] - node2[1])**2))
         node1, node2 = [path[0][-1], path[1][-1]], [path[0][0], path[1][0]]
 
-        print("distnce from", node1, "to", node2)
-        print("is:", sqrt((abs(node1[0] - node2[0]) ** 2 + abs(node1[1] - node2[1])**2)))
+        #print("distnce from", node1, "to", node2)
+        #print("is:", sqrt((abs(node1[0] - node2[0]) ** 2 + abs(node1[1] - node2[1])**2)))
         #distance += np.sum(np.power(np.subtract(node1, node2), 2))
         actual_distance += sqrt((abs(node1[0] - node2[0])**2 + abs(node1[1] - node2[1])**2))
         print("********DISTANCE*************")
@@ -165,7 +165,7 @@ class SOM:
         return flat_path
 
     def findWinner(self, feature):
-        eDistance = np.vectorize(self.euclidian_distance, cache=True)
+        #eDistance = np.vectorize(self.euclidian_distance, cache=True)
         self.input_vector = feature
         #print("weights", self.weights)
         weights = np.rot90(self.weights, 1)[::-1]
@@ -261,14 +261,14 @@ class SOM:
             np.sort(weights)
         return weights
 
-    def do_mapping(self, weight_range=None, hood=None, lrate=None, epochs=None, step='NA', sleep_time=1, path=None):
+    def do_mapping(self, weight_range=None, hood=None, lrate=None, epochs=None, step='NA', sleep_time=1, path=None, distance=0):
         if hood == None: hood=self.hoodsize
         if lrate == None: lrate=self.lrate
         if epochs == None: epochs=self.epochs
         if weight_range == None: weight_range=self.weight_range
-        if self.isDisplayed:
-            sleep(sleep_time)
-            PLT.close("all")
+        if self.full_screen:
+            mng = PLT.get_current_fig_manager()
+            mng.full_screen_toggle()
 
         if self.topo == "ring":
             self.map_tsp()
@@ -278,14 +278,16 @@ class SOM:
         if path != None:
             print("map path")
             self.map_path(path)
-
-        PLT.title("Run " + str(step) + " Epochs " + str(epochs) + " Lrate " + str(lrate) \
+            PLT.suptitle("Run: " + str(step) + " Distance: " + str(round(distance, 0)) + \
+                         " Problem: " + str(self.problem).replace("../data/", "").replace("txt",""))
+        else:
+            PLT.suptitle("Run: " + str(step))
+        PLT.title(" Epochs " + str(epochs) + " Lrate " + str(self.lrate) \
                      + " Hood " + str(hood) + " Weight range " + str(weight_range) + \
                      " Outsize " + str(self.outsize) + " constants " + str(self.lrConstant) + ',' + str(self.hoodConstant))
         PLT.show(block=False)
-        if step == 'Final':
-            sleep(sleep_time)
-        self.isDisplayed = True
+        sleep(sleep_time)
+        PLT.close("all")
 
     def map_path(self, path):
         PLT.plot(path[0], path[1], c='pink')
@@ -335,20 +337,19 @@ class SOM:
 
 def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=4000,  lrate=0.1, hoodsize=6,
          insize=2, outsize=90, weight_range=[0.49, 5], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-         lrConstant=0.5, hoodConstant=300, showint=1000, show_sleep=2, final_sleep=200, network_dims=None,
-         sort=False, radius=1):
+         lrConstant=0.5, hoodConstant=300, showint=1000, show_sleep=2, final_sleep=0, network_dims=None,
+         sort=False, radius=1, full_screen=False):
     features = data_funct(*data_params)
     start = time()
 
     som = SOM(epochs=epochs, lrate=lrate, hoodsize=hoodsize, features=features, insize=insize, outsize=outsize,
               weight_range=weight_range, lrate_decay=lrate_decay, hood_decay=hood_decay, lrConstant=lrConstant,
               hoodConstant=hoodConstant, showint=showint, show_sleep=show_sleep, network_dims=network_dims,
-              sort=sort, radius=radius)
+              sort=sort, radius=radius, problem=data_params[0], full_screen=full_screen)
     print('funct', data_funct, 'params', data_params, 'epochs', epochs, '\n',
           'lrate', lrate, 'hoodsize', hoodsize, 'insize', insize, 'outsize', outsize,  'weight_range', weight_range, '\n',
           'lrate_deacay', lrate_decay, 'hood_decay', hood_decay,   '\n',
-          'topo', som.topo, "lrConstant", lrConstant, "hoodConstant", hoodConstant, '\n',
-          "showint", showint, 'show_sleep', show_sleep, 'final_sleep', final_sleep, 'distance', som.findTotalDistance())
+          'topo', som.topo, "lrConstant", lrConstant, "hoodConstant", hoodConstant)
     end = time()
     print("Time elapsed:", end - start, "s", (end-start)/60, "m")
     print("Neuron ring", som.neuronRing)
@@ -358,8 +359,8 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=4000,  lr
         som.do_testing(som.features)
         print("test test")
         som.do_testing(st.get_mnist_test_data())
-    if final_sleep:
-        som.do_mapping(weight_range, hoodsize, lrate, epochs, 'Final', final_sleep)
+
+
 
 #print(st.generate_points(5.0, 7.0, 1.0, 0.1, 8))
 
@@ -374,11 +375,6 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=4000,  lr
 #         sort=False, radius=1)
 
 
-main(data_funct=st.readTSP, data_params=('../data/5.txt',), epochs=7000,  lrate=0.1, hoodsize=6,
-         insize=2, outsize=150, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-         lrConstant=0.5, hoodConstant=3000, showint=1000, show_sleep=2, final_sleep=200, network_dims=None,
-         sort=False, radius=1)
-
 # Close nr. 8
 #main(data_funct=st.readTSP, data_params=('../data/8.txt',), epochs=7000,  lrate=0.1, hoodsize=6,
 #         insize=2, outsize=250, weight_range=[350, 280], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
@@ -392,9 +388,9 @@ main(data_funct=st.readTSP, data_params=('../data/5.txt',), epochs=7000,  lrate=
 #         sort=False, radius=1)
 
 
-#main(data_funct=st.get_mnist_data, data_params=(500,), epochs=10000, lrate=0.3, hoodsize=3, insize=784, outsize=49,
-#     weight_range=[0, 784], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, lrConstant=0.1,
-#     hoodConstant=200, showint=100,show_sleep=1, final_sleep=0, network_dims=[7, 7])
+main(data_funct=st.get_mnist_data, data_params=(500,), epochs=10000, lrate=0.3, hoodsize=3, insize=784, outsize=49,
+     weight_range=[0, 784], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, lrConstant=0.1,
+     hoodConstant=200, showint=9999,show_sleep=1, final_sleep=0, network_dims=[7, 7])
 
 
 #main(data_funct=st.get_mnist_data, data_params=(100,), epochs=1000, lrate=0.3, hoodsize=3, insize=784, outsize=100,
@@ -419,3 +415,9 @@ x Visualize for mnist
 x Check how well mnist is classified
 x Batch training
 """
+
+# Works on 5 (<15816):
+#main(data_funct=st.readTSP, data_params=('../data/5.txt',), epochs=7001,  lrate=0.1, hoodsize=6,
+#         insize=2, outsize=150, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+#         lrConstant=0.5, hoodConstant=3000, showint=0, show_sleep=5, network_dims=None,
+#         sort=False, radius=1)
