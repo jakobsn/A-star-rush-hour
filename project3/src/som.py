@@ -2,15 +2,11 @@
 
 import numpy as np
 import somtools as st
-import numpy_indexed as npi
-from math import sqrt, ceil, floor, exp
-import math
-import six.moves.cPickle as cPickle
+from math import sqrt, ceil, floor
 import matplotlib.pyplot as PLT
 from matplotlib import colors, colorbar
 from time import sleep, time
 from random import randint
-import random
 
 
 class SOM:
@@ -66,7 +62,7 @@ class SOM:
     def do_batch_training(self):
         self.neuronRing = self.create_neuron_ring()
         for epoch in range(self.epochs):
-
+            print(str('[' + str(epoch) + ']'), "hood, lrate", self.hoodsize, self.lrate)
             if self.showint != 0 and (epoch == 0 or epoch % self.showint == 0):
                 if self.topo == "ring":
                     distance, path = self.findTotalDistance()
@@ -78,55 +74,37 @@ class SOM:
             if self.lrate == 0:
                 break
             if self.topo == "matrix":
-                #feature = self.features[randint(0, len(self.features)-1)][0]
-                #target = self.features[randint(0, len(self.features)-1)][1]
                 features = self.features
                 np.random.shuffle(features)
-                #print("features", features)
                 features, targets = np.rot90(features[:self.mbs], 1)[::-1]
-                #print("rotate")
-                #for f, t in zip(features, targets):
-                #    print(f,t)
-                #sleep(10)
-                #print("features", features)
             else:
                 features = self.features
                 np.random.shuffle(features)
                 features = features[:self.mbs]
-                #feature = self.features[randint(0, len(self.features)-1)]
 
-            #findWinners = np.vectorize(self.findWinner, cache=True)
-            #print("features", features)
             winners = []
             for feature in features:
-                #print('feature')
-                #print(feature)
                 winners.append(self.findWinner(feature))
-            # findWinners(features)
-            #print("winners", winners)
 
-            #findNeighbours = np.vectorize(self.get_neighbours, cache=True)
-
-            #for winner_neuron, feature in zip(winners, features):
             for i in range(len(winners)):
-                #print("neuron", winner_neuron)
                 neighbours = self.get_neighbours(winners[i])
-                #print(neighbours)
                 self.input_vector = features[i]
                 self.adjust_clusters(neighbours)
                 if self.topo == "matrix":
                     self.triggered_targets[winners[i]].append(targets[i])
-            #print(str('[' + str(epoch) + ']'), "hood, lrate", self.hoodsize, self.lrate)
             self.hoodsize = round(self.hood_decay(epoch, self.initial_hood, self.hoodConstant, self.epochs))
             self.lrate = self.lrate_decay(epoch, self.initial_lrate, self.lrConstant, self.epochs)
         if self.topo == "ring":
-            self.findTotalDistance()
+            distance, path = self.findTotalDistance()
+            if self.showint:
+                self.do_mapping(self.weight_range, self.hoodsize, self.lrate, self.epochs, epoch, self.show_sleep, path, distance)
+        else:
+            self.do_mapping(self.weight_range, self.hoodsize, self.lrate, self.epochs, epoch, self.show_sleep)
 
     # Pick random input feature
     # Update weights for winner and neighbours
     # Update lrate and hoodsize
     def do_training(self):
-        #print(self.weights)
         self.neuronRing = self.create_neuron_ring()
         for epoch in range(self.epochs):
 
@@ -157,7 +135,12 @@ class SOM:
                 self.triggered_targets[winner_neuron].append(target)
             #print(str('[' + str(epoch) + ']'), "hood, lrate", self.hoodsize, self.lrate)
         if self.topo == "ring":
-            self.findTotalDistance()
+            distance, path = self.findTotalDistance()
+            if self.showint:
+                self.do_mapping(self.weight_range, self.hoodsize, self.lrate, self.epochs, epoch, self.show_sleep, path, distance)
+        else:
+            self.do_mapping(self.weight_range, self.hoodsize, self.lrate, self.epochs, epoch, self.show_sleep)
+
 
     def do_testing(self, datasets):
         correct = 0
@@ -182,24 +165,14 @@ class SOM:
 
     # Find distance for TSP solution
     def findTotalDistance(self):
-        #distance = 0
         actual_distance = 0
         path = self.findPath()
         for p in range(len(path[0])-1):
             node1, node2 = [path[0][p], path[1][p]], [path[0][p+1], path[1][p+1]]
-            #print(node1, node2)
-            #distance += np.sum(np.power(np.subtract(node1, node2), 2))
-            #print("distance from", node1, "to", node2)
-            #print("is:", sqrt((abs(node1[0] - node2[0])**2 + abs(node1[1] - node2[1])**2)))
             actual_distance += sqrt((abs(node1[0] - node2[0])**2 + abs(node1[1] - node2[1])**2))
         node1, node2 = [path[0][-1], path[1][-1]], [path[0][0], path[1][0]]
-
-        #print("distnce from", node1, "to", node2)
-        #print("is:", sqrt((abs(node1[0] - node2[0]) ** 2 + abs(node1[1] - node2[1])**2)))
-        #distance += np.sum(np.power(np.subtract(node1, node2), 2))
         actual_distance += sqrt((abs(node1[0] - node2[0])**2 + abs(node1[1] - node2[1])**2))
         print("********DISTANCE*************")
-        #print(distance)
         print(actual_distance)
         print("*****************************")
         return actual_distance, path
@@ -227,14 +200,9 @@ class SOM:
         return flat_path
 
     def findWinner(self, feature):
-        #eDistance = np.vectorize(self.euclidian_distance, cache=True)
-        #self.input_vector = feature
-        #print("weights", self.weights)
         weights = np.rot90(self.weights, 1)[::-1]
         distances = self.euclidian_distance(weights, feature)
-        min_distance = np.min(distances)
         winner_neuron = np.argmin(distances)
-        #print("found winner", winner_neuron)
         return winner_neuron
 
     def adjust_clusters(self, neighbours):
@@ -243,7 +211,6 @@ class SOM:
         return
 
     def adjust_cluster(self, index, hood, weight):
-        # print(self.input_vector[self.i])
         self.weights[self.i][index] = weight + self.lrate*(hood+1)*np.subtract(self.input_vector[self.i], weight)
         #print("index", index, "input_value", self.input_vector[self.i], "hood", hood, "weight", weight, "new weight", self.weights[0][index])
         if self.i < (len(self.input_vector)-1):
@@ -349,6 +316,8 @@ class SOM:
                      + " Hood " + str(hood) + " Weight range " + str(weight_range) + \
                      " Outsize " + str(self.outsize) + " constants " + str(self.lrConstant) + ',' + str(self.hoodConstant))
         PLT.show(block=False)
+        if self.topo == 'matrix':
+            self.mnist_show_colors()
         sleep(sleep_time)
         PLT.close("all")
 
@@ -372,6 +341,8 @@ class SOM:
             else:
                 PLT.scatter(x, y, c='white')
 
+    def mnist_show_colors(self):
+        color_list = ['red', 'blue', 'green', 'black', 'purple', 'yellow', 'pink', 'gray', 'brown', 'orange']
         fig, ax = PLT.subplots()
         cmap = colors.ListedColormap(color_list)
         cmap.set_over('0.25')
@@ -432,7 +403,7 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=4000,  lr
 
 # Good run for nr. 6
 #
-# main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=10000,  lrate=0.1, hoodsize=6,
+#main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=10000,  lrate=0.1, hoodsize=6,
 #         insize=2, outsize=150, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
 #         lrConstant=0.5, hoodConstant=3000, showint=0, show_sleep=2, final_sleep=200, network_dims=None,
 #         sort=False, radius=1)
@@ -445,29 +416,29 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=4000,  lr
 #         sort=False, radius=3)
 
 
-#main(data_funct=st.readTSP, data_params=('../data/9.txt',), epochs=7000,  lrate=0.1, hoodsize=6,
+#main(data_funct=st.readTSP, data_params=('../data/1.txt',), epochs=7000,  lrate=0.1, hoodsize=6,
 #         insize=2, outsize=150, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
 #         lrConstant=0.5, hoodConstant=3000, showint=1000, show_sleep=2, final_sleep=200, network_dims=None,
 #         sort=False, radius=1)
 
 
-main(data_funct=st.get_mnist_data, data_params=(500,), epochs=1000, lrate=0.3, hoodsize=3, insize=784, outsize=49,
-     weight_range=[0, 1], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, lrConstant=0.1,
-     hoodConstant=200, showint=0,show_sleep=1, final_sleep=0, network_dims=[7, 7], mbs=0)
+#main(data_funct=st.get_mnist_data, data_params=(500,), epochs=10, lrate=0.3, hoodsize=3, insize=784, outsize=49,
+#     weight_range=[0, 1], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, lrConstant=0.1,
+#     hoodConstant=200, showint=50, show_sleep=2, final_sleep=0, network_dims=[7, 7], mbs=10)
 
-
+# This ran suprisingly good
 #main(data_funct=st.get_mnist_data, data_params=(100,), epochs=1000, lrate=0.3, hoodsize=3, insize=784, outsize=100,
 #     weight_range=[0, 1], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, lrConstant=0.01,
 #     hoodConstant=200, showint=0,show_sleep=0, final_sleep=20, network_dims=[10, 10])
 
 
-#main(data_funct=st.get_mnist_data, data_params=(100,), epochs=12500, lrate=0.2, hoodsize=5, insize=784, outsize=100,
+#main(data_funct=st.get_mnist_data, data_params=(100,), epochs=100, lrate=0.2, hoodsize=5, insize=784, outsize=100,
 #     weight_range=[0, 1], lrate_decay=st.exponentialDecay, hood_decay=st.exponentialDecay, lrConstant=100*12500,
 #     hoodConstant=14*12500, showint=0, show_sleep=0, final_sleep=100, network_dims=[10, 10])
 
 """
 TODO:
-- Batch training
+x Batch training
 x Visualize at step k (for ring)
 - Decay (exponential and power atm)
 x TOPOGRAPHY
@@ -487,8 +458,8 @@ x Check how well mnist is classified
 
 #main(data_funct=st.readTSP, data_params=('../data/5.txt',), epochs=10001,  lrate=0.1, hoodsize=6,
 #         insize=2, outsize=200, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-#         lrConstant=0.5, hoodConstant=3000, showint=0, show_sleep=3, network_dims=None,
-#         sort=False, radius=1, mbs=1)
+#         lrConstant=0.5, hoodConstant=3000, showint=101, show_sleep=3, network_dims=None,
+#         sort=False, radius=1, mbs=0)
 
 
 # Sometimes
