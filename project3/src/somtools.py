@@ -112,6 +112,7 @@ def get_mnist_data(size):
         output.append(np.array([np.array(features[i].tolist()), np.array(labels[i].tolist())]))
     return output
 
+
 def get_mnist_test_data(size=100):
     mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
     features, labels = mnist.test.next_batch(size)
@@ -119,6 +120,7 @@ def get_mnist_test_data(size=100):
     for i in range(len(features)):
         output.append(np.array([np.array(features[i].tolist()), np.array(labels[i].tolist())]))
     return output
+
 
 def generate_points(center_x, center_y, mean_radius, sigma_radius, num_points):
     points = [[], []]

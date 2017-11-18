@@ -6,14 +6,14 @@ from math import sqrt, ceil, floor
 import matplotlib.pyplot as PLT
 from matplotlib import colors, colorbar
 from time import sleep, time
-from random import randint
+from random import randint, sample
 
 
 class SOM:
     def __init__(self, epochs, lrate, hoodsize, insize, outsize, features,
                  weight_range, lrate_decay, hood_decay, lrConstant,
                  hoodConstant, showint,show_sleep, network_dims, sort, radius,
-                 problem, full_screen, mbs):
+                 problem, full_screen, mbs, vsize):
         self.epochs = epochs
         self.features = features
         self.weight_range = weight_range
@@ -54,6 +54,7 @@ class SOM:
         self.isDisplayed = False
         self.showint = showint
         self.show_sleep = show_sleep
+        self.vsize = vsize
         if self.mbs < 1:
             self.do_training()
         else:
@@ -62,8 +63,7 @@ class SOM:
     def do_batch_training(self):
         self.neuronRing = self.create_neuron_ring()
         for epoch in range(self.epochs):
-            print(str('[' + str(epoch) + ']'), "hood, lrate", self.hoodsize, self.lrate)
-            if self.showint != 0 and (epoch == 0 or epoch % self.showint == 0):
+            if self.showint != 0 and (epoch % self.showint == 0):
                 if self.topo == "ring":
                     distance, path = self.findTotalDistance()
                     self.do_mapping(self.weight_range, self.hoodsize, self.lrate, self.epochs, epoch, self.show_sleep, path, distance)
@@ -76,7 +76,13 @@ class SOM:
             if self.topo == "matrix":
                 features = self.features
                 np.random.shuffle(features)
-                features, targets = np.rot90(features[:self.mbs], 1)[::-1]
+                features = []
+                targets = []
+                sets = sample(range(0, len(self.features)), self.mbs)
+                for s in sets:
+                    features.append(self.features[s][0])
+                    targets.append(self.features[s][1])
+                #features, targets = np.rot90(features[:self.mbs], 1)[::-1]
             else:
                 features = self.features
                 np.random.shuffle(features)
@@ -94,11 +100,24 @@ class SOM:
                     self.triggered_targets[winners[i]].append(targets[i])
             self.hoodsize = round(self.hood_decay(epoch, self.initial_hood, self.hoodConstant, self.epochs))
             self.lrate = self.lrate_decay(epoch, self.initial_lrate, self.lrConstant, self.epochs)
+            #if epoch % 500 == 0:
+            #    if self.network_dims is not None:
+            #        print("test train")
+            #        self.do_testing(self.features)
+            #        print("test test")
+            #        self.do_testing(st.get_mnist_test_data(self.vsize))
+            #        print(str('[' + str(epoch) + ']'), "hood, lrate", self.hoodsize, self.lrate)
+
         if self.topo == "ring":
             distance, path = self.findTotalDistance()
             if self.showint:
                 self.do_mapping(self.weight_range, self.hoodsize, self.lrate, self.epochs, epoch, self.show_sleep, path, distance)
-        else:
+        if self.network_dims is not None:
+            print("test train")
+            self.do_testing(self.features)
+            print("test test")
+            self.do_testing(st.get_mnist_test_data(self.vsize))
+        elif self.showint:
             self.do_mapping(self.weight_range, self.hoodsize, self.lrate, self.epochs, epoch, self.show_sleep)
 
     # Pick random input feature
@@ -108,7 +127,7 @@ class SOM:
         self.neuronRing = self.create_neuron_ring()
         for epoch in range(self.epochs):
 
-            if self.showint != 0 and (epoch == 0 or epoch % self.showint == 0):
+            if self.showint != 0 and (epoch % self.showint == 0):
                 if self.topo == "ring":
                     distance, path = self.findTotalDistance()
                     self.do_mapping(self.weight_range, self.hoodsize, self.lrate, self.epochs, epoch, self.show_sleep, path, distance)
@@ -138,8 +157,8 @@ class SOM:
             distance, path = self.findTotalDistance()
             if self.showint:
                 self.do_mapping(self.weight_range, self.hoodsize, self.lrate, self.epochs, epoch, self.show_sleep, path, distance)
-        else:
-            self.do_mapping(self.weight_range, self.hoodsize, self.lrate, self.epochs, epoch, self.show_sleep)
+        elif self.showint:
+                self.do_mapping(self.weight_range, self.hoodsize, self.lrate, self.epochs, epoch, self.show_sleep)
 
 
     def do_testing(self, datasets):
@@ -372,27 +391,20 @@ class SOM:
 def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=4000,  lrate=0.1, hoodsize=6,
          insize=2, outsize=90, weight_range=[0.49, 5], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
          lrConstant=0.5, hoodConstant=300, showint=1000, show_sleep=2, final_sleep=0, network_dims=None,
-         sort=False, radius=1, full_screen=False, mbs=1):
+         sort=False, radius=1, full_screen=False, mbs=0, vsize=100):
     features = data_funct(*data_params)
     start = time()
 
     som = SOM(epochs=epochs, lrate=lrate, hoodsize=hoodsize, features=features, insize=insize, outsize=outsize,
               weight_range=weight_range, lrate_decay=lrate_decay, hood_decay=hood_decay, lrConstant=lrConstant,
               hoodConstant=hoodConstant, showint=showint, show_sleep=show_sleep, network_dims=network_dims,
-              sort=sort, radius=radius, problem=data_params[0], full_screen=full_screen, mbs=mbs)
+              sort=sort, radius=radius, problem=data_params[0], full_screen=full_screen, mbs=mbs, vsize=vsize)
     print('funct', data_funct, 'params', data_params, 'epochs', epochs, '\n',
           'lrate', lrate, 'hoodsize', hoodsize, 'insize', insize, 'outsize', outsize,  'weight_range', weight_range, '\n',
           'lrate_deacay', lrate_decay, 'hood_decay', hood_decay,   '\n',
           'topo', som.topo, "lrConstant", lrConstant, "hoodConstant", hoodConstant, "mbs", mbs)
     end = time()
     print("Time elapsed:", end - start, "s", (end-start)/60, "m")
-
-    if som.network_dims is not None:
-        print("test train")
-        som.do_testing(som.features)
-        print("test test")
-        som.do_testing(st.get_mnist_test_data())
-
 
 
 #print(st.generate_points(5.0, 7.0, 1.0, 0.1, 8))
@@ -405,7 +417,7 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=4000,  lr
 #
 #main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=10000,  lrate=0.1, hoodsize=6,
 #         insize=2, outsize=150, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-#         lrConstant=0.5, hoodConstant=3000, showint=0, show_sleep=2, final_sleep=200, network_dims=None,
+#         lrConstant=0.5, hoodConstant=3000, showint=500, show_sleep=3, final_sleep=200, network_dims=None,
 #         sort=False, radius=1)
 
 
@@ -467,3 +479,8 @@ x Check how well mnist is classified
 #         insize=2, outsize=150, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
 #         lrConstant=0.5, hoodConstant=3000, showint=0, show_sleep=0, network_dims=None,
 #         sort=False, radius=1)
+
+#WORKS WELL ENOUGH
+#main(data_funct=st.get_mnist_data, data_params=(900,), epochs=9000, lrate=0.3, hoodsize=2, insize=784, outsize=100,
+#     weight_range=[0, 1], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, lrConstant=0.08,
+#     hoodConstant=440, showint=0,show_sleep=0, final_sleep=20, network_dims=[10, 10], mbs=5)
