@@ -2,12 +2,13 @@
 
 import numpy as np
 import somtools as st
+from somtools import exponentialDecay, powerDecay, readTSP, get_mnist_data
 from math import sqrt, ceil, floor
 import matplotlib.pyplot as PLT
 from matplotlib import colors, colorbar
 from time import sleep, time
 from random import randint, sample
-
+import argparse
 
 class SOM:
     def __init__(self, epochs, lrate, hoodsize, insize, outsize, features,
@@ -82,7 +83,6 @@ class SOM:
                 for s in sets:
                     features.append(self.features[s][0])
                     targets.append(self.features[s][1])
-                #features, targets = np.rot90(features[:self.mbs], 1)[::-1]
             else:
                 features = self.features
                 np.random.shuffle(features)
@@ -105,6 +105,7 @@ class SOM:
             distance, path = self.findTotalDistance()
             if self.show_sleep:
                 self.do_mapping(self.weight_range, self.hoodsize, self.lrate, self.epochs, epoch, self.show_sleep, path, distance)
+                sleep(self.show_sleep)
         else:
             print("test train")
             self.do_testing(self.features)
@@ -112,6 +113,7 @@ class SOM:
             self.do_testing(st.get_mnist_test_data(self.vsize))
             if self.show_sleep:
                 self.do_mapping(self.weight_range, self.hoodsize, self.lrate, self.epochs, epoch, self.show_sleep)
+                sleep(self.show_sleep)
 
     # Pick random input feature
     # Update weights for winner and neighbours
@@ -151,6 +153,7 @@ class SOM:
             distance, path = self.findTotalDistance()
             if self.show_sleep:
                 self.do_mapping(self.weight_range, self.hoodsize, self.lrate, self.epochs, epoch, self.show_sleep, path, distance)
+                sleep(self.show_sleep)
         else:
             print("test train")
             self.do_testing(self.features)
@@ -158,7 +161,7 @@ class SOM:
             self.do_testing(st.get_mnist_test_data(self.vsize))
             if self.show_sleep:
                 self.do_mapping(self.weight_range, self.hoodsize, self.lrate, self.epochs, epoch, self.show_sleep)
-
+                sleep(self.show_sleep)
 
     def do_testing(self, datasets):
         correct = 0
@@ -312,9 +315,12 @@ class SOM:
 
     def do_mapping(self, weight_range=None, hood=None, lrate=None, epochs=None, step='NA', sleep_time=1, path=None, distance=0):
         if hood == None: hood=self.hoodsize
-        if lrate == None: lrate=self.lrate
         if epochs == None: epochs=self.epochs
         if weight_range == None: weight_range=self.weight_range
+        if PLT.get_fignums():
+            sleep(sleep_time)
+            PLT.close("all")
+
         if self.full_screen:
             mng = PLT.get_current_fig_manager()
             mng.full_screen_toggle()
@@ -336,8 +342,6 @@ class SOM:
         PLT.show(block=False)
         if self.topo == 'matrix':
             self.mnist_show_colors()
-        sleep(sleep_time)
-        PLT.close("all")
 
     def map_path(self, path):
         PLT.plot(path[0], path[1], c='pink')
@@ -387,23 +391,70 @@ class SOM:
             PLT.scatter(feature[0], feature[1], c="black")
 
 
-def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=4000,  lrate=0.1, hoodsize=6,
-         insize=2, outsize=90, weight_range=[0.49, 5], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-         lrConstant=0.5, hoodConstant=300, showint=1000, show_sleep=10, network_dims=None,
+def main(data_funct=st.readTSP, data_params='../data/6.txt', epochs=4000,  lrate=0.1, hoodsize=6,
+         insize=2, outsize=220, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+         lrConstant=0.5, hoodConstant=3300, showint=0, show_sleep=10, network_dims=None,
          sort=False, radius=1, full_screen=False, mbs=0, vsize=100):
-    features = data_funct(*data_params)
+    if type(data_params) == int:
+        features = data_funct(data_params)
+    elif not data_params.isdigit():
+        features = data_funct(data_params)
+    else:
+        features = data_funct(int(data_params))
     start = time()
 
     som = SOM(epochs=epochs, lrate=lrate, hoodsize=hoodsize, features=features, insize=insize, outsize=outsize,
               weight_range=weight_range, lrate_decay=lrate_decay, hood_decay=hood_decay, lrConstant=lrConstant,
               hoodConstant=hoodConstant, showint=showint, show_sleep=show_sleep, network_dims=network_dims,
-              sort=sort, radius=radius, problem=data_params[0], full_screen=full_screen, mbs=mbs, vsize=vsize)
+              sort=sort, radius=radius, problem=data_params, full_screen=full_screen, mbs=mbs, vsize=vsize)
     print('funct', data_funct, 'params', data_params, 'epochs', epochs, '\n',
           'lrate', lrate, 'hoodsize', hoodsize, 'insize', insize, 'outsize', outsize,  'weight_range', weight_range, '\n',
           'lrate_deacay', lrate_decay, 'hood_decay', hood_decay,   '\n',
           'topo', som.topo, "lrConstant", lrConstant, "hoodConstant", hoodConstant, "mbs", mbs)
     end = time()
     print("Time elapsed:", end - start, "s", (end-start)/60, "m")
+
+
+def str2funct(s):
+    return globals()[s]
+
+
+def str2list(s):
+    li = s.split(',')
+    for i, j in enumerate(li):
+        li[i] = int(j)
+    return li
+
+
+if __name__ == '__main__':
+    # Takes input from command line
+    parser = argparse.ArgumentParser(description='General Artificial Neural Network')
+    parser.add_argument('-fu', type=str2funct, help='Data function')
+    parser.add_argument('-dp', type=str, help='Data parameters, separated with \",\"')
+    parser.add_argument('-ep', type=int, help='Epochs', nargs='?')
+    parser.add_argument('-di', type=str2list, help='Dimensions, separated with \",\"', nargs='?')
+    parser.add_argument('-lr', type=float, help='Learning rate',nargs='?')
+    parser.add_argument('-lc', type=float, help='Learning rate decay constant', nargs = '?')
+    parser.add_argument('-lf', type=str2funct, help='Learning rate decay function', nargs = '?')
+    parser.add_argument('-is', type=int, help='Input size',nargs='?')
+    parser.add_argument('-os', type=int, help='Output size',nargs='?')
+    parser.add_argument('-hs', type=int, help='Hoodsize',nargs='?')
+    parser.add_argument('-hc', type=float ,help='Hood constant',nargs='?')
+    parser.add_argument('-hf', type=str2funct, help='Hood decay function', nargs='?')
+    parser.add_argument('-wr', type=str2list, help='Weight range, separated with \",\"', nargs='?')
+    parser.add_argument('-ss', type=int, help='Sleep on show', nargs='?')
+    parser.add_argument('-si', type=int, help='Show interval', nargs='?')
+    parser.add_argument('-mbs', type=int, help='Mini batch size',nargs='?')
+    parser.add_argument('-ra', type=int, help='Radius',nargs='?')
+    parser.add_argument('-vs', type=int, help='Number of validation cases',nargs='?')
+    args = parser.parse_args()
+
+    if args.ep is None: args.ep = 5000
+    if args.di is None: args.di = None
+
+    print(args)
+    main(args.fu, args.dp, network_dims=args.di)
+
 
 
 """
@@ -419,76 +470,57 @@ x Visualize for mnist
 x Check how well mnist is classified
 """
 
-# Works on 5 (<15816):
-#main(data_funct=st.readTSP, data_params=('../data/5.txt',), epochs=10001,  lrate=0.1, hoodsize=6,
-#         insize=2, outsize=200, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-#         lrConstant=0.5, hoodConstant=3000, showint=10000, show_sleep=3, network_dims=None,
-#         sort=False, radius=1, mbs=1)
-
-
-#main(data_funct=st.readTSP, data_params=('../data/5.txt',), epochs=10001,  lrate=0.1, hoodsize=6,
-#         insize=2, outsize=200, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-#         lrConstant=0.5, hoodConstant=3000, showint=101, show_sleep=3, network_dims=None,
-#         sort=False, radius=1, mbs=0)
-
-
-# Sometimes
-#main(data_funct=st.readTSP, data_params=('../data/8.txt',), epochs=10001,  lrate=0.1, hoodsize=6,
-#         insize=2, outsize=150, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-#         lrConstant=0.5, hoodConstant=3000, showint=0, show_sleep=0, network_dims=None,
-#         sort=False, radius=1)
-
 # SOLUTIONS
 
 # Works well enough on mnist
-#main(data_funct=st.get_mnist_data, data_params=(900,), epochs=9000, lrate=0.3, hoodsize=2, insize=784, outsize=100,
+#main(data_funct=st.get_mnist_data, data_params=900, epochs=9000, lrate=0.3, hoodsize=2, insize=784, outsize=100,
 #     weight_range=[0, 1], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, lrConstant=0.08,
-#     hoodConstant=440, showint=0, show_sleep=100, network_dims=[10, 10], mbs=5)
+#     hoodConstant=440, showint=0, show_sleep=10, network_dims=[10, 10], mbs=5)
 
 # Mostly is within 10% on 1
-#main(data_funct=st.readTSP, data_params=('../data/1.txt',), epochs=10000,  lrate=0.1, hoodsize=6,
-#         insize=2, outsize=150, weight_range=[800, 800], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+#main(data_funct=st.readTSP, data_params='../data/1.txt', epochs=10000, lrate=0.1, hoodsize=6,
+#        insize=2, outsize=150, weight_range=[800, 800], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
 #         lrConstant=0.5, hoodConstant=3000, showint=0, show_sleep=5, network_dims=None,
 #         sort=False, radius=1)
 
 # Mostly is within 10% on 2
-#main(data_funct=st.readTSP, data_params=('../data/2.txt',), epochs=11000,  lrate=0.1, hoodsize=7,
+# main(data_funct=st.readTSP, data_params='../data/2.txt', epochs=11000, lrate=0.1, hoodsize=7,
 #         insize=2, outsize=220, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
 #         lrConstant=1, hoodConstant=2000, showint=0, show_sleep=50, network_dims=None,
 #         sort=False, radius=1, mbs=0)
 
 # Good on 3
-#main(data_funct=st.readTSP, data_params=('../data/3.txt',), epochs=8000,  lrate=0.1, hoodsize=6,
+# main(data_funct=st.readTSP, data_params='../data/3.txt', epochs=8000, lrate=0.1, hoodsize=6,
 #         insize=2, outsize=220, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
 #         lrConstant=1.3, hoodConstant=3300, showint=0, show_sleep=50, network_dims=None,
 #         sort=False, radius=1, mbs=0)
 
 # Good on 4
-#main(data_funct=st.readTSP, data_params=('../data/4.txt',), epochs=9000,  lrate=0.1, hoodsize=6,
+# main(data_funct=st.readTSP, data_params='../data/4.txt', epochs=9000, lrate=0.1, hoodsize=6,
 #         insize=2, outsize=220, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
 #         lrConstant=1.3, hoodConstant=3300, showint=0, show_sleep=50, network_dims=None,
 #         sort=False, radius=1, mbs=0)
 
 # Mostly is within 10% on 5
-#main(data_funct=st.readTSP, data_params=('../data/5.txt',), epochs=9000,  lrate=0.08, hoodsize=6,
+# main(data_funct=st.readTSP, data_params='../data/5.txt', epochs=9000, lrate=0.08, hoodsize=6,
 #         insize=2, outsize=200, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
 #         lrConstant=0.7, hoodConstant=3000, showint=0, show_sleep=10, network_dims=None,
 #         sort=False, radius=1, mbs=0)
 
 # Mostly is within 10% on 6
-#main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=10000,  lrate=0.06, hoodsize=6,
+# main(data_funct=st.readTSP, data_params='../data/6.txt', epochs=10000, lrate=0.06, hoodsize=6,
 #         insize=2, outsize=200, weight_range=[50, 50], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
 #         lrConstant=0.9, hoodConstant=3500, showint=0, show_sleep=10, network_dims=None,
 #         sort=False, radius=1, mbs=0)
 
 # Mostly is within 10% on 7
-#main(data_funct=st.readTSP, data_params=('../data/7.txt',), epochs=8001,  lrate=0.1, hoodsize=6,
+# main(data_funct=st.readTSP, data_params='../data/7.txt', epochs=8001, lrate=0.1, hoodsize=6,
 #         insize=2, outsize=250, weight_range=[9000, 6000], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
 #         lrConstant=0.5, hoodConstant=3300, showint=200, show_sleep=2, network_dims=None,
 #         sort=False, radius=10, mbs=0)
 
 # Mostly is within 10% on 8
-#main(data_funct=st.readTSP, data_params=('../data/8.txt',), epochs=10000,  lrate=0.06, hoodsize=6,
+# main(data_funct=st.readTSP, data_params='../data/8.txt', epochs=10000, lrate=0.06, hoodsize=6,
 #         insize=2, outsize=220, weight_range=[60, 110], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
 #         lrConstant=0.7, hoodConstant=3300, showint=0, show_sleep=10, network_dims=None,
 #         sort=False, radius=2, mbs=0)
