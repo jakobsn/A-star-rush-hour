@@ -453,7 +453,7 @@ if __name__ == '__main__':
     if args.di is None: args.di = None
 
     print(args)
-    main(args.fu, args.dp, network_dims=args.di)
+    main(args.fu, args.dp, network_dims=args.di, insize=784, outsize=100)
 
 
 
