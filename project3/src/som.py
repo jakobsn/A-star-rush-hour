@@ -389,7 +389,7 @@ class SOM:
 
 def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=4000,  lrate=0.1, hoodsize=6,
          insize=2, outsize=90, weight_range=[0.49, 5], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-         lrConstant=0.5, hoodConstant=300, showint=1000, show_sleep=2, network_dims=None,
+         lrConstant=0.5, hoodConstant=300, showint=1000, show_sleep=10, network_dims=None,
          sort=False, radius=1, full_screen=False, mbs=0, vsize=100):
     features = data_funct(*data_params)
     start = time()
@@ -406,52 +406,11 @@ def main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=4000,  lr
     print("Time elapsed:", end - start, "s", (end-start)/60, "m")
 
 
-#print(st.generate_points(5.0, 7.0, 1.0, 0.1, 8))
-
-#main(data_funct=st.readTSP, data_params=('../data/small.txt',), epochs=1200, lrate=0.2, hoodsize=2,
-#     insize=2, outsize=19, weight_range=[30, 40], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, radius=3,
-#     lrConstant=0.5, hoodConstant=100, showint=0, show_sleep=2, network_dims=None, sort=False, mbs=1)
-
-# Good run for nr. 6
-#
-#main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=10000,  lrate=0.1, hoodsize=6,
-#         insize=2, outsize=150, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-#         lrConstant=0.5, hoodConstant=3000, showint=500, show_sleep=3, final_sleep=200, network_dims=None,
-#         sort=False, radius=1)
-
-
-# Close nr. 8
-#main(data_funct=st.readTSP, data_params=('../data/8.txt',), epochs=7000,  lrate=0.1, hoodsize=6,
-#         insize=2, outsize=250, weight_range=[350, 280], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-#         lrConstant=0.5, hoodConstant=500, showint=1000, show_sleep=2, network_dims=None,
-#         sort=False, radius=3)
-
-
-#main(data_funct=st.readTSP, data_params=('../data/1.txt',), epochs=7000,  lrate=0.1, hoodsize=6,
-#         insize=2, outsize=150, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-#         lrConstant=0.5, hoodConstant=3000, showint=1000, show_sleep=2, network_dims=None,
-#         sort=False, radius=1)
-
-
-#main(data_funct=st.get_mnist_data, data_params=(500,), epochs=10, lrate=0.3, hoodsize=3, insize=784, outsize=49,
-#     weight_range=[0, 1], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, lrConstant=0.1,
-#     hoodConstant=200, showint=50, show_sleep=2, network_dims=[7, 7], mbs=10)
-
-# This ran suprisingly good
-#main(data_funct=st.get_mnist_data, data_params=(100,), epochs=1000, lrate=0.3, hoodsize=3, insize=784, outsize=100,
-#     weight_range=[0, 1], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, lrConstant=0.01,
-#     hoodConstant=200, showint=0,show_sleep=0, network_dims=[10, 10])
-
-
-#main(data_funct=st.get_mnist_data, data_params=(100,), epochs=100, lrate=0.2, hoodsize=5, insize=784, outsize=100,
-#     weight_range=[0, 1], lrate_decay=st.exponentialDecay, hood_decay=st.exponentialDecay, lrConstant=100*12500,
-#     hoodConstant=14*12500, showint=0, show_sleep=0, network_dims=[10, 10])
-
 """
 TODO:
 x Batch training
 x Visualize at step k (for ring)
-- Decay (exponential and power atm)
+x Decay (exponential and power atm)
 x TOPOGRAPHY
 x Normalize input
 x Find path distance
@@ -504,14 +463,33 @@ x Check how well mnist is classified
 #         lrConstant=1.3, hoodConstant=3300, showint=0, show_sleep=50, network_dims=None,
 #         sort=False, radius=1, mbs=0)
 
-main(data_funct=st.readTSP, data_params=('../data/4.txt',), epochs=7000,  lrate=0.1, hoodsize=6,
-         insize=2, outsize=220, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
-         lrConstant=1.3, hoodConstant=3300, showint=0, show_sleep=50, network_dims=None,
-         sort=False, radius=1, mbs=0)
+# Good on 4
+#main(data_funct=st.readTSP, data_params=('../data/4.txt',), epochs=9000,  lrate=0.1, hoodsize=6,
+#         insize=2, outsize=220, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+#         lrConstant=1.3, hoodConstant=3300, showint=0, show_sleep=50, network_dims=None,
+#         sort=False, radius=1, mbs=0)
 
+# Mostly is within 10% on 5
+#main(data_funct=st.readTSP, data_params=('../data/5.txt',), epochs=9000,  lrate=0.08, hoodsize=6,
+#         insize=2, outsize=200, weight_range=[30, 30], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+#         lrConstant=0.7, hoodConstant=3000, showint=0, show_sleep=10, network_dims=None,
+#         sort=False, radius=1, mbs=0)
+
+# Mostly is within 10% on 6
+#main(data_funct=st.readTSP, data_params=('../data/6.txt',), epochs=10000,  lrate=0.06, hoodsize=6,
+#         insize=2, outsize=200, weight_range=[50, 50], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+#         lrConstant=0.9, hoodConstant=3500, showint=0, show_sleep=10, network_dims=None,
+#         sort=False, radius=1, mbs=0)
 
 # Mostly is within 10% on 7
 #main(data_funct=st.readTSP, data_params=('../data/7.txt',), epochs=8001,  lrate=0.1, hoodsize=6,
 #         insize=2, outsize=250, weight_range=[9000, 6000], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
 #         lrConstant=0.5, hoodConstant=3300, showint=200, show_sleep=2, network_dims=None,
 #         sort=False, radius=10, mbs=0)
+
+# Mostly is within 10% on 8
+#main(data_funct=st.readTSP, data_params=('../data/8.txt',), epochs=10000,  lrate=0.06, hoodsize=6,
+#         insize=2, outsize=220, weight_range=[60, 110], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
+#         lrConstant=0.7, hoodConstant=3300, showint=0, show_sleep=10, network_dims=None,
+#         sort=False, radius=2, mbs=0)
+

@@ -61,7 +61,7 @@ def calculate_average_and_standard_deviation(features):
 def get_data_features(data):
     # Create list to store lists of input features
     features = []
-    for x in range(len(data[0][0])):
+    for x in range(len(data[0])):
         features.append([])
 
     # Append all features
