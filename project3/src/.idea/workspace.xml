@@ -11,15 +11,15 @@
   </component>
   <component name="CoverageDataManager">
     <SUITE FILE_PATH="coverage/src$somtools.coverage" NAME="somtools Coverage Results" MODIFIED="1509963302399" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/src$som.coverage" NAME="som Coverage Results" MODIFIED="1511042150239" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/src$som.coverage" NAME="som Coverage Results" MODIFIED="1511098594071" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file leaf-file-name="somtools.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/somtools.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="488">
-              <caret line="123" column="0" lean-forward="false" selection-start-line="123" selection-start-column="0" selection-end-line="123" selection-end-column="0" />
+            <state relative-caret-position="344">
+              <caret line="123" column="0" lean-forward="true" selection-start-line="123" selection-start-column="0" selection-end-line="123" selection-end-column="0" />
               <folding>
                 <element signature="e#22#40#0" expanded="true" />
               </folding>
@@ -30,8 +30,8 @@
       <file leaf-file-name="som.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/som.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="402">
-              <caret line="480" column="31" lean-forward="false" selection-start-line="480" selection-start-column="31" selection-end-line="480" selection-end-column="31" />
+            <state relative-caret-position="514">
+              <caret line="506" column="51" lean-forward="false" selection-start-line="506" selection-start-column="51" selection-end-line="506" selection-end-column="51" />
               <folding>
                 <element signature="e#19#37#0" expanded="true" />
               </folding>
@@ -52,7 +52,7 @@
       <file leaf-file-name="tflowtools.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/../../project2/src/tflowtools.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="7740">
+            <state relative-caret-position="7560">
               <caret line="430" column="0" lean-forward="false" selection-start-line="430" selection-start-column="0" selection-end-line="431" selection-end-column="28" />
               <folding>
                 <element signature="e#91#114#0" expanded="true" />
@@ -64,7 +64,7 @@
       <file leaf-file-name="tutor3.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/../../project2/src/tutor3.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="10188">
+            <state relative-caret-position="9954">
               <caret line="566" column="72" lean-forward="false" selection-start-line="566" selection-start-column="66" selection-end-line="566" selection-end-column="72" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
@@ -77,7 +77,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>neighboor</find>
       <find>self.rad</find>
       <find>hood_deca</find>
       <find>min</find>
@@ -107,6 +106,7 @@
       <find>print(</find>
       <find>self.inp</find>
       <find>rot90</find>
+      <find>generate</find>
     </findStrings>
   </component>
   <component name="IdeDocumentHistory">
@@ -238,19 +238,18 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="24" width="1200" height="788" extended-state="0" />
-    <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32959184" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31938776" sideWeight="0.50208336" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="FLOATING" visible="true" show_stripe_button="true" weight="0.44152048" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" x="1051" y="24" width="848" height="1056" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="FLOATING" visible="true" show_stripe_button="true" weight="0.44152048" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" x="1200" y="24" width="720" height="1056" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="FLOATING" visible="true" show_stripe_button="true" weight="0.27755103" sideWeight="0.49791667" order="10" side_tool="false" content_ui="tabs" x="0" y="768" width="1198" height="312" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39766082" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="FLOATING" visible="true" show_stripe_button="true" weight="0.27755103" sideWeight="0.49791667" order="10" side_tool="false" content_ui="tabs" x="0" y="768" width="1201" height="312" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39766082" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -756,7 +755,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/../../project2/src/tutor3.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="10188">
+        <state relative-caret-position="9954">
           <caret line="566" column="72" lean-forward="false" selection-start-line="566" selection-start-column="66" selection-end-line="566" selection-end-column="72" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
@@ -766,7 +765,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/../../project2/src/tflowtools.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="7740">
+        <state relative-caret-position="7560">
           <caret line="430" column="0" lean-forward="false" selection-start-line="430" selection-start-column="0" selection-end-line="431" selection-end-column="28" />
           <folding>
             <element signature="e#91#114#0" expanded="true" />
@@ -784,8 +783,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/somtools.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="488">
-          <caret line="123" column="0" lean-forward="false" selection-start-line="123" selection-start-column="0" selection-end-line="123" selection-end-column="0" />
+        <state relative-caret-position="344">
+          <caret line="123" column="0" lean-forward="true" selection-start-line="123" selection-start-column="0" selection-end-line="123" selection-end-column="0" />
           <folding>
             <element signature="e#22#40#0" expanded="true" />
           </folding>
@@ -794,8 +793,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/som.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="402">
-          <caret line="480" column="31" lean-forward="false" selection-start-line="480" selection-start-column="31" selection-end-line="480" selection-end-column="31" />
+        <state relative-caret-position="514">
+          <caret line="506" column="51" lean-forward="false" selection-start-line="506" selection-start-column="51" selection-end-line="506" selection-end-column="51" />
           <folding>
             <element signature="e#19#37#0" expanded="true" />
           </folding>
