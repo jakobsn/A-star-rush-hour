@@ -1,0 +1,16 @@
+python3 som.py \
+-fu get_mnist_data \
+-dp 900 \
+-ep 9000 \
+-di 10,10 \
+-lr 0.3 \
+-lc 0.08 \
+-lf powerDecay \
+-iz 784 \
+-os 100 \
+-hs 6 \
+-hc 440 \
+-hf exponentialDecay \
+-wr 0,1 \
+-mbs 5
+

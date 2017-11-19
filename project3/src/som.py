@@ -430,13 +430,13 @@ if __name__ == '__main__':
     # Takes input from command line
     parser = argparse.ArgumentParser(description='General Artificial Neural Network')
     parser.add_argument('-fu', type=str2funct, help='Data function')
-    parser.add_argument('-dp', type=str, help='Data parameters, separated with \",\"')
+    parser.add_argument('-dp', type=str, help='Data parameter')
     parser.add_argument('-ep', type=int, help='Epochs', nargs='?')
     parser.add_argument('-di', type=str2list, help='Dimensions, separated with \",\"', nargs='?')
     parser.add_argument('-lr', type=float, help='Learning rate',nargs='?')
     parser.add_argument('-lc', type=float, help='Learning rate decay constant', nargs = '?')
     parser.add_argument('-lf', type=str2funct, help='Learning rate decay function', nargs = '?')
-    parser.add_argument('-is', type=int, help='Input size',nargs='?')
+    parser.add_argument('-iz', type=int, help='Input size',nargs='?')
     parser.add_argument('-os', type=int, help='Output size',nargs='?')
     parser.add_argument('-hs', type=int, help='Hoodsize',nargs='?')
     parser.add_argument('-hc', type=float ,help='Hood constant',nargs='?')
@@ -451,10 +451,25 @@ if __name__ == '__main__':
 
     if args.ep is None: args.ep = 5000
     if args.di is None: args.di = None
+    if args.lr is None: args.lr = 0.1
+    if args.lc is None: args.lc = 0.5
+    if args.lf is None: args.lf = powerDecay
+    if args.iz is None: args.iz = 2
+    if args.os is None: args.os = 220
+    if args.hs is None: args.hs = 6
+    if args.hc is None: args.hc = 3300
+    if args.hf is None: args.hf = exponentialDecay
+    if args.wr is None: args.wr = [50, 50]
+    if args.ss is None: args.ss = 0
+    if args.si is None: args.si = 0
+    if args.mbs is None: args.mbs = 0
+    if args.ra is None: args.ra = None
+    if args.vs is None: args.vs = 100
 
-    print(args)
-    main(args.fu, args.dp, network_dims=args.di, insize=784, outsize=100)
-
+    main(data_funct=args.fu, data_params=args.dp, epochs=args.ep, network_dims=args.di,
+         lrate=args.lr, lrConstant=args.lc, lrate_decay=args.lf, insize=args.iz, outsize=args.os,
+         hoodsize=args.hs, hoodConstant=args.hc, hood_decay=args.hf, weight_range=args.wr,
+         show_sleep=args.ss, showint=args.si, mbs=args.mbs, radius=args.ra, vsize=args.vs)
 
 
 """
@@ -473,12 +488,12 @@ x Check how well mnist is classified
 # SOLUTIONS
 
 # Works well enough on mnist
-#main(data_funct=st.get_mnist_data, data_params=900, epochs=9000, lrate=0.3, hoodsize=2, insize=784, outsize=100,
+# main(data_funct=st.get_mnist_data, data_params=900, epochs=9000, lrate=0.3, hoodsize=2, insize=784, outsize=100,
 #     weight_range=[0, 1], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay, lrConstant=0.08,
 #     hoodConstant=440, showint=0, show_sleep=10, network_dims=[10, 10], mbs=5)
 
 # Mostly is within 10% on 1
-#main(data_funct=st.readTSP, data_params='../data/1.txt', epochs=10000, lrate=0.1, hoodsize=6,
+# main(data_funct=st.readTSP, data_params='../data/1.txt', epochs=10000, lrate=0.1, hoodsize=6,
 #        insize=2, outsize=150, weight_range=[800, 800], lrate_decay=st.powerDecay, hood_decay=st.exponentialDecay,
 #         lrConstant=0.5, hoodConstant=3000, showint=0, show_sleep=5, network_dims=None,
 #         sort=False, radius=1)

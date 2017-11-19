@@ -1,0 +1,13 @@
+python3 som.py \
+-fu readTSP \
+-dp ../data/1.txt \
+-ep 9000 \
+-lr 0.1 \
+-hs 6 \
+-iz 2 \
+-os 150 \
+-wr 800,800 \
+-lc 0.5 \
+-hc 3000 \
+-ra 1
+
